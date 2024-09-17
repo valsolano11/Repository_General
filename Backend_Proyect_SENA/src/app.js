@@ -3,6 +3,9 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import morgan from "morgan";
+import UsuarioRouter from "./routes/Usuario.routes.js";
+import RolRouter from "./routes/Rol.routes.js";
+import EstadoRouter from "./routes/Estado.routes.js";
 const app = express();
 
 app.use(
@@ -16,8 +19,11 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* app.use(
-
+app.use(
+    
+    UsuarioRouter, 
+    RolRouter, 
+    EstadoRouter
 );
- */
+
 export default app;
