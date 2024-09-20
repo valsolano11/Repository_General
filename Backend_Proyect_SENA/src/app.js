@@ -23,7 +23,8 @@ app.use(
     
     UsuarioRouter, 
     RolRouter, 
-    EstadoRouter
+    EstadoRouter,
+    LoginRouter
 );
 
 export default app;
