@@ -2,8 +2,6 @@ import { DataTypes } from "sequelize";
 import { conexion } from "../conexion.js";
 import Rol from "./Rol.js";
 import Estado from "./Estado.js";
-import Permiso from "./Permiso.js";
-import DetallePermiso from "./DetallePermiso.js"; 
 import { config } from "dotenv";
 import bcrypt from "bcryptjs";
 
@@ -80,8 +78,6 @@ const Usuario = conexion.define(
 
 Usuario.belongsTo(Estado, { foreignKey: "EstadoId" });
 Usuario.belongsTo(Rol, { foreignKey: "RolId" });
-Usuario.belongsToMany(Permiso, { through: DetallePermiso });
-Permiso.belongsToMany(Usuario, { through: DetallePermiso });
 
 var salt = bcrypt.genSaltSync(10);
 var hashPass = bcrypt.hashSync(process.env.PASSWORD_ADMIN, salt);

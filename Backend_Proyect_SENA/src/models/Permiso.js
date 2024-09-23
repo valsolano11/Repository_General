@@ -27,7 +27,7 @@ const Permiso = conexion.define("Permiso",
 
 
 
-
+/* 
     const datosPermisos = [
 
         // Estado
@@ -104,12 +104,18 @@ const Permiso = conexion.define("Permiso",
         { nombrePermiso: 'Modificar Unidad medida'},
         { nombrePermiso: 'vista Unidades medida'},
 
-         // Usuario
-         { nombrePermiso: 'Crear ' },
-         { nombrePermiso: 'Obtener' },
-         { nombrePermiso: 'Modificar'},
-         { nombrePermiso: 'vista'},
+        // Historial
+        { nombrePermiso: 'Obtener Historial' },
+        { nombrePermiso: 'vista Historial'},
+
+        // Notificaciones
+        { nombrePermiso: 'Obtener Notificaciones' },
+        { nombrePermiso: 'vista notificaciones'},
+
+        // Dashboard
+        { nombrePermiso: 'Generar Reporte General del Dashboard' },
+        { nombrePermiso: 'vista Dashboard'},
 
     ];
-
+ */
     export default Permiso;

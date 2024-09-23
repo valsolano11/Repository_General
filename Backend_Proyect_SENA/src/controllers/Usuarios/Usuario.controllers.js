@@ -1,4 +1,3 @@
-
 import bcrypt from "bcryptjs";
 import { config } from "dotenv";
 import { Op } from "sequelize";
