@@ -7,6 +7,7 @@ import UsuarioRouter from "./routes/Usuario.routes.js";
 import RolRouter from "./routes/Rol.routes.js";
 import EstadoRouter from "./routes/Estado.routes.js";
 import LoginRouter from "./routes/Login.routes.js";
+import recuperacionRouter from "./routes/Olvidarcontrasena.routes.js";
 const app = express();
 
 app.use(
@@ -25,7 +26,8 @@ app.use(
     UsuarioRouter, 
     RolRouter, 
     EstadoRouter,
-    LoginRouter
+    LoginRouter,
+    recuperacionRouter
 );
 
 export default app;

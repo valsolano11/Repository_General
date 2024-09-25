@@ -30,7 +30,7 @@ export const login = async (req, res) =>{
 
         res.cookie("token", token).status(200).json({
             message: "Inicio de sesión exitoso",
-            role: usuario.Rol.roleName,
+            role: usuario.Rol.rolName,
             token,
         });
 

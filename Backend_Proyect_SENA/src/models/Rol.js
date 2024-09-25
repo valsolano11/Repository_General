@@ -8,33 +8,57 @@ const Rol = conexion.define(
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
+      unique: true,
       autoIncrement: true,
       allowNull: false,
     },
     rolName: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
+      validate: {
+        notEmpty: {
+          msg: "El valor no puede estar vacio",
+        },
+      },
     },
   },
   {
     tableName: "Roles",
     timestamps: false,
+    indexes: [
+      {
+        unique: true,
+        fields: ["rolName"],
+      },
+    ],
+    hooks: {
+      beforeSave: (rol) => {
+        rol.rolName = rol.rolName.toLowerCase();
+      },
+    },
   }
 );
 
 const insertarRoles = async (datos) => {
   try {
     await Rol.sync();
-    const respuesta = await Rol.findAll();
+    for (const rol of datos) {
+      const [created] = await Rol.findOrCreate({
+        where: { rolName: rol.rolName.toLowerCase() },
+        defaults: { ...rol, rolName: rol.rolName.toLowerCase() },
+      });
 
-    if (respuesta.length === 0) {
-      await Rol.bulkCreate(datos);
+      if (!created) {
+        console.log(`El rol ${rol.rolName} ya existe.`);
+      }
     }
   } catch (error) {
+    console.error("Error al insertar roles:", error.message);
     throw new Error(error.message);
   }
 };
 
-insertarRoles([{ rolName: "ADMIN" }, { rolName: "USUARIO" }, {rolName: "COORDINADOR"}]);
+insertarRoles([{ rolName: "ADMIN" }, { rolName: "USUARIO" }, { rolName: "COORDINADOR" }]);
 
 export default Rol;
