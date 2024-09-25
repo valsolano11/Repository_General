@@ -4,7 +4,7 @@ import { conexion } from "../conexion.js";
 const Rol = conexion.define(
   "Rol",
   {
-    // ID automatico
+    // ID automático
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -18,7 +18,7 @@ const Rol = conexion.define(
       unique: true,
       validate: {
         notEmpty: {
-          msg: "El valor no puede estar vacio",
+          msg: "El valor no puede estar vacío",
         },
       },
     },
@@ -34,7 +34,7 @@ const Rol = conexion.define(
     ],
     hooks: {
       beforeSave: (rol) => {
-        rol.rolName = rol.rolName.toLowerCase();
+        rol.rolName = rol.rolName.toUpperCase();
       },
     },
   }
@@ -43,14 +43,19 @@ const Rol = conexion.define(
 const insertarRoles = async (datos) => {
   try {
     await Rol.sync();
+
     for (const rol of datos) {
+      const rolNameUpper = rol.rolName.toUpperCase();
+
       const [created] = await Rol.findOrCreate({
-        where: { rolName: rol.rolName.toLowerCase() },
-        defaults: { ...rol, rolName: rol.rolName.toLowerCase() },
+        where: { rolName: rolNameUpper }, 
+        defaults: { ...rol, rolName: rolNameUpper }, 
       });
 
       if (!created) {
-        console.log(`El rol ${rol.rolName} ya existe.`);
+        console.log(`El rol ${rolNameUpper} ya existe.`);
+      } else {
+        console.log(`Rol ${rolNameUpper} insertado correctamente.`);
       }
     }
   } catch (error) {
@@ -59,6 +64,10 @@ const insertarRoles = async (datos) => {
   }
 };
 
-insertarRoles([{ rolName: "ADMIN" }, { rolName: "USUARIO" }, { rolName: "COORDINADOR" }]);
+insertarRoles([
+  { rolName: "ADMIN" },
+  { rolName: "USUARIO" },
+  { rolName: "COORDINADOR" },
+]);
 
 export default Rol;

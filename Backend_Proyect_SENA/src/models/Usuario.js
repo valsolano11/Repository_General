@@ -85,7 +85,7 @@ var hashPass = bcrypt.hashSync(process.env.PASSWORD_ADMIN, salt);
 const master = {
   Documento: process.env.DOCUMENT_ADMIN,
   nombre: "Administrador sena",
-  correo: "scv5267@gmail.com",
+  correo: "inventariodelmobiliario@gmail.com",
   password: hashPass,
   RolId: 1,
   EstadoId: 1,

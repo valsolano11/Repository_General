@@ -2,10 +2,7 @@ import { enviarCorreo } from "../../libs/nodemailer.js";
 import bcrypt from "bcryptjs";
 import Usuario from "../../models/Usuario.js";
 import { crearToken, verificarTokenRecupercion } from "../../libs/token.js";
-import {
-  generarCodigo,
-  validarCorreo,
-} from "../../helpers/OlvidarContrasena.js";
+import {generarCodigo,validarCorreo,} from "../../helpers/OlvidarContrasena.js";
 
 export const validarEmail = (email) => {
   return /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email);
