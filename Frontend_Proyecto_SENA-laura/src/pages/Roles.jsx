@@ -21,7 +21,7 @@ const Roles = () => {
   const fetchRoles = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/roles");
+      const response = await api.get("/Rol");
       const sortedRoles = response.data.sort((a, b) => a.id - b.id);
       setRoles(sortedRoles);
     } catch (error) {

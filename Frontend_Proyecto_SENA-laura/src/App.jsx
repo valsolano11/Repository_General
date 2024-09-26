@@ -49,19 +49,19 @@ function App() {
             <Route path="/fichas" element={<Fichas />} />
             <Route path="/excel" element={<ImportExcel />} />
             <Route path="/unidadmedida" element={<UnidadMedida />} />
-            <Route path='/productos' element={<Productos/>}/> 
+            <Route path='/productos' element={<Productos/>}/>
             <Route path='/herramientas' element={<Herramientas/>}/>
-            <Route path='/prestamos' element={<Prestamos/>}/>  
+            <Route path='/prestamos' element={<Prestamos/>}/>
             <Route path='/pedidos' element={<Pedidos/>}/>
             <Route path='/historial' element={<Historial/>}/>
-          </Route>
+          </Route> 
 
           {/* Ruta protegida para el RolId 2 */}
-          <Route element={<ProtectedRoute requiredRoleId={2} />}>
+          <Route element={<ProtectedRoute requiredRoleId={3} />}>
             <Route path="/homecoord" element={<HomeCoord />} />
-            <Route path="/firmaPedidos" element={<FirmaPedidos />} />            
+            <Route path="/firmaPedidos" element={<FirmaPedidos />} />
           </Route>
-          
+
         </Routes>
       </BrowserRouter>
     </AuthProvider>
