@@ -28,17 +28,19 @@ const EditUserModal = ({ isOpen, onClose, user }) => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await api.get("/roles");
+        const response = await api.get("/Rol");
         setRoles(response.data);
       } catch (error) {
         toast.error("Error al cargar roles", { position: "top-right" });
       }
     };
-
+  
     const fetchEstados = async () => {
       try {
-        const response = await api.get("/Estado");
-        setEstados(response.data);
+        const response1 = await api.get("/Estado/1");
+        const response2 = await api.get("/Estado/2");
+
+        setEstados([response1.data, response2.data]);
       } catch (error) {
         toast.error("Error al cargar los estados", { position: "top-right" });
       }
@@ -47,6 +49,7 @@ const EditUserModal = ({ isOpen, onClose, user }) => {
     fetchRoles();
     fetchEstados();
   }, []);
+  
 
   const fetchUserDetails = async (userId) => {
     setLoading(true);

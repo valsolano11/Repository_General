@@ -21,7 +21,7 @@ const EditRolModal = ({ isOpen, onClose, rol }) => {
   const fetchRolDetails = async (id) => {
     setLoading(true);
     try {
-      const response = await api.get(`/roles/${id}`);
+      const response = await api.get(`/Rol/${id}`);
       if (response.status === 200) {
         const { rolName } = response.data;
         setFormData({
@@ -63,7 +63,7 @@ const EditRolModal = ({ isOpen, onClose, rol }) => {
     setLoading(true);
     try {
       const response = await api.put(
-        `/roles/${rol.id}`,
+        `/Rol/${rol.id}`,
         {
           rolName,
         },

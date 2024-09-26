@@ -3,8 +3,7 @@ import { api } from "../api/token";
 import { FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Accordion, AccordionSummary, AccordionDetails, FormControlLabel, Checkbox } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { FormControlLabel, Checkbox } from "@mui/material";
 
 const AddUserModal = ({ isOpen, onClose, user }) => {
   const [roles, setRoles] = useState([]);
@@ -48,24 +47,26 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await api.get("/roles");
+        const response = await api.get("/Rol");
         setRoles(response.data);
       } catch (error) {
-        showToastError("Error al cargar roles");
+        toast.error("Error al cargar roles", { position: "top-right" });
       }
     };
-
-    const fetchStates = async () => {
+  
+    const fetchEstados = async () => {
       try {
-        const response = await api.get("/Estado");
-        setEstados(response.data);
+        const response1 = await api.get("/Estado/1");
+        const response2 = await api.get("/Estado/2");
+
+        setEstados([response1.data, response2.data]);
       } catch (error) {
-        showToastError("Error al cargar los estados");
+        toast.error("Error al cargar los estados", { position: "top-right" });
       }
     };
 
     fetchRoles();
-    fetchStates();
+    fetchEstados();
   }, []);
 
   const validateInput = (name, value) => {
@@ -115,10 +116,6 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
       draggable: true,
       progress: undefined,
     });
-  };
-
-  const handleAccordionChange = (panel) => (event, newExpanded) => {
-    setExpanded(newExpanded ? panel : false);
   };
 
   const handleCheckboxChange = (panel) => (e) => {
@@ -202,8 +199,9 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
           draggable: true,
           progress: undefined,
         });
-        resetForm();
-        setTimeout(() => {}, 2000);
+        setTimeout(() => {
+          onClose(response.data);
+        }, 2000);
       } else {
         showToastError(
           "Ocurrió un error!, por favor intenta con un documento o correo diferente."
@@ -366,239 +364,72 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
                 </div>
 
                 <h6 className="font-bold text-center text-xl mb-2">Permisos</h6>
-                <Accordion
-                  expanded={expanded === "panel1"}
-                  onChange={handleAccordionChange("panel1")}
-                  sx={{
-                    "&:before": { display: "none" },
-                    boxShadow: "none",
-                  }}
-                >
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    className="font-bold text-sm"
-                    sx={{
-                      backgroundColor: "grisClaro.main",
-                      borderRadius: "0.5rem",
-                      minHeight: "unset",
-                      "&.Mui-expanded": { minHeight: "unset" },
-                      "& .MuiAccordionSummary-content": {
-                        margin: "6px",
-                        "&.Mui-expanded": { margin: "6px" },
-                      },
-                    }}
-                  >
-                    Admin
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <div className="text-center">
-                      <FormControlLabel
-                        sx={{
-                          "& .MuiFormControlLabel-label": {
-                            fontSize: "0.775rem",
-                            fontWeight: "bold",
-                          },
-                        }}
-                        control={
-                          <Checkbox
-                            checked={isAllSelected("admin")}
-                            indeterminate={isIndeterminate("admin")}
-                            onChange={handleSelectAllChange("admin")}
-                          />
-                        }
-                        label="Seleccionar todos"
-                      />
-                    </div>
-                    <div>
-                      <FormControlLabel
-                        sx={{
-                          "& .MuiFormControlLabel-label": {
-                            fontSize: "0.675rem",
-                          },
-                        }}
-                        control={
-                          <Checkbox
-                            checked={permissions.admin.option1}
-                            onChange={handleCheckboxChange("admin")}
-                            name="option1"
-                          />
-                        }
-                        label="Agregar usuarios"
-                      />
-                      <FormControlLabel
-                        sx={{
-                          "& .MuiFormControlLabel-label": {
-                            fontSize: "0.675rem",
-                          },
-                        }}
-                        control={
-                          <Checkbox
-                            checked={permissions.admin.option2}
-                            onChange={handleCheckboxChange("admin")}
-                            name="option2"
-                          />
-                        }
-                        label="Editar usuarios"
-                      />
-                      <FormControlLabel
-                        sx={{
-                          "& .MuiFormControlLabel-label": {
-                            fontSize: "0.675rem",
-                          },
-                        }}
-                        control={
-                          <Checkbox
-                            checked={permissions.admin.option3}
-                            onChange={handleCheckboxChange("admin")}
-                            name="option3"
-                          />
-                        }
-                        label="Agregar productos"
-                      />
-                    </div>
-                  </AccordionDetails>
-                </Accordion>
 
-                <Accordion
-                  expanded={expanded === "panel2"}
-                  onChange={handleAccordionChange("panel2")}
-                  sx={{
-                    "&:before": { display: "none" },
-                    boxShadow: "none",
-                  }}
-                >
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    className="font-bold text-sm"
+                <div className="text-center">
+                  <FormControlLabel
                     sx={{
-                      backgroundColor: "grisClaro.main",
-                      borderRadius: "0.5rem",
-                      minHeight: "unset",
-                      "&.Mui-expanded": { minHeight: "unset" },
-                      "& .MuiAccordionSummary-content": {
-                        margin: "6px",
-                        "&.Mui-expanded": { margin: "6px" },
+                      "& .MuiFormControlLabel-label": {
+                        fontSize: "0.775rem",
+                        fontWeight: "bold",
                       },
                     }}
-                  >
-                    Usuario
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <div className="text-center">
-                      <FormControlLabel
-                        sx={{
-                          "& .MuiFormControlLabel-label": {
-                            fontSize: "0.775rem",
-                            fontWeight: "bold",
-                          },
-                        }}
-                        control={
-                          <Checkbox
-                            checked={isAllSelected("usuario")}
-                            indeterminate={isIndeterminate("usuario")}
-                            onChange={handleSelectAllChange("usuario")}
-                          />
-                        }
-                        label="Seleccionar todos"
+                    control={
+                      <Checkbox
+                        checked={isAllSelected("admin")}
+                        indeterminate={isIndeterminate("admin")}
+                        onChange={handleSelectAllChange("admin")}
                       />
-                    </div>
-                    <div>
-                      <FormControlLabel
-                        sx={{
-                          "& .MuiFormControlLabel-label": {
-                            fontSize: "0.675rem",
-                          },
-                        }}
-                        control={
-                          <Checkbox
-                            checked={permissions.usuario.option1}
-                            onChange={handleCheckboxChange("usuario")}
-                            name="option1"
-                          />
-                        }
-                        label="Editar su perfil"
-                      />
-                    </div>
-                  </AccordionDetails>
-                </Accordion>
-
-                <Accordion
-                  expanded={expanded === "panel3"}
-                  onChange={handleAccordionChange("panel3")}
-                  sx={{
-                    "&:before": { display: "none" },
-                    boxShadow: "none",
-                  }}
-                >
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    className="font-bold text-sm"
+                    }
+                    label="Seleccionar todos"
+                  />
+                </div>
+                <div>
+                  <FormControlLabel
                     sx={{
-                      backgroundColor: "grisClaro.main",
-                      borderRadius: "0.5rem",
-                      minHeight: "unset",
-                      "&.Mui-expanded": { minHeight: "unset" },
-                      "& .MuiAccordionSummary-content": {
-                        margin: "6px",
-                        "&.Mui-expanded": { margin: "6px" },
+                      "& .MuiFormControlLabel-label": {
+                        fontSize: "0.675rem",
                       },
                     }}
-                  >
-                    Coordinador
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <div className="text-center">
-                      <FormControlLabel
-                        sx={{
-                          "& .MuiFormControlLabel-label": {
-                            fontSize: "0.775rem",
-                            fontWeight: "bold",
-                          },
-                        }}
-                        control={
-                          <Checkbox
-                            checked={isAllSelected("coordinador")}
-                            indeterminate={isIndeterminate("coordinador")}
-                            onChange={handleSelectAllChange("coordinador")}
-                          />
-                        }
-                        label="Seleccionar todos"
+                    control={
+                      <Checkbox
+                        checked={permissions.admin.option1}
+                        onChange={handleCheckboxChange("admin")}
+                        name="option1"
                       />
-                    </div>
-                    <div>
-                      <FormControlLabel
-                        sx={{
-                          "& .MuiFormControlLabel-label": {
-                            fontSize: "0.675rem",
-                          },
-                        }}
-                        control={
-                          <Checkbox
-                            checked={permissions.coordinador.option1}
-                            onChange={handleCheckboxChange("coordinador")}
-                            name="option1"
-                          />
-                        }
-                        label="Agregar usuarios"
+                    }
+                    label="Agregar usuarios"
+                  />
+                  <FormControlLabel
+                    sx={{
+                      "& .MuiFormControlLabel-label": {
+                        fontSize: "0.675rem",
+                      },
+                    }}
+                    control={
+                      <Checkbox
+                        checked={permissions.admin.option2}
+                        onChange={handleCheckboxChange("admin")}
+                        name="option2"
                       />
-                      <FormControlLabel
-                        sx={{
-                          "& .MuiFormControlLabel-label": {
-                            fontSize: "0.675rem",
-                          },
-                        }}
-                        control={
-                          <Checkbox
-                            checked={permissions.coordinador.option2}
-                            onChange={handleCheckboxChange("coordinador")}
-                            name="option2"
-                          />
-                        }
-                        label="Editar usuarios"
+                    }
+                    label="Editar usuarios"
+                  />
+                  <FormControlLabel
+                    sx={{
+                      "& .MuiFormControlLabel-label": {
+                        fontSize: "0.675rem",
+                      },
+                    }}
+                    control={
+                      <Checkbox
+                        checked={permissions.admin.option3}
+                        onChange={handleCheckboxChange("admin")}
+                        name="option3"
                       />
-                    </div>
-                  </AccordionDetails>
-                </Accordion>
+                    }
+                    label="Agregar productos"
+                  />
+                </div>
 
                 <div className="sm:w-full md:w-full flex flex-col justify-end">
                   <div className="flex justify-center mt-4 mb-4 mx-2">
@@ -617,8 +448,8 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
             </div>
           </div>
         </div>
+        <ToastContainer />
       </div>
-      <ToastContainer />
     </div>
   );
 };

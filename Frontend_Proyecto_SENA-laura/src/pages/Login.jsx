@@ -21,7 +21,7 @@ const Login = () => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await api.get("/roles");
+        const response = await api.get("/Rol");
         setRoles(response.data);
       } catch (error) {
         toast.error("Error al cargar roles", {
@@ -119,7 +119,11 @@ const Login = () => {
             progress: undefined,
           });
           setTimeout(() => {
-            navigate("/dashboard");
+            if (role.toUpperCase() === "COORDINADOR") {
+              navigate("/homecoord"); 
+            } else {
+              navigate("/dashboard");  
+            }
           }, 2000);
         }
       } catch (error) {
@@ -230,7 +234,7 @@ const Login = () => {
                   className="absolute right-2 text-white ml-2"
                 />
               </div>
-              {passwordError && (
+              {password && (
                 <div className="text-red-400 text-sm mt-1">{passwordError}</div>
               )}
             </div>
@@ -245,7 +249,7 @@ const Login = () => {
                   <option value="">Seleccione su rol</option>
                   {roles.map((role) => (
                     <option key={role.id} value={role.rolName}>
-                      {role.rolName}
+                      {role.rolName.toUpperCase()}
                     </option>
                   ))}
                 </select>
