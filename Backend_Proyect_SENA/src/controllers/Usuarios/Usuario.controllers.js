@@ -3,7 +3,9 @@ import { config } from "dotenv";
 import { Op } from "sequelize";
 import Usuario from "../../models/Usuario.js";
 import Rol from "../../models/Rol.js";
+import Permiso from "../../models/Permiso.js";
 import Estado from "../../models/Estado.js";
+import { DetallePermiso } from "../../models/DetallePermiso.js";
 
 config();
 
@@ -11,42 +13,78 @@ const DOCUMENTO_ADMIN = process.env.DOCUMENTO_ADMIN;
 
 export const crearUsuario = async (req, res) => {
   try {
+    const { nombre, correo, Documento, password, permisos, RolId, EstadoId } = req.body;
+
+    // Verificar si el usuario ya existe por ID
     const consultaId = await Usuario.findByPk(req.body.id);
     if (consultaId) {
       return res.status(400).json({ message: "El ID del usuario ya existe" });
     }
 
-    const consultaRol = await Rol.findByPk(req.body.RolId);
+    const consultaNombre = await Usuario.findOne({ where: { nombre } });
+    if (consultaNombre) {
+      return res.status(400).json({ message: "El nombre ya existe" });
+    }
+
+    // Verificar si el rol existe
+    const consultaRol = await Rol.findByPk(RolId);
     if (!consultaRol) {
       return res.status(400).json({ message: "Rol no encontrado" });
     }
 
-    const consultaCorreo = await Usuario.findOne({
-      where: { correo: req.body.correo },
-    });
+    // Verificar si el correo ya está registrado
+    const consultaCorreo = await Usuario.findOne({ where: { correo } });
     if (consultaCorreo) {
       return res.status(400).json({ message: "El correo ya existe" });
     }
 
-    const consultaDocumento = await Usuario.findOne({
-      where: { Documento: req.body.Documento },
-    });
+    // Verificar si el documento ya está registrado
+    const consultaDocumento = await Usuario.findOne({ where: { Documento } });
     if (consultaDocumento) {
       return res.status(400).json({ message: "El documento ya existe" });
     }
 
-    let data = req.body;
+    // Crear el usuario con la contraseña hasheada
     const salt = bcrypt.genSaltSync(10);
-    data.password = bcrypt.hashSync(data.password, salt);
+    const hashedPassword = bcrypt.hashSync(password, salt);
+    
+    const crearUser = await Usuario.create({
+      ...req.body,
+      password: hashedPassword,
+    });
 
-    const crearUser = await Usuario.create(data);
+    // Guardar usuario en la base de datos
+    await crearUser.save();
 
-    const guardar = await crearUser.save();
+    // Verificar si hay permisos seleccionados
+    if (permisos && permisos.length > 0) {
+      // Buscar permisos válidos
+      const permisosValidos = await Permiso.findAll({
+        where: {
+          id: permisos, // Verifica si los permisos existen
+        },
+      });
 
-    res.status(201).json(guardar);
+      if (permisosValidos.length === 0) {
+        return res.status(400).json({ message: 'Permisos no válidos' });
+      }
+
+      // Asignar los permisos al usuario (tabla intermedia)
+      const detallePermisos = permisosValidos.map(permiso => ({
+        UsuarioId: crearUser.id,
+        PermisoId: permiso.id,
+      }));
+
+      await DetallePermiso.bulkCreate(detallePermisos); // Guardar permisos en la tabla intermedia
+    }
+
+    res.status(201).json({
+      message: "Usuario creado exitosamente con permisos asignados",
+      usuario: crearUser,
+    });
   } catch (error) {
     console.error("Error al crear usuario:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error al crear usuario" });
   }
 };
 
@@ -112,9 +150,7 @@ export const Putusuario = async (req, res) => {
         },
       });
       if (documentoExists) {
-        return res
-          .status(400)
-          .json({ message: "El documento ya está en uso por otro usuario" });
+        return res.status(400).json({ message: "El documento ya está en uso por otro usuario" });
       }
     }
 
@@ -126,6 +162,20 @@ export const Putusuario = async (req, res) => {
         message: "No se puede cambiar el rol o el estado del admin principal",
       });
     }
+        if (req.params.id === process.env.DOCUMENT_ADMIN) {
+          return res.status(404).json({
+            message: "Usuario administrador no se puede cambiarle el rol",
+          });
+        }
+
+        if (req.body.id === DOCUMENTO_ADMIN) {
+          delete data.id;
+        }
+
+        if (req.params.id === DOCUMENTO_ADMIN && req.body.RolId === 2) {
+          delete data.RolId;
+        }
+
 
     for (let key in req.body) {
       if (req.body[key] === null) {
