@@ -28,11 +28,11 @@ const AddRolModal = ({ isOpen, onClose }) => {
     });
   };
 
-  const resetForm = () => {
-    setFormData({
-      rolName: "",
-    });
-  };
+  // const resetForm = () => {
+  //   setFormData({
+  //     rolName: "",
+  //   });
+  // };
 
   const handleCreate = async () => {
     const { rolName } = formData;
@@ -47,7 +47,7 @@ const AddRolModal = ({ isOpen, onClose }) => {
         /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
         "$1"
       );
-      const response = await api.post("/roles", formData, {
+      const response = await api.post("/Rol", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -63,8 +63,9 @@ const AddRolModal = ({ isOpen, onClose }) => {
           draggable: true,
           progress: undefined,
         });
-        resetForm();
-        setTimeout(() => {}, 2000);
+        setTimeout(() => {
+          onClose(response.data);
+        }, 2000);
       } else {
         showToastError("Ocurrió un error!, por favor intenta de nuevo.");
       }
