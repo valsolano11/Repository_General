@@ -1,6 +1,5 @@
 import Permiso from "../../models/Permiso.js";
 
-
 export const getAllPermisos = async (req, res )=> {
     try {
         let permiso = await Permiso.findAll({

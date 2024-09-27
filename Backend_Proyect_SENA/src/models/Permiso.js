@@ -47,10 +47,10 @@ const Permiso = conexion.define("Permiso",
         { nombrePermiso: 'vista Roles'},
 
         // Permiso
-        { nombrePermiso: 'Obtener Permisos' },
-        { nombrePermiso: 'vista Permisos'},
+        //Valdiacion que solo el admin pueda hacerlo
+        { nombrePermiso: 'Mostrar Permisos' },
+        { nombrePermiso: 'Asignar Permisos'},
 
-  
           // Categoria
           { nombrePermiso: 'Crear Categoria' },
           { nombrePermiso: 'Obtener Categorias' },
