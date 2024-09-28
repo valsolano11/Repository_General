@@ -53,20 +53,16 @@ const EditUserModal = ({ isOpen, onClose, user }) => {
       const response = await api.get(`/usuarios/${userId}`);
       if (response.status === 200) {
         const { nombre, Documento, correo, RolId, EstadoId, DetallePermisos } = response.data;
-  
-        // Actualizar formData con los datos del usuario
         setFormData({
           nombre: nombre || "",
           Documento: Documento || "",
           correo: correo || "",
           rolId: RolId || "",
           estadoId: EstadoId || "",
-          DetallePermisos: DetallePermisos || [], // Asegúrate de manejar el caso de permisos vacíos
+          DetallePermisos: DetallePermisos || [],
         });
-  
-        // Actualizar selectedPermisos con los IDs de los permisos asignados
         if (DetallePermisos && DetallePermisos.length > 0) {
-          const permisoIds = DetallePermisos.map((permiso) => permiso.id);
+          const permisoIds = DetallePermisos.map((detalle) => detalle.PermisoId);
           setSelectedPermisos(permisoIds);
         } else {
           setSelectedPermisos([]);
@@ -83,15 +79,13 @@ const EditUserModal = ({ isOpen, onClose, user }) => {
     }
   };
 
-useEffect(() => {
-  if (user && permisos.length > 0) {
-    // Si ya tenemos los permisos y los detalles del usuario, sincronizar el estado selectedPermisos
-    const permisoIds = formData.DetallePermisos.map((permiso) => permiso.id);
-    setSelectedPermisos(permisoIds);
-  }
-}, [permisos, formData.DetallePermisos]);
-
-
+  useEffect(() => {
+    if (user && permisos.length > 0 && formData.DetallePermisos.length > 0) {
+      const permisoIds = formData.DetallePermisos.map((detalle) => detalle.PermisoId);
+      setSelectedPermisos(permisoIds);
+    }
+  }, [permisos, formData.DetallePermisos]);
+  
   const validateInput = (name, value) => {
     let errorMessage = "";
     if (name === "nombre") {
@@ -145,23 +139,30 @@ useEffect(() => {
   const handleUpdate = async () => {
     const { nombre, correo, Documento, rolId, estadoId } = formData;
   
+    // Validar campos obligatorios
     if (!nombre || !correo || !Documento || !rolId || !estadoId) {
-      toast.error("Todos los campos son obligatorios.", {
-        position: "top-right",
-      });
+      toast.error("Todos los campos son obligatorios.", { position: "top-right" });
+      return;
+    }
+  
+    // Validar permisos seleccionados
+    if (!selectedPermisos || selectedPermisos.length === 0) {
+      toast.error("Debe seleccionar al menos un permiso.", { position: "top-right" });
       return;
     }
   
     setLoading(true);
     try {
+      // Aquí se preparan los datos que serán enviados en la petición
       const updatedFormData = {
         ...formData,
-        DetallePermisos: selectedPermisos.map((permisoId) => ({ id: permisoId })),
+        permisos: selectedPermisos, // Enviar permisos en el campo 'permisos'
       };
   
+      // Hacemos la llamada API para actualizar el usuario
       const response = await api.put(
-        `/usuarios/${user.id}`,
-        updatedFormData,
+        `/usuarios/${user.id}`, // Reemplaza user.id con el ID del usuario que estás editando
+        updatedFormData, 
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -175,7 +176,7 @@ useEffect(() => {
           autoClose: 2000,
         });
         setTimeout(() => {
-          onClose(response.data);
+          onClose(response.data); 
         }, 2000);
       } else {
         console.error("Error updating user profile:", response.data.message);
@@ -193,9 +194,9 @@ useEffect(() => {
         toast.error("Error al actualizar la información del usuario.", {
           position: "top-right",
         });
-      }
+      }    
     } finally {
-      setLoading(false);
+      setLoading(false); 
     }
   };  
 
@@ -356,16 +357,10 @@ useEffect(() => {
                       {permisos.map((permiso) => (
                         <FormControlLabel
                           key={permiso.id}
-                          sx={{
-                            "& .MuiFormControlLabel-label": {
-                              fontSize: "0.675rem",
-                            },
-                          }}
                           control={
                             <Checkbox
                               checked={selectedPermisos.includes(permiso.id)}
                               onChange={handleCheckboxChange(permiso.id)}
-                              name={permiso.nombrePermiso}
                             />
                           }
                           label={permiso.nombrePermiso}
