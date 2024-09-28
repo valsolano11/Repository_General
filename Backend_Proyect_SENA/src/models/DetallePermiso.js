@@ -25,20 +25,25 @@ const DetallePermiso = conexion.define(
   DetallePermiso.belongsTo(Usuario, { foreignKey: "UsuarioId" });
   DetallePermiso.belongsTo(Permiso, { foreignKey: "PermisoId" });
 
-  DetallePermiso.afterCreate(async () => {
+DetallePermiso.afterSync(async () => {
   try {
-    const permisosAdmin = await DetallePermiso.findOne({ where: { UsuarioId: 1 } });
-    
+    // Verificar si el usuario administrador ya tiene permisos asignados
+    const permisosAdmin = await DetallePermiso.findOne({
+      where: { UsuarioId: 1 },
+    });
+
     if (!permisosAdmin) {
+      // Si no tiene permisos, asignar todos los permisos disponibles
       const permisos = await Permiso.findAll();
 
-      const permisosDetalle = permisos.map(permiso => ({
-        UsuarioId: 1, 
-        PermisoId: permiso.id, 
+      const permisosDetalle = permisos.map((permiso) => ({
+        UsuarioId: 1, // El ID del administrador
+        PermisoId: permiso.id, // Asignar cada permiso al administrador
       }));
 
+      // Insertar los permisos en la tabla DetallePermiso
       await DetallePermiso.bulkCreate(permisosDetalle);
-      
+
       console.log("Todos los permisos han sido asignados al administrador.");
     } else {
       console.log("El administrador ya tiene permisos asignados.");
