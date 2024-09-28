@@ -9,6 +9,8 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import AddRolModal from "../components/AddRolModal";
 import EditRolModal from "../components/EditRolModal";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const Roles = () => {
   const [sidebarToggle, setSidebarToggle] = useState(false);
@@ -62,7 +64,9 @@ const Roles = () => {
       label: "ID",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th key={columnMeta.index} className="text-center bg-white text-black uppercase text-xs font-bold">
+            {columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -72,7 +76,9 @@ const Roles = () => {
       label: "ROL",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th key={columnMeta.index} className="text-center bg-white text-black uppercase text-xs font-bold">
+            {columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -83,7 +89,9 @@ const Roles = () => {
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th key={columnMeta.index} className="text-center bg-white text-black uppercase text-xs font-bold">
+          {columnMeta.label}
+        </th>
         ),
         customBodyRender: (value, tableMeta, updateValue) => (
           <div className="flex items-center justify-center">
@@ -117,6 +125,33 @@ const Roles = () => {
     saveAs(data, "Roles.xlsx");
   };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const tableColumn = ["ID", "Rol"];
+    const tableRows = [];
+  
+    roles.forEach((rol) => {
+      const rolData = [
+        rol.id,
+        rol.rolName || "", 
+      ];
+      tableRows.push(rolData);
+    });
+  
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20, 
+      theme: 'striped', 
+      styles: { fontSize: 10 }, 
+      headStyles: { fillColor: [0, 57, 107] }, 
+      margin: { top: 10 }, 
+    });
+  
+    doc.text("Roles", 14, 15); 
+    doc.save("Roles.pdf");
+  };
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -130,6 +165,12 @@ const Roles = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
+          <button 
+            className="btn-black mr-2" 
+            onClick={handleExportPDF}
+          >
+            Exportar PDF
+          </button>
           <button
             className="btn-primary"
             onClick={() => setIsOpenAddModal(true)}

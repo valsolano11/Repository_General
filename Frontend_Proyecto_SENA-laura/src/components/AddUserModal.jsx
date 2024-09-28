@@ -62,14 +62,6 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
     return errorMessage;
   };
 
-  // const handleCheckboxChange = (panel) => (e) => {
-  //   const { name, checked } = e.target;
-  //   setPermissions((prevPermissions) => ({
-  //     ...prevPermissions,
-  //     [panel]: { ...prevPermissions[panel], [name]: checked },
-  //   }));
-  // };
-
   const handleCheckboxChange = (permisoId) => (event) => {
     if (event.target.checked) {
       setSelectedPermisos([...selectedPermisos, permisoId]);
@@ -117,6 +109,17 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
     });
   };
 
+  const resetForm = () => {
+    setFormData({
+      nombre: "",
+      Documento: "",
+      correo: "",
+      password: "",
+      RolId: "",
+      EstadoId: "",
+    });
+  };
+
   const handleCreate = async () => {
     const { nombre, correo, password, Documento, RolId, EstadoId } = formData;
     const nombreError = validateInput("nombre", nombre);
@@ -132,7 +135,6 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
       showToastError("Por favor, corrige los errores antes de agregar.");
       return;
     }
-
     if (
       !nombre ||
       !Documento ||
@@ -145,7 +147,6 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
       showToastError("Todos los campos son obligatorios.");
       return;
     }
-
     setLoading(true);
     try {
       const token = document.cookie.replace(
@@ -175,6 +176,7 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
           draggable: true,
           progress: undefined,
         });
+        resetForm();
         setTimeout(() => {
           onClose(response.data);
         }, 2000);
