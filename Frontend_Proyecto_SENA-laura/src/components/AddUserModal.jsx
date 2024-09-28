@@ -10,7 +10,8 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
   const [estados, setEstados] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState(false);
+  const [permisos, setPermisos] = useState([]);
+  const [selectedPermisos, setSelectedPermisos] = useState([]);
   const [formData, setFormData] = useState({
     nombre: "",
     Documento: "",
@@ -19,56 +20,25 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
     RolId: "",
     EstadoId: "",
   });
-  const [permissions, setPermissions] = useState({
-    admin: { option1: false, option2: false, option3: false },
-    usuario: { option1: false, option2: false, option3: false },
-    coordinador: { option1: false, option2: false, option3: false },
-  });
 
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
+      Promise.all([api.get("/Rol"), api.get("/Estado/1"), api.get("/Estado/2"), api.get("/permisos")])
+        .then(([rolesResponse, estado1Response, estado2Response, permisosResponse]) => {
+          setRoles(rolesResponse.data);
+          setEstados([estado1Response.data, estado2Response.data]);
+          setPermisos(permisosResponse.data);
+        })
+        .catch((error) => {
+          toast.error("Error al cargar los datos", { position: "top-right" });
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
   }, [isOpen]);
-
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        nombre: user.nombre || "",
-        Documento: user.Documento || "",
-        correo: user.correo || "",
-        password: user.password || "",
-        RolId: user.RolId || "",
-        EstadoId: user.EstadoId || "",
-      });
-    }
-  }, [user]);
-
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const response = await api.get("/Rol");
-        setRoles(response.data);
-      } catch (error) {
-        toast.error("Error al cargar roles", { position: "top-right" });
-      }
-    };
   
-    const fetchEstados = async () => {
-      try {
-        const response1 = await api.get("/Estado/1");
-        const response2 = await api.get("/Estado/2");
-
-        setEstados([response1.data, response2.data]);
-      } catch (error) {
-        toast.error("Error al cargar los estados", { position: "top-right" });
-      }
-    };
-
-    fetchRoles();
-    fetchEstados();
-  }, []);
-
   const validateInput = (name, value) => {
     let errorMessage = "";
     if (name === "nombre") {
@@ -90,6 +60,35 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
       }
     }
     return errorMessage;
+  };
+
+  // const handleCheckboxChange = (panel) => (e) => {
+  //   const { name, checked } = e.target;
+  //   setPermissions((prevPermissions) => ({
+  //     ...prevPermissions,
+  //     [panel]: { ...prevPermissions[panel], [name]: checked },
+  //   }));
+  // };
+
+  const handleCheckboxChange = (permisoId) => (event) => {
+    if (event.target.checked) {
+      setSelectedPermisos([...selectedPermisos, permisoId]);
+    } else {
+      setSelectedPermisos(selectedPermisos.filter((id) => id !== permisoId));
+    }
+  };
+
+  const isAllSelected = selectedPermisos.length === permisos.length;
+
+  const isIndeterminate =
+    selectedPermisos.length > 0 && selectedPermisos.length < permisos.length;
+
+  const handleSelectAllChange = (event) => {
+    if (event.target.checked) {
+      setSelectedPermisos(permisos.map((permiso) => permiso.id));
+    } else {
+      setSelectedPermisos([]);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -118,44 +117,6 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
     });
   };
 
-  const handleCheckboxChange = (panel) => (e) => {
-    const { name, checked } = e.target;
-    setPermissions((prevPermissions) => ({
-      ...prevPermissions,
-      [panel]: { ...prevPermissions[panel], [name]: checked },
-    }));
-  };
-
-  const handleSelectAllChange = (panel) => (e) => {
-    const { checked } = e.target;
-    setPermissions((prevPermissions) => ({
-      ...prevPermissions,
-      [panel]: Object.fromEntries(
-        Object.keys(prevPermissions[panel]).map((key) => [key, checked])
-      ),
-    }));
-  };
-
-  const isAllSelected = (panel) =>
-    Object.values(permissions[panel]).every((value) => value);
-  const isIndeterminate = (panel) =>
-    Object.values(permissions[panel]).some((value) => value) &&
-    !isAllSelected(panel);
-
-  const resetForm = () => {
-    setFormData({
-      nombre: "",
-      Documento: "",
-      correo: "",
-      password: "",
-      RolId: "",
-      EstadoId: "",
-    });
-    setAdminPermissions({
-      addProducts: false,
-    });
-  };
-
   const handleCreate = async () => {
     const { nombre, correo, password, Documento, RolId, EstadoId } = formData;
     const nombreError = validateInput("nombre", nombre);
@@ -172,7 +133,15 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
       return;
     }
 
-    if (!nombre || !Documento || !correo || !password || !RolId || !EstadoId) {
+    if (
+      !nombre ||
+      !Documento ||
+      !correo ||
+      !password ||
+      !RolId ||
+      !EstadoId ||
+      !selectedPermisos.length
+    ) {
       showToastError("Todos los campos son obligatorios.");
       return;
     }
@@ -183,11 +152,18 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
         /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
         "$1"
       );
-      const response = await api.post("/usuarios", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await api.post(
+        "/usuarios",
+        {
+          ...formData,
+          permisos: selectedPermisos,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.status === 201) {
         toast.success("Usuario agregado exitosamente", {
@@ -222,14 +198,14 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
         isOpen ? "" : "hidden"
       }`}
     >
-      <div className="bg-white rounded-lg shadow-lg sm:w-full md:w-1/2 mt-4 max-h-screen overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-lg sm:w-full md:w-3/4 mt-4 max-h-screen overflow-y-auto">
         <div className="flex justify-end p-2">
           <button onClick={onClose}>
             <FaTimes className="text-black w-4 h-4" />
           </button>
         </div>
-        <div className="flex items-center justify-center space-y-4 md:space-y-0 mb-4">
-          <div className="w-full md:w-3/4">
+        <div className="flex items-center justify-center space-y-4 md:space-y-0">
+          <div className="w-full md:w-11/12">
             <div className="font-inter ml-2">
               <div className="space-y-2 md:space-y-2 text-left">
                 <h6 className="font-bold text-center text-2xl mb-2">
@@ -364,71 +340,46 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
                 </div>
 
                 <h6 className="font-bold text-center text-xl mb-2">Permisos</h6>
-
-                <div className="text-center">
-                  <FormControlLabel
-                    sx={{
-                      "& .MuiFormControlLabel-label": {
-                        fontSize: "0.775rem",
-                        fontWeight: "bold",
-                      },
-                    }}
-                    control={
-                      <Checkbox
-                        checked={isAllSelected("admin")}
-                        indeterminate={isIndeterminate("admin")}
-                        onChange={handleSelectAllChange("admin")}
-                      />
-                    }
-                    label="Seleccionar todos"
-                  />
-                </div>
                 <div>
-                  <FormControlLabel
-                    sx={{
-                      "& .MuiFormControlLabel-label": {
-                        fontSize: "0.675rem",
-                      },
-                    }}
-                    control={
-                      <Checkbox
-                        checked={permissions.admin.option1}
-                        onChange={handleCheckboxChange("admin")}
-                        name="option1"
+                  <div className="text-center">
+                    <FormControlLabel
+                      sx={{
+                        "& .MuiFormControlLabel-label": {
+                          fontSize: "0.775rem",
+                          fontWeight: "bold",
+                        },
+                      }}
+                      control={
+                        <Checkbox
+                          checked={isAllSelected}
+                          indeterminate={isIndeterminate}
+                          onChange={handleSelectAllChange}
+                        />
+                      }
+                      label="Seleccionar todos"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-1">
+                    {permisos.map((permiso) => (
+                      <FormControlLabel
+                        key={permiso.id}
+                        sx={{
+                          "& .MuiFormControlLabel-label": {
+                            fontSize: "0.675rem",
+                          },
+                        }}
+                        control={
+                          <Checkbox
+                            checked={selectedPermisos.includes(permiso.id)}
+                            onChange={handleCheckboxChange(permiso.id)}
+                            name={permiso.nombrePermiso}
+                          />
+                        }
+                        label={permiso.nombrePermiso}
                       />
-                    }
-                    label="Agregar usuarios"
-                  />
-                  <FormControlLabel
-                    sx={{
-                      "& .MuiFormControlLabel-label": {
-                        fontSize: "0.675rem",
-                      },
-                    }}
-                    control={
-                      <Checkbox
-                        checked={permissions.admin.option2}
-                        onChange={handleCheckboxChange("admin")}
-                        name="option2"
-                      />
-                    }
-                    label="Editar usuarios"
-                  />
-                  <FormControlLabel
-                    sx={{
-                      "& .MuiFormControlLabel-label": {
-                        fontSize: "0.675rem",
-                      },
-                    }}
-                    control={
-                      <Checkbox
-                        checked={permissions.admin.option3}
-                        onChange={handleCheckboxChange("admin")}
-                        name="option3"
-                      />
-                    }
-                    label="Agregar productos"
-                  />
+                    ))}
+                  </div>
                 </div>
 
                 <div className="sm:w-full md:w-full flex flex-col justify-end">
@@ -455,3 +406,4 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
 };
 
 export default AddUserModal;
+
