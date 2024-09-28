@@ -5,7 +5,7 @@ import Usuario from "../../models/Usuario.js";
 import Rol from "../../models/Rol.js";
 import Permiso from "../../models/Permiso.js";
 import Estado from "../../models/Estado.js";
-import { DetallePermiso } from "../../models/DetallePermiso.js";
+import DetallePermiso from "../../models/DetallePermiso.js";
 
 config();
 
@@ -121,7 +121,7 @@ export const Putusuario = async (req, res) => {
   try {
 
     const { permisos } = req.body;
-    
+
     const consultarusuario = await Usuario.findByPk(req.params.id);
     if (!consultarusuario) {
       return res.status(404).json({ message: "Usuario no encontrado" });

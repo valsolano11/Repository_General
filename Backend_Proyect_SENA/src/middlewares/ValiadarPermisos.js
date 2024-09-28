@@ -1,5 +1,5 @@
 import Permiso from "../models/Permiso.js";
-import { DetallePermiso } from "../models/DetallePermiso.js";
+import DetallePermiso from "../models/DetallePermiso.js";
 
 
 export const validarPermiso = (nombrePermiso) => {
