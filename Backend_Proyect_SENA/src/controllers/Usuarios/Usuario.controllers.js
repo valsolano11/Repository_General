@@ -107,12 +107,36 @@ export const getAllusuario = async (req, res) => {
 
 export const getUsuario = async (req, res) => {
   try {
-    const consultarusuario = await Usuario.findByPk(req.params.id);
+    const consultarusuario = await Usuario.findByPk(req.params.id, {
+      include: [
+        {
+          model: Rol,
+          attributes: ["rolName"],
+        },
+        {
+          model: Estado,
+          attributes: ["estadoName"],
+        },
+        {
+          model: DetallePermiso,
+          attributes: ["PermisoId"],
+          include: [
+            {
+              model: Permiso,
+              attributes: ["nombrePermiso"],
+            },
+          ],
+        },
+      ],
+    });
+
     if (!consultarusuario) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
+
     res.status(200).json(consultarusuario);
   } catch (error) {
+    console.error("Error al obtener usuario:", error);
     res.status(500).json(error.message);
   }
 };
@@ -135,9 +159,7 @@ export const Putusuario = async (req, res) => {
         },
       });
       if (emailExists) {
-        return res
-          .status(400)
-          .json({ message: "El email ya está en uso por otro usuario" });
+        return res.status(400).json({ message: "El email ya está en uso por otro usuario" });
       }
     }
 
@@ -149,9 +171,7 @@ export const Putusuario = async (req, res) => {
         },
       });
       if (documentoExists) {
-        return res
-          .status(400)
-          .json({ message: "El documento ya está en uso por otro usuario" });
+        return res.status(400).json({ message: "El documento ya está en uso por otro usuario" });
       }
     }
 
@@ -180,9 +200,7 @@ export const Putusuario = async (req, res) => {
 
     for (let key in req.body) {
       if (req.body[key] === null) {
-        return res
-          .status(400)
-          .json({ message: `El campo ${key} no puede ser nulo` });
+        return res.status(400).json({ message: `El campo ${key} no puede ser nulo` });
       }
     }
 
@@ -223,8 +241,6 @@ export const Putusuario = async (req, res) => {
     });
   }
 };
-
-
 
 export const DeletePermisoUsuario = async( req,res ) =>{
   try {
