@@ -3,35 +3,6 @@ import Usuario from './../../models/Usuario.js';
 import { DetallePermiso } from '../../models/DetallePermiso.js';
 
 
-export const crearUsuarioConPermisos = async (req, res) => {
-  try {
-    const { nombre, correo, password, Documento, RolId, EstadoId, permisos } = req.body;
-
-    // Crear el usuario
-    const nuevoUsuario = await Usuario.create({ nombre, correo, password, Documento, RolId, EstadoId });
-
-    // Verificar si hay permisos seleccionados
-    if (permisos && permisos.length > 0) {
-      // Asignar los permisos al usuario
-      const permisosAsignados = permisos.map(async (permisoId) => {
-        const permiso = await Permiso.findByPk(permisoId);
-        if (permiso) {
-          await DetallePermiso.create({ UsuarioId: nuevoUsuario.id, PermisoId: permiso.id });
-        }
-      });
-      
-      // Esperar a que todas las promesas se resuelvan
-      await Promise.all(permisosAsignados);
-    }
-
-    res.status(201).json({ message: 'Usuario creado y permisos asignados exitosamente' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al crear usuario y asignar permisos', error });
-  }
-};
-
-
 
 
 

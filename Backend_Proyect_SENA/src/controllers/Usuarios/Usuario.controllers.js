@@ -15,7 +15,6 @@ export const crearUsuario = async (req, res) => {
   try {
     const { nombre, correo, Documento, password, permisos, RolId, EstadoId } = req.body;
 
-    // Verificar si el usuario ya existe por ID
     const consultaId = await Usuario.findByPk(req.body.id);
     if (consultaId) {
       return res.status(400).json({ message: "El ID del usuario ya existe" });
@@ -26,25 +25,26 @@ export const crearUsuario = async (req, res) => {
       return res.status(400).json({ message: "El nombre ya existe" });
     }
 
-    // Verificar si el rol existe
     const consultaRol = await Rol.findByPk(RolId);
     if (!consultaRol) {
       return res.status(400).json({ message: "Rol no encontrado" });
     }
 
-    // Verificar si el correo ya está registrado
+    const consultarEstado= await Estado.findByPk(EstadoId);
+    if (!consultarEstado) {
+      return res.status(400).json({ message: "Estado no encontrado" });
+    }
+
     const consultaCorreo = await Usuario.findOne({ where: { correo } });
     if (consultaCorreo) {
       return res.status(400).json({ message: "El correo ya existe" });
     }
 
-    // Verificar si el documento ya está registrado
     const consultaDocumento = await Usuario.findOne({ where: { Documento } });
     if (consultaDocumento) {
       return res.status(400).json({ message: "El documento ya existe" });
     }
 
-    // Crear el usuario con la contraseña hasheada
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(password, salt);
     
@@ -53,15 +53,12 @@ export const crearUsuario = async (req, res) => {
       password: hashedPassword,
     });
 
-    // Guardar usuario en la base de datos
     await crearUser.save();
 
-    // Verificar si hay permisos seleccionados
     if (permisos && permisos.length > 0) {
-      // Buscar permisos válidos
       const permisosValidos = await Permiso.findAll({
         where: {
-          id: permisos, // Verifica si los permisos existen
+          id: permisos, 
         },
       });
 
@@ -69,13 +66,12 @@ export const crearUsuario = async (req, res) => {
         return res.status(400).json({ message: 'Permisos no válidos' });
       }
 
-      // Asignar los permisos al usuario (tabla intermedia)
       const detallePermisos = permisosValidos.map(permiso => ({
         UsuarioId: crearUser.id,
         PermisoId: permiso.id,
       }));
 
-      await DetallePermiso.bulkCreate(detallePermisos); // Guardar permisos en la tabla intermedia
+      await DetallePermiso.bulkCreate(detallePermisos); 
     }
 
     res.status(201).json({
@@ -123,6 +119,9 @@ export const getUsuario = async (req, res) => {
 
 export const Putusuario = async (req, res) => {
   try {
+
+    const { permisos } = req.body;
+    
     const consultarusuario = await Usuario.findByPk(req.params.id);
     if (!consultarusuario) {
       return res.status(404).json({ message: "Usuario no encontrado" });
@@ -136,9 +135,7 @@ export const Putusuario = async (req, res) => {
         },
       });
       if (emailExists) {
-        return res
-          .status(400)
-          .json({ message: "El email ya está en uso por otro usuario" });
+        return res.status(400).json({ message: "El email ya está en uso por otro usuario" });
       }
     }
 
@@ -179,22 +176,61 @@ export const Putusuario = async (req, res) => {
 
     for (let key in req.body) {
       if (req.body[key] === null) {
-        return res
-          .status(400)
-          .json({ message: `El campo ${key} no puede ser nulo` });
+        return res.status(400).json({ message: `El campo ${key} no puede ser nulo` });
       }
     }
 
     await consultarusuario.update(req.body);
 
+  if (permisos && permisos.length > 0) {
+      const permisosAsignados = await DetallePermiso.findAll({
+        where: { UsuarioId: id },
+        attributes: ["PermisoId"],
+      });
+
+      const permisosAsignadosIds = permisosAsignados.map((permiso) => permiso.PermisoId);
+      const permisosNuevos = permisos.filter((permisoId) => !permisosAsignadosIds.includes(permisoId));
+
+      if (permisosNuevos.length > 0) {
+        const detallePermisos = permisosNuevos.map((permisoId) => ({
+          UsuarioId: id,
+          PermisoId: permisoId,
+        }));
+
+        await DetallePermiso.bulkCreate(detallePermisos);
+      }
+    }
+
     return res.status(200).json({
-      message: "Usuario actualizado correctamente",
+      message: "Usuario actualizado correctamente con permisos asignados",
       usuario: consultarusuario,
     });
   } catch (error) {
+    console.error("Error al actualizar el usuario:", error);
     return res.status(500).json({
       message: "Error al actualizar el usuario",
       error: error.message,
     });
   }
 };
+
+
+export const DeletePermisoUsuario = async( req,res ) =>{
+  try {
+    const { UsuarioId } = req.params;
+
+    const usuario = await Usuario.findByPk(UsuarioId) 
+     if (!usuario) {
+      return res.status(404).json({message: "Usuario no encontrado"})
+     }
+
+     await DetallePermiso.destroy({
+      where:{UsuarioId: UsuarioId}
+     })
+
+     res.status(200).json({ message: "Permisos del usuario eliminado correctamente"})
+  } catch (error) {
+    console.error("Error al eliminar permisos del usuario:", error);
+    res.status(500).json({ message: "Error al eliminar los permisos del usuario" });
+  }
+}

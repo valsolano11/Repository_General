@@ -38,7 +38,8 @@ const Permiso = conexion.define("Permiso",
         { nombrePermiso: 'Crear Usuario' },
         { nombrePermiso: 'Obtener Usuarios' },
         { nombrePermiso: 'Modificar Usuario'},
-        { nombrePermiso: 'vista Usuario'},
+        { nombrePermiso: 'Vista Usuario'},
+        { nombrePermiso: 'Eliminar Permisos'},
 
         // Rol
         { nombrePermiso: 'Crear Rol' },
