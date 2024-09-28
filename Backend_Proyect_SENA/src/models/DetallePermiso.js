@@ -27,21 +27,18 @@ const DetallePermiso = conexion.define(
 
 DetallePermiso.afterSync(async () => {
   try {
-    // Verificar si el usuario administrador ya tiene permisos asignados
     const permisosAdmin = await DetallePermiso.findOne({
       where: { UsuarioId: 1 },
     });
 
     if (!permisosAdmin) {
-      // Si no tiene permisos, asignar todos los permisos disponibles
       const permisos = await Permiso.findAll();
 
       const permisosDetalle = permisos.map((permiso) => ({
-        UsuarioId: 1, // El ID del administrador
-        PermisoId: permiso.id, // Asignar cada permiso al administrador
+        UsuarioId: 1,
+        PermisoId: permiso.id, 
       }));
 
-      // Insertar los permisos en la tabla DetallePermiso
       await DetallePermiso.bulkCreate(permisosDetalle);
 
       console.log("Todos los permisos han sido asignados al administrador.");

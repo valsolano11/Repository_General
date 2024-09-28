@@ -117,9 +117,9 @@ export const getUsuario = async (req, res) => {
   }
 };
 
+
 export const Putusuario = async (req, res) => {
   try {
-
     const { permisos } = req.body;
 
     const consultarusuario = await Usuario.findByPk(req.params.id);
@@ -135,7 +135,9 @@ export const Putusuario = async (req, res) => {
         },
       });
       if (emailExists) {
-        return res.status(400).json({ message: "El email ya está en uso por otro usuario" });
+        return res
+          .status(400)
+          .json({ message: "El email ya está en uso por otro usuario" });
       }
     }
 
@@ -147,7 +149,9 @@ export const Putusuario = async (req, res) => {
         },
       });
       if (documentoExists) {
-        return res.status(400).json({ message: "El documento ya está en uso por otro usuario" });
+        return res
+          .status(400)
+          .json({ message: "El documento ya está en uso por otro usuario" });
       }
     }
 
@@ -159,41 +163,47 @@ export const Putusuario = async (req, res) => {
         message: "No se puede cambiar el rol o el estado del admin principal",
       });
     }
-        if (req.params.id === process.env.DOCUMENT_ADMIN) {
-          return res.status(404).json({
-            message: "Usuario administrador no se puede cambiarle el rol",
-          });
-        }
 
-        if (req.body.id === DOCUMENTO_ADMIN) {
-          delete data.id;
-        }
+    if (req.params.id === process.env.DOCUMENT_ADMIN) {
+      return res.status(404).json({
+        message: "Usuario administrador no se puede cambiarle el rol",
+      });
+    }
 
-        if (req.params.id === DOCUMENTO_ADMIN && req.body.RolId === 2) {
-          delete data.RolId;
-        }
+    if (req.body.id === DOCUMENTO_ADMIN) {
+      delete req.body.id; 
+    }
 
+    if (req.params.id === DOCUMENTO_ADMIN && req.body.RolId === 2) {
+      delete req.body.RolId;
+    }
 
     for (let key in req.body) {
       if (req.body[key] === null) {
-        return res.status(400).json({ message: `El campo ${key} no puede ser nulo` });
+        return res
+          .status(400)
+          .json({ message: `El campo ${key} no puede ser nulo` });
       }
     }
 
     await consultarusuario.update(req.body);
 
-  if (permisos && permisos.length > 0) {
+    if (permisos && permisos.length > 0) {
       const permisosAsignados = await DetallePermiso.findAll({
-        where: { UsuarioId: id },
+        where: { UsuarioId: req.params.id },
         attributes: ["PermisoId"],
       });
 
-      const permisosAsignadosIds = permisosAsignados.map((permiso) => permiso.PermisoId);
-      const permisosNuevos = permisos.filter((permisoId) => !permisosAsignadosIds.includes(permisoId));
+      const permisosAsignadosIds = permisosAsignados.map(
+        (permiso) => permiso.PermisoId
+      );
+      const permisosNuevos = permisos.filter(
+        (permisoId) => !permisosAsignadosIds.includes(permisoId)
+      );
 
       if (permisosNuevos.length > 0) {
         const detallePermisos = permisosNuevos.map((permisoId) => ({
-          UsuarioId: id,
+          UsuarioId: req.params.id,
           PermisoId: permisoId,
         }));
 
@@ -213,6 +223,7 @@ export const Putusuario = async (req, res) => {
     });
   }
 };
+
 
 
 export const DeletePermisoUsuario = async( req,res ) =>{
