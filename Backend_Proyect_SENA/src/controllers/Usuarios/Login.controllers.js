@@ -2,6 +2,8 @@ import { crearToken, verificarToken } from "../../libs/token.js";
 import Estado from "../../models/Estado.js";
 import Rol from "../../models/Rol.js";
 import Usuario from "../../models/Usuario.js";
+import DetallePermiso from "../../models/DetallePermiso.js"
+import Permiso from "../../models/Permiso.js";
 import bcrypt from "bcryptjs";
 
 export const login = async (req, res) => {
