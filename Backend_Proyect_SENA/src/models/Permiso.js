@@ -43,9 +43,7 @@ const Permiso = conexion.define("Permiso",
 
         // Rol
         { nombrePermiso: 'Crear Rol' },
-        { nombrePermiso: 'Obtener Roles' },
         { nombrePermiso: 'Modificar Rol'},
-        { nombrePermiso: 'vista Roles'},
 
         // Permiso
         //Valdiacion que solo el admin pueda hacerlo

@@ -4,42 +4,51 @@ import Rol from "../../models/Rol.js";
 import Usuario from "../../models/Usuario.js";
 import bcrypt from "bcryptjs";
 
-export const login = async (req, res) =>{
-    try {
-        const {Documento, password}= req.body;
+export const login = async (req, res) => {
+  try {
+    const { Documento, password } = req.body;
+    
+    const usuario = await Usuario.findOne({
+      where: { Documento },
+      include: [
+        { model: Rol, include: [{ model: Permiso }] }, 
+        { model: Estado },
+      ],
+    });
 
-        const usuario = await Usuario.findOne({
-            where:{Documento},
-            include:[{model: Rol}, {model:Estado}],
-        });
-
-        if(!usuario){
-            return res.status(404).json({message: "Credenciales invalidas"});
-        }
-
-        if(usuario.Estado.estadoName !== "ACTIVO"){
-            return res.status(401).json({message: "Estado no ACTIVO"});
-        }
-
-        const esPasswordValido = await bcrypt.compare(password, usuario.password);
-
-        if(!esPasswordValido){
-            return res.status(401).json({message: "Credenciales invalidas"});
-        }
-        const token = await crearToken({Documento: usuario.Documento});
-
-        res.cookie("token", token).status(200).json({
-            message: "Inicio de sesión exitoso",
-            role: usuario.Rol.rolName,
-            token,
-        });
-
-    } catch (error) {
-        res.status(500).json({
-            message: "Error interno del servidor",
-            error: error.message,
-        });
+    if (!usuario) {
+      return res.status(404).json({ message: "Credenciales inválidas" });
     }
+
+    if (usuario.Estado.estadoName !== "ACTIVO") {
+      return res.status(401).json({ message: "El estado del usuario no es ACTIVO" });
+    }
+
+    const esPasswordValido = await bcrypt.compare(password, usuario.password);
+    if (!esPasswordValido) {
+      return res.status(401).json({ message: "Credenciales inválidas" });
+    }
+
+    const permisos = usuario.Rol.Permisos.map((permiso) => permiso.nombrePermiso);
+    if (!permisos || permisos.length === 0) {
+      return res.status(403).json({ message: "El usuario no tiene permisos asignados" });
+    }
+
+    const token = await crearToken({ Documento: usuario.Documento });
+
+    res.cookie("token", token).status(200).json({
+      message: "Inicio de sesión exitoso",
+      role: usuario.Rol.rolName,
+      permisos, 
+      token,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error interno del servidor",
+      error: error.message,
+    });
+  }
 };
 
 

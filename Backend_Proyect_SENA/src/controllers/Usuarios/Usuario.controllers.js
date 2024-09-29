@@ -242,22 +242,28 @@ export const Putusuario = async (req, res) => {
   }
 };
 
-export const DeletePermisoUsuario = async( req,res ) =>{
+export const DeletePermisoUsuario = async (req, res) => {
   try {
     const { UsuarioId } = req.params;
 
-    const usuario = await Usuario.findByPk(UsuarioId) 
-     if (!usuario) {
-      return res.status(404).json({message: "Usuario no encontrado"})
-     }
+    const usuario = await Usuario.findByPk(UsuarioId);
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
 
-     await DetallePermiso.destroy({
-      where:{UsuarioId: UsuarioId}
-     })
+    const permisos = await DetallePermiso.findAll({ where: { UsuarioId: UsuarioId } });
 
-     res.status(200).json({ message: "Permisos del usuario eliminado correctamente"})
+    if (!permisos.length) {
+      return res.status(404).json({ message: "No se encontraron permisos para este usuario" });
+    }
+
+    for (const permiso of permisos) {
+      await permiso.destroy();
+    }
+
+    res.status(200).json({ message: "Permisos del usuario eliminados correctamente, uno por uno" });
   } catch (error) {
     console.error("Error al eliminar permisos del usuario:", error);
     res.status(500).json({ message: "Error al eliminar los permisos del usuario" });
   }
-}
+};
