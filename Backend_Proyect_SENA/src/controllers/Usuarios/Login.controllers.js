@@ -7,31 +7,42 @@ import bcrypt from "bcryptjs";
 export const login = async (req, res) => {
   try {
     const { Documento, password } = req.body;
-    
+
     const usuario = await Usuario.findOne({
       where: { Documento },
       include: [
-        { model: Rol, include: [{ model: Permiso }] }, 
+        { model: Rol },
         { model: Estado },
+        {
+          model: DetallePermiso,
+          include: [{ model: Permiso }],
+        },
       ],
     });
 
     if (!usuario) {
-      return res.status(404).json({ message: "Credenciales inválidas" });
+      return res.status(404).json({
+        message: "Credenciales inválidas",
+      });
     }
 
     if (usuario.Estado.estadoName !== "ACTIVO") {
-      return res.status(401).json({ message: "El estado del usuario no es ACTIVO" });
+      return res.status(400).json({
+        message: "Estado no activo",
+      });
     }
 
     const esPasswordValido = await bcrypt.compare(password, usuario.password);
     if (!esPasswordValido) {
-      return res.status(401).json({ message: "Credenciales inválidas" });
+      return res.status(404).json({
+        message: "Credenciales inválidas",
+      });
     }
 
-    const permisos = usuario.Rol.Permisos.map((permiso) => permiso.nombrePermiso);
-    if (!permisos || permisos.length === 0) {
-      return res.status(403).json({ message: "El usuario no tiene permisos asignados" });
+    if (!usuario.DetallePermisos || usuario.DetallePermisos.length === 0) {
+      return res.status(403).json({
+        message: "El usuario no tiene permisos asignados",
+      });
     }
 
     const token = await crearToken({ Documento: usuario.Documento });
@@ -39,10 +50,8 @@ export const login = async (req, res) => {
     res.cookie("token", token).status(200).json({
       message: "Inicio de sesión exitoso",
       role: usuario.Rol.rolName,
-      permisos, 
       token,
     });
-
   } catch (error) {
     res.status(500).json({
       message: "Error interno del servidor",
@@ -50,7 +59,6 @@ export const login = async (req, res) => {
     });
   }
 };
-
 
 export const logout = async (req, res)=> {
     try {

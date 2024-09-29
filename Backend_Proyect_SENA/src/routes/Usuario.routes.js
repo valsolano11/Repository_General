@@ -17,6 +17,5 @@ UsuarioRouter.post(
   crearUsuario
 );
 UsuarioRouter.put("/usuarios/:id",rutaProtegida, validarPermiso('Modificar Usuario'),Putusuario);
-UsuarioRouter.delete("/usuarios", rutaProtegida,validarPermiso('Eliminar Permisos'), DeletePermisoUsuario)
-
+UsuarioRouter.delete("/usuarios/:UsuarioId", rutaProtegida,validarPermiso('Eliminar Permisos'), DeletePermisoUsuario);
 export default UsuarioRouter;
