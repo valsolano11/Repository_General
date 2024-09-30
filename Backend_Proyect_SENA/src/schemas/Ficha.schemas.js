@@ -13,7 +13,8 @@ export const FichaSchemas = z.object({
   Programa: z.string({
     required_error: "El programa es requerido",
   }),
-  Jornada: z.string({
-    required_error: "La jornada es requerida",
+  Jornada: z.enum(["MAÑANA", "TARDE", "NOCHE"], {
+    required_error: "La jornada de la ficha es requerida",
+    invalid_type_error: "La jornada debe ser 'MAÑANA', 'TARDE' o 'NOCHE'",
   }),
 });
