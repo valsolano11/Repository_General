@@ -11,6 +11,7 @@ import recuperacionRouter from "./routes/Olvidarcontrasena.routes.js";
 import permisoRouter from "./routes/Permiso.routes.js";
 import FichaRouter from "./routes/Fichas.routes.js";
 import InstructorRouter from "./routes/Instructores.routes.js";
+import Relacion from "./routes/Relacion.routes.js";
 const app = express();
 
 app.use(
@@ -33,7 +34,8 @@ app.use(
     recuperacionRouter,
     permisoRouter,
     FichaRouter,
-    InstructorRouter
+    InstructorRouter,
+    Relacion
     
 
 );
