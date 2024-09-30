@@ -18,7 +18,7 @@ export const obtenerRelaciones = async (req, res) => {
         },
         {
           model: Usuario,
-          attributes: ["nombre", "correo"], // Datos del usuario que realizó la acción
+          attributes: ["nombre"], // Datos del usuario que realizó la acción
         },
       ],
     });

@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { conexion } from "../conexion.js";
 import Instructores from "./Instructores.js";
 import Fichas from "./Fichas.js";
+import Usuario from "./Usuario.js";
 
 const InstructorFicha = conexion.define(
   "InstructorFicha",
@@ -21,14 +22,21 @@ const InstructorFicha = conexion.define(
         },
       },
     },
+    UsuarioId: {
+      type: DataTypes.INTEGER,  // Llave foránea para relacionar con el usuario
+      references: {
+        model: Usuario, // Relacionar con la tabla Usuarios
+        key: 'id',
+      }
+    }
   },
   {
     tableName: "InstructorFicha",
     timestamps: true,
     indexes: [
       {
-        fields: ["InstructorId", "FichaId", "semestre"], 
-        unique: true, 
+        fields: ["InstructorId", "FichaId", "semestre", "UsuarioId"],
+        unique: true,
       },
     ],
   }
@@ -36,5 +44,5 @@ const InstructorFicha = conexion.define(
 
 InstructorFicha.belongsTo(Instructores, { foreignKey: "InstructorId" });
 InstructorFicha.belongsTo(Fichas, { foreignKey: "FichaId" });
-
+InstructorFicha.belongsTo(Usuario, { foreignKey: "UsuarioId" }); 
 export default InstructorFicha;
