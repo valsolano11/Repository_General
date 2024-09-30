@@ -9,6 +9,8 @@ import EstadoRouter from "./routes/Estado.routes.js";
 import LoginRouter from "./routes/Login.routes.js";
 import recuperacionRouter from "./routes/Olvidarcontrasena.routes.js";
 import permisoRouter from "./routes/Permiso.routes.js";
+import FichaRouter from "./routes/Fichas.routes.js";
+import InstructorRouter from "./routes/Instructores.routes.js";
 const app = express();
 
 app.use(
@@ -30,6 +32,8 @@ app.use(
     LoginRouter,
     recuperacionRouter,
     permisoRouter,
+    FichaRouter,
+    InstructorRouter
     
 
 );

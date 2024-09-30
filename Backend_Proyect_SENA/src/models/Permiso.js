@@ -66,13 +66,11 @@ const Permiso = conexion.define("Permiso",
           { nombrePermiso: 'Crear Instructor' },
           { nombrePermiso: 'Obtener Intructores' },
           { nombrePermiso: 'Modificar Intructor'},
-          { nombrePermiso: 'vista Intructores'},
   
           // ficha
           { nombrePermiso: 'Crear Ficha' },
           { nombrePermiso: 'Obtener Fichas' },
           { nombrePermiso: 'Modificar Ficha'},
-          { nombrePermiso: 'vista Fichas'},
   
           // Producto
           { nombrePermiso: 'Crear Producto' },
