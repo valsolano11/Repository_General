@@ -12,6 +12,8 @@ import AddUserModal from "../components/AddUserModal";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
 import "react-toastify/dist/ReactToastify.css";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const Usuarios = () => {
   const [sidebarToggle, setSidebarToggle] = useState(false);
@@ -91,7 +93,10 @@ const Usuarios = () => {
       options: {
         customBodyRender: (value) => <div className="text-center">{value}</div>,
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}  
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         )
       },
     },
@@ -101,7 +106,10 @@ const Usuarios = () => {
       options: {
         customBodyRender: (value) => <div className="text-center">{value}</div>,
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}  
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
       },
     },
@@ -111,7 +119,10 @@ const Usuarios = () => {
       options: {
         customBodyRender: (value) => <div className="text-center">{value}</div>,
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}  
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
       },
     },
@@ -121,7 +132,10 @@ const Usuarios = () => {
       options: {
         customBodyRender: (value) => <div className="text-center">{value}</div>,
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}  
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
       },
     },
@@ -131,7 +145,10 @@ const Usuarios = () => {
       options: {
         customBodyRender: (value) => <div className="text-center">{value}</div>,
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}  
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
       },
     },
@@ -140,7 +157,10 @@ const Usuarios = () => {
       label: "ESTADO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}  
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => (
           <div
@@ -161,7 +181,10 @@ const Usuarios = () => {
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label} 
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value, tableMeta, updateValue) => (
           <div className="flex items-center justify-center">
@@ -197,6 +220,37 @@ const Usuarios = () => {
     saveAs(data, "Usuarios.xlsx");
   };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const tableColumn = ["ID", "Documento", "Nombre", "Correo", "Rol", "Estado"];
+    const tableRows = [];
+  
+    data.forEach((user) => {
+      const userData = [
+        user.id,
+        user.Documento || "",
+        user.nombre || "",
+        user.correo || "",
+        user.rolName || "",
+        user.estadoName || ""
+      ];
+      tableRows.push(userData);
+    });
+  
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      theme: 'striped',
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [0, 57, 107] }, 
+      margin: { top: 10 }
+    });
+  
+    doc.text("Usuarios", 14, 15); 
+    doc.save("Usuarios.pdf");
+  };  
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -210,6 +264,9 @@ const Usuarios = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
+          <button className="btn-black mr-2" onClick={handleExportPDF}>
+            Exportar PDF
+          </button>
           <button className="btn-primary" onClick={handleOpenAddModal}>
             Agregar Usuario
           </button>

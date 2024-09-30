@@ -28,11 +28,11 @@ const AddRolModal = ({ isOpen, onClose }) => {
     });
   };
 
-  // const resetForm = () => {
-  //   setFormData({
-  //     rolName: "",
-  //   });
-  // };
+  const resetForm = () => {
+    setFormData({
+      rolName: "",
+    });
+  };
 
   const handleCreate = async () => {
     const { rolName } = formData;
@@ -63,6 +63,7 @@ const AddRolModal = ({ isOpen, onClose }) => {
           draggable: true,
           progress: undefined,
         });
+        resetForm();
         setTimeout(() => {
           onClose(response.data);
         }, 2000);
