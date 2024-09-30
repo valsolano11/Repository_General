@@ -50,6 +50,10 @@ const Permiso = conexion.define("Permiso",
         { nombrePermiso: 'Mostrar Permisos' },
         { nombrePermiso: 'Asignar Permisos'},
 
+        //Fichas E Instructores
+        { nombrePermiso: 'Actualizacion de trimestres'},
+        { nombrePermiso: ' Mostrar actualizacion trimestres'},
+
           // Categoria
           { nombrePermiso: 'Crear Categoria' },
           { nombrePermiso: 'Obtener Categorias' },
