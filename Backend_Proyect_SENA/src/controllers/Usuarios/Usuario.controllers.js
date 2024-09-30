@@ -200,7 +200,7 @@ export const Putusuario = async (req, res) => {
 
     for (let key in req.body) {
       if (req.body[key] === null) {
-        return res.status(400).json({ message: `El campo ${key} no puede ser nulo` });
+        return res.status(400).json({ message: `El campo ${key} no puede ser nulo `});
       }
     }
 
@@ -212,19 +212,25 @@ export const Putusuario = async (req, res) => {
         attributes: ["PermisoId"],
       });
 
-      const permisosAsignadosIds = permisosAsignados.map(
-        (permiso) => permiso.PermisoId
-      );
-      const permisosNuevos = permisos.filter(
-        (permisoId) => !permisosAsignadosIds.includes(permisoId)
-      );
+      const permisosAsignadosIds = permisosAsignados.map(permiso => permiso.PermisoId);
 
-      if (permisosNuevos.length > 0) {
-        const detallePermisos = permisosNuevos.map((permisoId) => ({
+      const permisosAEliminar = permisosAsignadosIds.filter(permisoId => !permisos.includes(permisoId));
+      const permisosANuevos = permisos.filter(permisoId => !permisosAsignadosIds.includes(permisoId));
+
+      if (permisosAEliminar.length > 0) {
+        await DetallePermiso.destroy({
+          where: {
+            UsuarioId: req.params.id,
+            PermisoId: permisosAEliminar,
+          },
+        });
+      }
+
+      if (permisosANuevos.length > 0) {
+        const detallePermisos = permisosANuevos.map(permisoId => ({
           UsuarioId: req.params.id,
           PermisoId: permisoId,
         }));
-
         await DetallePermiso.bulkCreate(detallePermisos);
       }
     }
@@ -240,30 +246,5 @@ export const Putusuario = async (req, res) => {
       error: error.message,
     });
   }
-};
+}
 
-export const DeletePermisoUsuario = async (req, res) => {
-  try {
-    const { UsuarioId } = req.params;
-
-    const usuario = await Usuario.findByPk(UsuarioId);
-    if (!usuario) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
-    }
-
-    const permisos = await DetallePermiso.findAll({ where: { UsuarioId: UsuarioId } });
-
-    if (!permisos.length) {
-      return res.status(404).json({ message: "No se encontraron permisos para este usuario" });
-    }
-
-    for (const permiso of permisos) {
-      await permiso.destroy();
-    }
-
-    res.status(200).json({ message: "Permisos del usuario eliminados correctamente, uno por uno" });
-  } catch (error) {
-    console.error("Error al eliminar permisos del usuario:", error);
-    res.status(500).json({ message: "Error al eliminar los permisos del usuario" });
-  }
-};

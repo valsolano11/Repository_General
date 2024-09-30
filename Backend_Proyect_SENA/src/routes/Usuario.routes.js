@@ -1,6 +1,6 @@
 import { Router } from "express";
 import validarSchemas from "../middlewares/ValidarSchemas.js";
-import { crearUsuario , DeletePermisoUsuario, getAllusuario, getUsuario, Putusuario } from "../controllers/Usuarios/Usuario.controllers.js";
+import { crearUsuario , getAllusuario, getUsuario, Putusuario } from "../controllers/Usuarios/Usuario.controllers.js";
 import { usuarioSchemas } from "../schemas/Usuario.schemas.js";
 import { rutaProtegida} from "../middlewares/ValidarToken.js";
 import { validarPermiso } from "../middlewares/ValiadarPermisos.js";
@@ -17,5 +17,5 @@ UsuarioRouter.post(
   crearUsuario
 );
 UsuarioRouter.put("/usuarios/:id",rutaProtegida, validarPermiso('Modificar Usuario'),Putusuario);
-UsuarioRouter.delete("/usuarios/:UsuarioId", rutaProtegida,validarPermiso('Eliminar Permisos'), DeletePermisoUsuario);
+
 export default UsuarioRouter;
