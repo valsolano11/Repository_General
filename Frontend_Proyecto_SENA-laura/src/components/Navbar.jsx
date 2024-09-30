@@ -71,7 +71,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
       </div>
       <div className="flex justify-end w-full max-w-full">
         <div className="flex items-center gap-x-5">
-          <div className="relative items-center md:w-65">
+          {/* <div className="relative items-center md:w-65">
             <span className="relative md:absolute inside-y-0 left-0 flex items-center pl-40">
               <button className="p-2 focus:outline-none text-white md:text-black">
                 <FaSearch />
@@ -82,7 +82,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
               placeholder="Buscar aquí"
               className="w-full px-4 py-1 pl-22 rounded-lg shadow outline-none hidden md:block bg-gray-100"
             />
-          </div>
+          </div> */}
           <div className="text-white">
             <FaBell
               className="w-6 h-6 text-black cursor-pointer"
