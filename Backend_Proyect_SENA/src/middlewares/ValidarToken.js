@@ -36,6 +36,8 @@ export const rutaProtegida = async (req, res, next) => {
   }
 };
 
+
+
 // Opcion 2
 
 /* import { verificarToken } from "../libs/token.js";
