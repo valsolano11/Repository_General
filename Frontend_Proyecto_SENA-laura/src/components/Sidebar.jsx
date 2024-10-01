@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaHome, FaUsers, FaRegFileExcel, FaUnity, FaClipboardList } from "react-icons/fa";
 import { FaUserLarge } from "react-icons/fa6";
 import { PiChalkboardTeacher } from "react-icons/pi";
+import { RiTokenSwapLine } from "react-icons/ri";
 import { TbCategory } from "react-icons/tb";
 import { MdOutlineCategory, MdAssignmentReturned } from "react-icons/md";
 import { SiGoogleclassroom } from "react-icons/si";
@@ -115,6 +116,12 @@ const Sidebar = ({ sidebarToggle }) => {
                 <a href="/instructores" className="px-3 flex items-center">
                 <PiChalkboardTeacher className="inline-block w-4 h-4 mr-2 -mt-1"></PiChalkboardTeacher>
                 Instructores
+                </a>
+              </li>
+              <li className="py-1 hover:bg-gray-700 rounded mx-4">
+                <a href="/instructor-fichas" className="px-3 flex items-center">
+                <RiTokenSwapLine className="inline-block w-4 h-4 mr-2 -mt-1"></RiTokenSwapLine>
+                Fichas por Instructor
                 </a>
               </li>
             </ul>

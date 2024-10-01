@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { FaFileSignature } from "react-icons/fa";
+import { SiGoogleclassroom } from "react-icons/si";
 import fondo from "/logoSena.png";
 
 const SidebarCoord = ({ sidebarToggleCoord }) => {
@@ -42,6 +43,12 @@ const SidebarCoord = ({ sidebarToggleCoord }) => {
           <a href="/firmaPedidos" className="px-3">
             <FaFileSignature className="inline-block w-6 h-6 mr-2 -mt-2"></FaFileSignature>
             Autorizar Pedidos 
+          </a>
+        </li>
+        <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
+          <a href="/fichasCoordi" className="px-3">
+            <SiGoogleclassroom className="inline-block w-6 h-6 mr-2 -mt-2"></SiGoogleclassroom>
+            Gestión Fichas
           </a>
         </li>
       </ul>

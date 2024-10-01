@@ -62,7 +62,10 @@ const Herramientas = () => {
       label: "CÓDIGO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -72,7 +75,10 @@ const Herramientas = () => {
       label: "NOMBRE",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -82,7 +88,10 @@ const Herramientas = () => {
       label: "FECHA DE INGRESO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -92,7 +101,10 @@ const Herramientas = () => {
       label: "MARCA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -102,7 +114,10 @@ const Herramientas = () => {
       label: "CONDICIÓN",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -112,7 +127,10 @@ const Herramientas = () => {
       label: "DESCRIPCIÓN",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -122,7 +140,10 @@ const Herramientas = () => {
       label: "EDITAR",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         filter: false,
         customBodyRender: (value, tableMeta, updateValue) => (

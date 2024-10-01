@@ -127,6 +127,30 @@ const Login = () => {
           }, 2000);
         }
       } catch (error) {
+             // Verificar si es un error específico del estado o los permisos
+      const errorMessage = error.response?.data?.message || "Error al iniciar sesión";
+
+      if (errorMessage === "Estado no activo") {
+        toast.error("Su cuenta no está activa. Por favor, contacte al administrador.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      } else if (errorMessage === "El usuario no tiene permisos asignados") {
+        toast.error("No tiene permisos asignados. Contacte al administrador.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      } else {
         toast.error("Credenciales inválidas", {
           position: "top-right",
           autoClose: 5000,
@@ -136,6 +160,7 @@ const Login = () => {
           draggable: true,
           progress: undefined,
         });
+      }
       }
     }
   };

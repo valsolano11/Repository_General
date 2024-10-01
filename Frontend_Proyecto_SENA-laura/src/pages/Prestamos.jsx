@@ -93,7 +93,10 @@ const Prestamos = () => {
       label: "CÓDIGO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -103,7 +106,10 @@ const Prestamos = () => {
       label: "ID",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -113,7 +119,10 @@ const Prestamos = () => {
       label: "FICHA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -123,7 +132,10 @@ const Prestamos = () => {
       label: "USUARIO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -133,7 +145,10 @@ const Prestamos = () => {
       label: "INSTRUCTOR",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -143,7 +158,10 @@ const Prestamos = () => {
       label: "HERRAMIENTA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -153,7 +171,10 @@ const Prestamos = () => {
       label: "CANTIDAD",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -163,7 +184,10 @@ const Prestamos = () => {
       label: "FECHA DE PRÉSTAMO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -173,7 +197,10 @@ const Prestamos = () => {
       label: "FECHA DE DEVOLUCIÓN",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -183,7 +210,10 @@ const Prestamos = () => {
       label: "ESTADO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -193,7 +223,10 @@ const Prestamos = () => {
       label: "OBSERVACIONES",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -204,7 +237,10 @@ const Prestamos = () => {
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value, tableMeta, updateValue) => (
           <div className="flex items-center justify-center">

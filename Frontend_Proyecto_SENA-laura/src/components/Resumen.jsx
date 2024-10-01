@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from 'react-router-dom';
 import { Link } from "react-router-dom";
 import { Box, Button, CardHeader, IconButton, Typography } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -13,9 +14,16 @@ import StatBox from "./../components/StatBox";
 import { mockTransactions } from "../data/mockData";
 import BarChart from "../components/BarChart";
 import PieChart from "../components/PieChart";
+import Reportes from "../pages/Reportes";
 
 const Resumen = () => {
-  
+
+  const navigate = useNavigate();
+
+  const handleRedirect = () => {
+    navigate('/reportes');
+  };
+
   return (
     <div>
       <Box m="20px">
@@ -55,9 +63,11 @@ const Resumen = () => {
                   color: "white",
                 },
               }}
+              onClick={handleRedirect}
             >
               <DownloadIcon sx={{ mr: "10px" }} />
               Descargar Reportes
+              
             </Button>
           </Box>
         </Box>

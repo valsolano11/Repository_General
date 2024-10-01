@@ -27,20 +27,29 @@ const AddUserModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
-      Promise.all([api.get("/Rol"), api.get("/Estado/1"), api.get("/Estado/2"), api.get("/permisos")])
+      Promise.all([api.get("/Rol"), api.get("/Estado/1"), api.get("/Estado/2")])
         .then(([rolesResponse, estado1Response, estado2Response, permisosResponse]) => {
           setRoles(rolesResponse.data);
           setEstados([estado1Response.data, estado2Response.data]);
           setPermisos(permisosResponse.data);
         })
-        .catch((error) => {
-          toast.error("Error al cargar los datos", { position: "top-right" });
-        })
-        .finally(() => {
+        .catch(() => {
           setLoading(false);
         });
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const fetchPermisos = async () => {
+      try {
+        const response = await api.get("/permisos");
+        setPermisos(response.data);
+      } catch (error) {
+      }
+    };
+    fetchPermisos();
+  }, []);
+
   
   const validateInput = (name, value) => {
     let errorMessage = "";
@@ -352,66 +361,66 @@ const AddUserModal = ({ isOpen, onClose }) => {
                 </div>
 
                 {(hasPermission("Mostrar Permisos") || hasPermission("Asignar Permisos")) && (
-                  <>
-                    <h6 className="font-bold text-center text-xl mb-2">Permisos</h6>
-                    <div>
-                      <div className="text-center">
-                        <FormControlLabel
-                          sx={{
-                            "& .MuiFormControlLabel-label": {
-                              fontSize: "0.775rem",
-                              fontWeight: "bold",
-                            },
-                          }}
-                          control={
-                            <Checkbox
-                              checked={isAllSelected}
-                              indeterminate={isIndeterminate}
-                              onChange={handleSelectAllChange}
-                            />
-                          }
-                          label="Seleccionar todos"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-4 gap-1">
-                        {permisos.map((permiso) => (
+                    <>
+                      <h6 className="font-bold text-center text-xl mb-2">Permisos</h6>
+                      <div>
+                        <div className="text-center">
                           <FormControlLabel
-                            key={permiso.id}
                             sx={{
                               "& .MuiFormControlLabel-label": {
-                                fontSize: "0.675rem",
+                                fontSize: "0.775rem",
+                                fontWeight: "bold",
                               },
                             }}
                             control={
                               <Checkbox
-                                checked={selectedPermisos.includes(permiso.id)}
-                                onChange={handleCheckboxChange(permiso.id)}
-                                name={permiso.nombrePermiso}
+                                checked={isAllSelected}
+                                indeterminate={isIndeterminate}
+                                onChange={handleSelectAllChange}
                               />
                             }
-                            label={permiso.nombrePermiso}
+                            label="Seleccionar todos"
                           />
-                        ))}
-                      </div>
-                    </div>
+                        </div>
 
-                    <div className="sm:w-full md:w-full flex flex-col justify-end">
-                      <div className="flex justify-center mt-4 mb-4 mx-2">
-                        <button className="btn-danger2 mx-2" onClick={onClose}>
-                          Cancelar
-                        </button>
-                        <button
-                          className="btn-primary2 mx-2"
-                          onClick={handleCreate}
-                        >
-                          Agregar
-                        </button>
+                        <div className="grid grid-cols-4 gap-1">
+                          {permisos.map((permiso) => (
+                            <FormControlLabel
+                              key={permiso.id}
+                              sx={{
+                                "& .MuiFormControlLabel-label": {
+                                  fontSize: "0.675rem",
+                                },
+                              }}
+                              control={
+                                <Checkbox
+                                  checked={selectedPermisos.includes(permiso.id)}
+                                  onChange={handleCheckboxChange(permiso.id)}
+                                  name={permiso.nombrePermiso}
+                                />
+                              }
+                              label={permiso.nombrePermiso}
+                            />
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  </>
+
+                <div className="sm:w-full md:w-full flex flex-col justify-end">
+                  <div className="flex justify-center mt-4 mb-4 mx-2">
+                    <button className="btn-danger2 mx-2" onClick={onClose}>
+                      Cancelar
+                    </button>
+                    <button
+                      className="btn-primary2 mx-2"
+                      onClick={handleCreate}
+                    >
+                      Agregar
+                    </button>
+                  </div>
+                </div>
+                </>
                 )}
-              </div>
+            </div>
             </div>
           </div>
         </div>

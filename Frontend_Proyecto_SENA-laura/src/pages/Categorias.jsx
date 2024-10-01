@@ -78,7 +78,10 @@ const Categorias = () => {
       label: "ID",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -88,7 +91,10 @@ const Categorias = () => {
       label: "CATEGORIA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -98,7 +104,10 @@ const Categorias = () => {
       label: "ESTADO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => (
           <div
@@ -118,7 +127,10 @@ const Categorias = () => {
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value, tableMeta, updateValue) => (
           <div className="flex items-center justify-center">

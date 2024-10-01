@@ -93,7 +93,9 @@ const ImportExcel = () => {
       label: "ID",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),
@@ -105,7 +107,9 @@ const ImportExcel = () => {
       label: "NOMBRE",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),
@@ -117,7 +121,9 @@ const ImportExcel = () => {
       label: "VISTA PREVIA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),
