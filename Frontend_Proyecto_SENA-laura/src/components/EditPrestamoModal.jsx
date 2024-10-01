@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api/token";
 import { FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
+import { useAuth } from "../context/AuthContext"; 
 import "react-toastify/dist/ReactToastify.css";
 
 const EditPrestamoModal = ({ isOpen, onClose, prestamo }) => {
@@ -25,11 +26,15 @@ const EditPrestamoModal = ({ isOpen, onClose, prestamo }) => {
     estado: "",
     observaciones: "",
   });
+
+  const { user } = useAuth();
+  
   useEffect(() => {
     if (isOpen && prestamo) {
       fetchPrestamoDetails(prestamo.id);
     }
   }, [isOpen, prestamo]);
+
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
@@ -69,6 +74,7 @@ const EditPrestamoModal = ({ isOpen, onClose, prestamo }) => {
     fetchHerramientas();
     fetchEstados();
   }, []);
+
   const fetchPrestamoDetails = async (prestamoId) => {
     setLoading(true);
     try {
@@ -114,6 +120,7 @@ const EditPrestamoModal = ({ isOpen, onClose, prestamo }) => {
       setLoading(false);
     }
   };
+
   const validateInput = (name, value) => {
     let errorMessage = "";
     if (name === "cantidad" && value <= 0) {
@@ -212,6 +219,14 @@ const EditPrestamoModal = ({ isOpen, onClose, prestamo }) => {
       setLoading(false);
     }
   };
+
+  // Función para verificar permisos
+  const hasPermission = (permissionName) => {
+    return user.DetallePermisos.some(
+      (permiso) => permiso.Permiso.nombrePermiso === permissionName
+    );
+  }; 
+   
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 ${isOpen ? "" : "hidden"}`}>
       <div className="bg-white rounded-lg shadow-lg sm:w-full md:w-1/4 mt-4 max-h-screen overflow-y-auto">

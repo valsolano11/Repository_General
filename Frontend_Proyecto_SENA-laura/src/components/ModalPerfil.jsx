@@ -67,7 +67,7 @@ const ModalPerfil = ({ isOpen, onClose }) => {
 
   const fetchUserRole = async (roleId) => {
     try {
-      const response = await api.get(`/roles/${roleId}`);
+      const response = await api.get(`/Rol/${roleId}`);
       if (response.status === 200) {
         setFormData((prevData) => ({
           ...prevData,

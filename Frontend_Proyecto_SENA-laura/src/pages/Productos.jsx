@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
+import { saveAs } from "file-saver";
+import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext"; 
 import MUIDataTable from "mui-datatables";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 import Sidebar from "../components/Sidebar";
 import Home from "../components/Home";
 import EditProductModal from "../components/EditProductModal";
 import AddProductModal from "../components/AddProductModal";
 import EditCantidadEntradaModal from "../components/EditCantidadEntradaModal"; 
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Productos = () => {
@@ -21,6 +22,8 @@ const Productos = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const { user } = useAuth();
 
   const fetchData = async () => {
     setLoading(true);
@@ -298,6 +301,13 @@ const Productos = () => {
     saveAs(data, "Productos.xlsx");
   };
 
+  // Función para verificar permisos
+  const hasPermission = (permissionName) => {
+    return user.DetallePermisos.some(
+      (permiso) => permiso.Permiso.nombrePermiso === permissionName
+    );
+  };  
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -311,9 +321,11 @@ const Productos = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
-          <button className="btn-primary" onClick={handleOpenAddModal}>
-            Agregar Producto
-          </button>
+          {hasPermission("Crear Producto") && (
+            <button className="btn-primary" onClick={handleOpenAddModal}>
+              Agregar Producto
+            </button>
+          )}
         </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="w-full max-w-9xl mx-auto">

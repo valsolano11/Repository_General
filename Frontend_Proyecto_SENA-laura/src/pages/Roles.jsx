@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../api/token";
+import { saveAs } from "file-saver";
+import { useAuth } from "../context/AuthContext"; 
 import Sidebar from "../components/Sidebar";
 import Home from "../components/Home";
 import MUIDataTable from "mui-datatables";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 import AddRolModal from "../components/AddRolModal";
 import EditRolModal from "../components/EditRolModal";
 import jsPDF from "jspdf";
@@ -19,6 +20,8 @@ const Roles = () => {
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState([]);
+
+  const { user } = useAuth();
 
   const fetchRoles = async () => {
     setLoading(true);
@@ -152,6 +155,13 @@ const Roles = () => {
     doc.save("Roles.pdf");
   };
 
+  // Función para verificar permisos
+  const hasPermission = (permissionName) => {
+    return user.DetallePermisos.some(
+      (permiso) => permiso.Permiso.nombrePermiso === permissionName
+    );
+  };  
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -171,12 +181,14 @@ const Roles = () => {
           >
             Exportar PDF
           </button>
-          <button
-            className="btn-primary"
-            onClick={() => setIsOpenAddModal(true)}
-          >
-            Agregar Rol
-          </button>
+          {hasPermission("Crear Rol") && (
+            <button
+              className="btn-primary"
+              onClick={() => setIsOpenAddModal(true)}
+            >
+              Agregar Rol
+            </button>
+           )}
         </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="max-w-4xl mx-auto">

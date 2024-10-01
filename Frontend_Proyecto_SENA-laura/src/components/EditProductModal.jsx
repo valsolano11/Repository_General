@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api/token";
 import { FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
+import { useAuth } from "../context/AuthContext"; 
 import "react-toastify/dist/ReactToastify.css";
 
 const EditProductModal = ({ isOpen, onClose, product }) => {
@@ -23,11 +24,15 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
     nombre: "",
     codigo: "",
   });
+
+  const { user } = useAuth();
+  
   useEffect(() => {
     if (isOpen && product) {
       fetchProductDetails(product.id);
     }
   }, [isOpen, product]);
+
   useEffect(() => {
     const fetchEstados = async () => {
       try {
@@ -50,6 +55,7 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
     fetchEstados();
     fetchMedidas();
   }, []);
+  
   const fetchProductDetails = async (productId) => {
     setLoading(true);
     try {
@@ -95,6 +101,7 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
       setLoading(false);
     }
   };
+
   const validateInput = (name, value) => {
     let errorMessage = "";
     if (name === "nombre" || name === "descripcion") {
@@ -108,6 +115,7 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
     }
     return errorMessage;
   };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const errorMessage = validateInput(name, value);
@@ -120,6 +128,7 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
       [name]: value,
     }));
   };
+
   const handleUpdate = async () => {
     const {
       marca,
@@ -204,7 +213,15 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
       setLoading(false);
     }
   };
+
   if (!isOpen) return null;
+
+  // Función para verificar permisos
+  const hasPermission = (permissionName) => {
+    return user.DetallePermisos.some(
+      (permiso) => permiso.Permiso.nombrePermiso === permissionName
+    );
+  };  
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-fondo bg-opacity-50">
@@ -406,14 +423,16 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
           </div>
         </div>
         <div className="sm:w-full md:w-full flex flex-col justify-end">
-          <div className="flex justify-center mb-2 mx-1">
-            <button className="btn-danger2 mx-1 text-xs" onClick={onClose}>
-              Cancelar
-            </button>
-            <button className="btn-primary2 mx-1 text-xs" onClick={handleUpdate}>
-              Actualizar
-            </button>
-          </div>
+          {hasPermission("Modificar Producto") && (
+            <div className="flex justify-center mb-2 mx-1">
+              <button className="btn-danger2 mx-1 text-xs" onClick={onClose}>
+                Cancelar
+              </button>
+              <button className="btn-primary2 mx-1 text-xs" onClick={handleUpdate}>
+                Actualizar
+              </button>
+            </div>
+          )}
         </div>
       </div>
       <ToastContainer />

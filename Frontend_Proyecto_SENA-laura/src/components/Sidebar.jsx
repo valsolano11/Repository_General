@@ -9,11 +9,14 @@ import { LiaDropbox } from "react-icons/lia";
 import { FiTool } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; 
 import fondo from "/logoSena.png";
 
 const Sidebar = ({ sidebarToggle }) => {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(null);
+
+  const { user } = useAuth();
 
   const handleClick = () => {
     navigate("/dashboard");
@@ -22,6 +25,18 @@ const Sidebar = ({ sidebarToggle }) => {
   const handleToggle = (panel) => {
     setExpanded(expanded === panel ? null : panel);
   };
+  
+  //Función para verificar si el usuario tiene un permiso específico
+  // const hasPermission = (permiso) => {
+  //   const { user } = useAuth();
+  //   return user?.DetallePermisos.some((p) => p.Permiso.nombrePermiso === permiso);
+  // };
+
+  const hasPermission = (permissionName) => {
+    return user.DetallePermisos.some(
+      (permiso) => permiso.Permiso.nombrePermiso === permissionName
+    );
+  };  
 
   return (
     <motion.div
@@ -64,12 +79,14 @@ const Sidebar = ({ sidebarToggle }) => {
           </div>
           {expanded === "usuarios" && (
             <ul className="bg-black text-center text-white text-sm">
-              <li className="py-1 hover:bg-gray-700 rounded mx-4">
-                <a href="/Usuarios" className="px-3 flex items-center">
-                <FaUserLarge className="inline-block w-4 h-4 mr-2 -mt-1"></FaUserLarge>
-                Usuarios
-                </a>
-              </li>
+              {hasPermission("Vista Usuario") && (
+                <li className="py-1 hover:bg-gray-700 rounded mx-4">
+                  <a href="/Usuarios" className="px-3 flex items-center">
+                  <FaUserLarge className="inline-block w-4 h-4 mr-2 -mt-1"></FaUserLarge>
+                  Usuarios
+                  </a>
+                </li>
+              )}
               <li className="py-1 hover:bg-gray-700 rounded mx-4">
                 <a href="/roles" className="px-3 flex items-center">
                 <FaUsers className="inline-block w-4 h-4 mr-2 -mt-1"></FaUsers>
@@ -111,72 +128,90 @@ const Sidebar = ({ sidebarToggle }) => {
         </li>
 
         {/* Categorías */}
-        <li className="mb-2">
-          <div
-            className="flex items-center justify-between px-3 py-2 rounded hover:shadow hover:bg-gray-700 cursor-pointer"
-            onClick={() => handleToggle("categorias")}
-          >
-            <div className="flex items-center">
-              <TbCategory className="inline-block w-6 h-6 mr-2 -mt-2" />
-              Categorías
-            </div>
-            <span>{expanded === "categorias" ? "-" : "+"}</span>
-          </div>
-          {expanded === "categorias" && (
-            <ul className="bg-black text-center text-white text-sm">
-              <li className="py-1 hover:bg-gray-700 rounded mx-4">
-                <a href="/categorias" className="px-3 flex items-center">
-                <TbCategory className="inline-block w-4 h-4 mr-2 -mt-1"></TbCategory>
+        {(hasPermission("vista Categorias") || hasPermission("vista Subcategorias")) && (
+          <li className="mb-2">
+            <div
+              className="flex items-center justify-between px-3 py-2 rounded hover:shadow hover:bg-gray-700 cursor-pointer"
+              onClick={() => handleToggle("categorias")}
+            >
+              <div className="flex items-center">
+                <TbCategory className="inline-block w-6 h-6 mr-2 -mt-2" />
                 Categorías
-                </a>
-              </li>
-              <li className="py-1 hover:bg-gray-700 rounded mx-4">
-                <a href="/subcategorias" className="px-3 flex items-center">
-                <MdOutlineCategory className="inline-block w-4 h-4 mr-2 -mt-1"></MdOutlineCategory>
-                Subcategorías
-                </a>
-              </li>
-            </ul>
-          )}
-        </li>
+              </div>
+              <span>{expanded === "categorias" ? "-" : "+"}</span>
+            </div>
+            {expanded === "categorias" && (
+              <ul className="bg-black text-center text-white text-sm">
+                {hasPermission("vista Categorias") && (
+                <li className="py-1 hover:bg-gray-700 rounded mx-4">
+                  <a href="/categorias" className="px-3 flex items-center">
+                  <TbCategory className="inline-block w-4 h-4 mr-2 -mt-1"></TbCategory>
+                  Categorías
+                  </a>
+                </li>
+                )}
+                {hasPermission("vista Subcategorias") && (
+                  <li className="py-1 hover:bg-gray-700 rounded mx-4">
+                    <a href="/subcategorias" className="px-3 flex items-center">
+                    <MdOutlineCategory className="inline-block w-4 h-4 mr-2 -mt-1"></MdOutlineCategory>
+                    Subcategorías
+                    </a>
+                  </li>
+                )}
+              </ul>
+            )}
+          </li>
+        )}
 
         {/* Otros enlaces */}
-        <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
-          <a href="/productos" className="px-3">
-            <LiaDropbox className="inline-block w-6 h-6 mr-2 -mt-2"></LiaDropbox>
-            Productos
-          </a>
-        </li>
-        <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
-          <a href="/herramientas" className="px-3">
-            <FiTool className="inline-block w-6 h-6 mr-2 -mt-2"></FiTool>
-            Herramientas
-          </a>
-        </li>
-        <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
-          <a href="/prestamos" className="px-3">
-            <MdAssignmentReturned className="inline-block w-6 h-6 mr-2 -mt-2"></MdAssignmentReturned>
-            Préstamos
-          </a>
-        </li>
-        <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
-          <a href="/pedidos" className="px-3">
-            <FaClipboardList className="inline-block w-6 h-6 mr-2 -mt-2"></FaClipboardList>
-            Pedidos
-          </a>
-        </li>
-        <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
-          <a href="/excel" className="px-3">
-            <FaRegFileExcel className="inline-block w-6 h-6 mr-2 -mt-2"></FaRegFileExcel>
-            Importar Excel
-          </a>
-        </li>
-        <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
-          <a href="/unidadmedida" className="px-3">
-            <FaUnity className="inline-block w-6 h-6 mr-2 -mt-2"></FaUnity>
-            Unidad de Medida
-          </a>
-        </li>
+        {hasPermission("Vista Productos") && (
+          <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
+            <a href="/productos" className="px-3">
+              <LiaDropbox className="inline-block w-6 h-6 mr-2 -mt-2"></LiaDropbox>
+              Productos
+            </a>
+          </li>
+        )}
+        {hasPermission("Vista Herramientas") && (
+          <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
+            <a href="/herramientas" className="px-3">
+              <FiTool className="inline-block w-6 h-6 mr-2 -mt-2"></FiTool>
+              Herramientas
+            </a>
+          </li>
+        )}
+        {hasPermission("Vista Prestamos") && (
+          <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
+            <a href="/prestamos" className="px-3">
+              <MdAssignmentReturned className="inline-block w-6 h-6 mr-2 -mt-2"></MdAssignmentReturned>
+              Préstamos
+            </a>
+          </li>
+        )}
+        {hasPermission("Vista Pedidos") && (
+          <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
+            <a href="/pedidos" className="px-3">
+              <FaClipboardList className="inline-block w-6 h-6 mr-2 -mt-2"></FaClipboardList>
+              Pedidos
+            </a>
+          </li>
+        )}
+        {hasPermission("Vista Excel") && (
+          <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
+            <a href="/excel" className="px-3">
+              <FaRegFileExcel className="inline-block w-6 h-6 mr-2 -mt-2"></FaRegFileExcel>
+              Importar Excel
+            </a>
+          </li>
+        )}
+        {hasPermission("Vista Unidad de Medida") && (
+          <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
+            <a href="/unidadmedida" className="px-3">
+              <FaUnity className="inline-block w-6 h-6 mr-2 -mt-2"></FaUnity>
+              Unidad de Medida
+            </a>
+          </li>
+        )}
       </ul>
     </motion.div>
   );

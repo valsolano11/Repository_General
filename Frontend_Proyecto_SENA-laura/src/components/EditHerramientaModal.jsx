@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api/token";
 import { FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
+import { useAuth } from "../context/AuthContext"; 
 import "react-toastify/dist/ReactToastify.css";
 
 const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
@@ -20,6 +21,8 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
     categoriaId: "",
     descripcion: "",
   });
+
+  const { user } = useAuth();
 
   useEffect(() => {
     if (isOpen && herramienta) {
@@ -195,6 +198,13 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
     }
   };
 
+  // Función para verificar permisos
+  const hasPermission = (permissionName) => {
+    return user.DetallePermisos.some(
+      (permiso) => permiso.Permiso.nombrePermiso === permissionName
+    );
+  };  
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-fondo bg-opacity-50">
       <div className="bg-white rounded-lg shadow-lg sm:w-full md:w-1/4 mt-4 max-h-screen overflow-y-auto">
@@ -339,14 +349,16 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
           </div>
         </div>
         <div className="sm:w-full md:w-full flex flex-col justify-end">
-          <div className="flex justify-center mb-4 mx-2">
-            <button className="btn-danger2 mx-2" onClick={onClose}>
-              Cancelar
-            </button>
-            <button className="btn-primary2 mx-2" onClick={handleUpdate}>
-              Actualizar
-            </button>
-          </div>
+          {hasPermission("Modificar Herramienta") && (
+            <div className="flex justify-center mb-4 mx-2">
+              <button className="btn-danger2 mx-2" onClick={onClose}>
+                Cancelar
+              </button>
+              <button className="btn-primary2 mx-2" onClick={handleUpdate}>
+                Actualizar
+              </button>
+            </div>
+          )}
         </div>
       </div>
       <ToastContainer />

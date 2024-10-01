@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { api } from "../api/token";
 import { saveAs } from "file-saver";
 import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext"; 
 import Sidebar from "../components/Sidebar";
 import Home from "../components/Home";
 import MUIDataTable from "mui-datatables";
@@ -22,6 +23,8 @@ const Usuarios = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const { user } = useAuth();
 
   const fetchData = async () => {
     // console.time('fetchData');
@@ -63,9 +66,17 @@ const Usuarios = () => {
 
   const handleEditClick = (rowIndex) => {
     const user = data[rowIndex];
+    console.log("Editando fila:", rowIndex);
     setSelectedUser(user);
     setIsOpenEditModal(true);
   };
+
+  // Función para verificar permisos
+  const hasPermission = (permissionName) => {
+    return user.DetallePermisos.some(
+      (permiso) => permiso.Permiso.nombrePermiso === permissionName
+    );
+  };  
 
   const handleCloseEditModal = (updatedUser) => {
     if (updatedUser) {
@@ -175,7 +186,7 @@ const Usuarios = () => {
         setCellHeaderProps: () => ({ style: { textAlign: 'center' } }),
       },
     },
-    {
+    ...(hasPermission("Modificar Usuario") ? [{
       name: "edit",
       label: "EDITAR",
       options: {
@@ -199,7 +210,7 @@ const Usuarios = () => {
         ),
         setCellHeaderProps: () => ({ style: { textAlign: 'center' } }),
       },
-    },
+    }] : []),
   ];
 
   const handleCustomExport = (rows) => {
@@ -267,9 +278,11 @@ const Usuarios = () => {
           <button className="btn-black mr-2" onClick={handleExportPDF}>
             Exportar PDF
           </button>
-          <button className="btn-primary" onClick={handleOpenAddModal}>
-            Agregar Usuario
-          </button>
+          {hasPermission("Crear Usuario") && (
+            <button className="btn-primary" onClick={handleOpenAddModal}>
+              Agregar Usuario
+            </button>
+          )}
         </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="max-w-6xl mx-auto">

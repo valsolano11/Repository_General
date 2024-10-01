@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { saveAs } from "file-saver";
+import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext"; 
 import MUIDataTable from "mui-datatables";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 import Sidebar from "../components/Sidebar";
 import Home from "../components/Home";
 import EditPrestamoModal from "../components/EditPrestamoModal";
 import AddPrestamoModal from "../components/AddPrestamoModal";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Prestamos = () => {
@@ -18,7 +19,9 @@ const Prestamos = () => {
   const [isOpenEditModal, setIsOpenEditModal] = useState(false);
   const [selectedPrestamo, setSelectedPrestamo] = useState(null);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true)
+
+  const { user } = useAuth();
 
   const fetchData = async () => {
     setLoading(true);
@@ -54,14 +57,17 @@ const Prestamos = () => {
     }
     setLoading(false);
   };
+
   useEffect(() => {
     fetchData();
   }, []);
+
   const handleEditClick = (rowIndex) => {
     const prestamo = data[rowIndex];
     setSelectedPrestamo(prestamo);
     setIsOpenEditModal(true);
   };
+
   const handleCloseEditModal = (updatedPrestamo) => {
     if (updatedPrestamo) {
       fetchData();
@@ -69,15 +75,18 @@ const Prestamos = () => {
     setIsOpenEditModal(false);
     setSelectedPrestamo(null);
   };
+
   const handleOpenAddModal = () => {
     setIsOpenAddModal(true);
   };
+
   const handleCloseAddModal = (newPrestamo) => {
     if (newPrestamo) {
       fetchData();
     }
     setIsOpenAddModal(false);
   };
+
   const columns = [
     {
       name: "Codigo",
@@ -211,6 +220,7 @@ const Prestamos = () => {
       },
     },
   ];
+
   const handleCustomExport = (rows) => {
     const exportData = rows.map((row) => ({
       Codigo: row.data[0],
@@ -236,6 +246,13 @@ const Prestamos = () => {
     saveAs(data, "Prestamos.xlsx");
   };
 
+  // Función para verificar permisos
+  const hasPermission = (permissionName) => {
+    return user.DetallePermisos.some(
+      (permiso) => permiso.Permiso.nombrePermiso === permissionName
+    );
+  }; 
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -249,9 +266,11 @@ const Prestamos = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
-          <button className="btn-primary" onClick={handleOpenAddModal}>
-            Agregar Préstamo
-          </button>
+          {hasPermission("Crear Prestamo") && (
+            <button className="btn-primary" onClick={handleOpenAddModal}>
+              Agregar Préstamo
+            </button>
+          )}
         </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="max-w-9xl mx-auto">

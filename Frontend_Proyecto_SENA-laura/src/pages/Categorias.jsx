@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../api/token";
+import { saveAs } from "file-saver";
+import { useAuth } from "../context/AuthContext"; 
 import Sidebar from "../components/Sidebar";
 import Home from "../components/Home";
 import MUIDataTable from "mui-datatables";
@@ -7,7 +9,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 import AddCategModal from "../components/AddCategModal";
 import EditCategModal from "../components/EditCategModal";
 
@@ -18,6 +19,8 @@ const Categorias = () => {
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
+
+  const { user } = useAuth();
 
   const fetchData = async () => {
     setLoading(true);
@@ -148,6 +151,13 @@ const Categorias = () => {
     saveAs(data, "Categorias.xlsx");
   };
 
+  // Función para verificar permisos
+  const hasPermission = (permissionName) => {
+    return user.DetallePermisos.some(
+      (permiso) => permiso.Permiso.nombrePermiso === permissionName
+    );
+  };  
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -161,12 +171,14 @@ const Categorias = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
-          <button
-            className="btn-primary"
-            onClick={() => setIsOpenAddModal(true)}
-          >
-            Agregar Categoria
-          </button>
+          {hasPermission("Crear Categoria") && (
+            <button
+              className="btn-primary"
+              onClick={() => setIsOpenAddModal(true)}
+            >
+              Agregar Categoria
+            </button>
+          )}
         </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="max-w-4xl mx-auto">

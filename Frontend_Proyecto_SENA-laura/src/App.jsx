@@ -73,7 +73,7 @@ function App() {
               element={<ProtectedRoute requiredPermission="vista Productos" />}
             >
               <Route path="" element={<Productos />} />
-            </Route>
+            </Route> 
             <Route
               path="/herramientas"
               element={<ProtectedRoute requiredPermission="vista Herramientas" />}
