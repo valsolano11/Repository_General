@@ -25,12 +25,6 @@ const Sidebar = ({ sidebarToggle }) => {
   const handleToggle = (panel) => {
     setExpanded(expanded === panel ? null : panel);
   };
-  
-  //Función para verificar si el usuario tiene un permiso específico
-  // const hasPermission = (permiso) => {
-  //   const { user } = useAuth();
-  //   return user?.DetallePermisos.some((p) => p.Permiso.nombrePermiso === permiso);
-  // };
 
   const hasPermission = (permissionName) => {
     return user.DetallePermisos.some(
@@ -164,7 +158,7 @@ const Sidebar = ({ sidebarToggle }) => {
         )}
 
         {/* Otros enlaces */}
-        {hasPermission("Vista Productos") && (
+        {hasPermission("vista Productos") && (
           <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
             <a href="/productos" className="px-3">
               <LiaDropbox className="inline-block w-6 h-6 mr-2 -mt-2"></LiaDropbox>
@@ -172,7 +166,7 @@ const Sidebar = ({ sidebarToggle }) => {
             </a>
           </li>
         )}
-        {hasPermission("Vista Herramientas") && (
+        {hasPermission("vista Herramientas") && (
           <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
             <a href="/herramientas" className="px-3">
               <FiTool className="inline-block w-6 h-6 mr-2 -mt-2"></FiTool>
@@ -180,7 +174,7 @@ const Sidebar = ({ sidebarToggle }) => {
             </a>
           </li>
         )}
-        {hasPermission("Vista Prestamos") && (
+        {hasPermission("vista Prestamos") && (
           <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
             <a href="/prestamos" className="px-3">
               <MdAssignmentReturned className="inline-block w-6 h-6 mr-2 -mt-2"></MdAssignmentReturned>
@@ -188,7 +182,7 @@ const Sidebar = ({ sidebarToggle }) => {
             </a>
           </li>
         )}
-        {hasPermission("Vista Pedidos") && (
+        {hasPermission("vista Pedidos") && (
           <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
             <a href="/pedidos" className="px-3">
               <FaClipboardList className="inline-block w-6 h-6 mr-2 -mt-2"></FaClipboardList>
@@ -196,15 +190,15 @@ const Sidebar = ({ sidebarToggle }) => {
             </a>
           </li>
         )}
-        {hasPermission("Vista Excel") && (
+        {/* {hasPermission("vista Excel") && ( */}
           <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
             <a href="/excel" className="px-3">
               <FaRegFileExcel className="inline-block w-6 h-6 mr-2 -mt-2"></FaRegFileExcel>
               Importar Excel
             </a>
           </li>
-        )}
-        {hasPermission("Vista Unidad de Medida") && (
+        {/* )} */}
+        {hasPermission("vista Unidades medida") && (
           <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
             <a href="/unidadmedida" className="px-3">
               <FaUnity className="inline-block w-6 h-6 mr-2 -mt-2"></FaUnity>
