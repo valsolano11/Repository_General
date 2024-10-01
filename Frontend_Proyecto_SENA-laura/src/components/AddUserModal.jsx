@@ -360,11 +360,13 @@ const AddUserModal = ({ isOpen, onClose }) => {
                   </div>
                 </div>
 
-                {(hasPermission("Mostrar Permisos") || hasPermission("Asignar Permisos")) && (
+                {/* {(hasPermission("Mostrar Permisos") || hasPermission("Asignar Permisos")) && ( */}
                     <>
                       <h6 className="font-bold text-center text-xl mb-2">Permisos</h6>
+              
                       <div>
                         <div className="text-center">
+                        {user.id === 1 ? (
                           <FormControlLabel
                             sx={{
                               "& .MuiFormControlLabel-label": {
@@ -380,7 +382,12 @@ const AddUserModal = ({ isOpen, onClose }) => {
                               />
                             }
                             label="Seleccionar todos"
-                          />
+                            />
+                          ) : (
+                            <p className="text-red-500 font-bold">
+                              Para asignar permisos, comunicarse con el administrador.
+                            </p>
+                          )}
                         </div>
 
                         <div className="grid grid-cols-4 gap-1">
@@ -419,7 +426,7 @@ const AddUserModal = ({ isOpen, onClose }) => {
                   </div>
                 </div>
                 </>
-                )}
+                {/* )} */}
             </div>
             </div>
           </div>

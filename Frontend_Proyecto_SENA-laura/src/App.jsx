@@ -52,7 +52,7 @@ function App() {
             <Route path="/instructor-fichas" element={<Intructor_Ficha />} />
             <Route path="/excel" element={<ImportExcel />} />
             <Route path="/historial" element={<Historial />} />
-            <Route path="/reportes" element={<Reportes />} />
+
 
             {/* Ruta protegida por permiso */}
             <Route
@@ -112,6 +112,11 @@ function App() {
             <Route path="/fichasCoordi" element={<FichasCoordi />} />
           </Route>
           
+          {/* Rutas protegidas por RolId 1 y 3 */}
+          <Route element={<ProtectedRoute requiredRoleIds={[1, 3]} />}>
+            <Route path="/reportes" element={<Reportes />} />
+          </Route>
+
         </Routes>
       </BrowserRouter>
     </AuthProvider>
