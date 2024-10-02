@@ -39,3 +39,38 @@ DB_USUARIO=postgres
 DB_CONTRASEÑA=1022003147
 ENV=SENA
 
+---
+
+## 🛠️ Tecnologías Empleadas 💻
+
+Este proyecto utiliza diversas tecnologías para asegurar un desarrollo eficiente y escalable:
+
+### **Frontend**:
+- **HTML**: Define la estructura de la interfaz de usuario.
+- **CSS (Tailwind CSS)**: Un framework de CSS utilitario para estilizar rápidamente la interfaz.
+- **JavaScript**: Para la lógica del lado del cliente y las interacciones dinámicas.
+
+### **Backend**:
+- **Node.js**: Entorno de ejecución para JavaScript en el lado del servidor.
+- **Express.js**: Framework minimalista para crear APIs y gestionar las rutas y controladores.
+- **Sequelize**: ORM (Object-Relational Mapping) que facilita la interacción con bases de datos SQL.
+
+### **Base de Datos**:
+- **PostgreSQL**: Sistema de gestión de bases de datos relacional, utilizado para almacenar información sobre herramientas, usuarios y préstamos.
+
+Cada proyecto puede utilizar tecnologías adicionales. Consulta cada carpeta para más detalles sobre las tecnologías específicas empleadas. 📁
+
+---
+
+## 📜 Guía de Uso 🔍
+
+### Pasos para configurar y ejecutar el proyecto:
+
+1. **Clonar el Repositorio:**
+
+   Para comenzar, clona el repositorio en tu máquina local con el siguiente comando:
+
+   ```bash
+   git clone https://github.com/valsolano11/Repository_General.git
+
+
