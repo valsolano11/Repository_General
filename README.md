@@ -25,8 +25,12 @@ Antes de ejecutar el proyecto, asegúrate de configurar las variables de entorno
 
 Estas variables son utilizadas en entornos de desarrollo:
 
-```bash
-PUERTO=9100
-DOCUMENTO_ADMIN=1234567890
-CONTRASEÑA_ADMIN=SenaMobiliario
-CLAVE_SECRETA=CLAVE_SECRETA_ADMIN2654
+```bashPUERTO=9400
+DB_HOST=127.0.0.1
+DB_NAME=pruebas
+DB_NOMBRE=Nueva_Backend
+DB_PUERTO=5432
+DB_USUARIO=postgres
+DB_CONTRASEÑA=1022003147
+ENV=SENA
+
