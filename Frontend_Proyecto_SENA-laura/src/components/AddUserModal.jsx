@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { api } from "../api/token";
 import { FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { FormControlLabel, Checkbox } from "@mui/material";
+import { useAuth } from "../context/AuthContext"; 
+import "react-toastify/dist/ReactToastify.css";
 
-const AddUserModal = ({ isOpen, onClose, user }) => {
+const AddUserModal = ({ isOpen, onClose }) => {
   const [roles, setRoles] = useState([]);
   const [estados, setEstados] = useState([]);
   const [formErrors, setFormErrors] = useState({});
@@ -21,23 +22,34 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
     EstadoId: "",
   });
 
+  const { user } = useAuth();
+
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
-      Promise.all([api.get("/Rol"), api.get("/Estado/1"), api.get("/Estado/2"), api.get("/permisos")])
+      Promise.all([api.get("/Rol"), api.get("/Estado/1"), api.get("/Estado/2")])
         .then(([rolesResponse, estado1Response, estado2Response, permisosResponse]) => {
           setRoles(rolesResponse.data);
           setEstados([estado1Response.data, estado2Response.data]);
           setPermisos(permisosResponse.data);
         })
-        .catch((error) => {
-          toast.error("Error al cargar los datos", { position: "top-right" });
-        })
-        .finally(() => {
+        .catch(() => {
           setLoading(false);
         });
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const fetchPermisos = async () => {
+      try {
+        const response = await api.get("/permisos");
+        setPermisos(response.data);
+      } catch (error) {
+      }
+    };
+    fetchPermisos();
+  }, []);
+
   
   const validateInput = (name, value) => {
     let errorMessage = "";
@@ -194,6 +206,13 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
     }
   };
 
+  // Función para verificar permisos
+  const hasPermission = (permissionName) => {
+    return user.DetallePermisos.some(
+      (permiso) => permiso.Permiso.nombrePermiso === permissionName
+    );
+  };  
+
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center bg-fondo bg-opacity-50 ${
@@ -341,48 +360,57 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
                   </div>
                 </div>
 
-                <h6 className="font-bold text-center text-xl mb-2">Permisos</h6>
-                <div>
-                  <div className="text-center">
-                    <FormControlLabel
-                      sx={{
-                        "& .MuiFormControlLabel-label": {
-                          fontSize: "0.775rem",
-                          fontWeight: "bold",
-                        },
-                      }}
-                      control={
-                        <Checkbox
-                          checked={isAllSelected}
-                          indeterminate={isIndeterminate}
-                          onChange={handleSelectAllChange}
-                        />
-                      }
-                      label="Seleccionar todos"
-                    />
-                  </div>
+                {/* {(hasPermission("Mostrar Permisos") || hasPermission("Asignar Permisos")) && ( */}
+                    <>
+                      <h6 className="font-bold text-center text-xl mb-2">Permisos</h6>
+              
+                      <div>
+                        <div className="text-center">
+                        {user.id === 1 ? (
+                          <FormControlLabel
+                            sx={{
+                              "& .MuiFormControlLabel-label": {
+                                fontSize: "0.775rem",
+                                fontWeight: "bold",
+                              },
+                            }}
+                            control={
+                              <Checkbox
+                                checked={isAllSelected}
+                                indeterminate={isIndeterminate}
+                                onChange={handleSelectAllChange}
+                              />
+                            }
+                            label="Seleccionar todos"
+                            />
+                          ) : (
+                            <p className="text-red-500 font-bold">
+                              Para asignar permisos, comunicarse con el administrador.
+                            </p>
+                          )}
+                        </div>
 
-                  <div className="grid grid-cols-4 gap-1">
-                    {permisos.map((permiso) => (
-                      <FormControlLabel
-                        key={permiso.id}
-                        sx={{
-                          "& .MuiFormControlLabel-label": {
-                            fontSize: "0.675rem",
-                          },
-                        }}
-                        control={
-                          <Checkbox
-                            checked={selectedPermisos.includes(permiso.id)}
-                            onChange={handleCheckboxChange(permiso.id)}
-                            name={permiso.nombrePermiso}
-                          />
-                        }
-                        label={permiso.nombrePermiso}
-                      />
-                    ))}
-                  </div>
-                </div>
+                        <div className="grid grid-cols-4 gap-1">
+                          {permisos.map((permiso) => (
+                            <FormControlLabel
+                              key={permiso.id}
+                              sx={{
+                                "& .MuiFormControlLabel-label": {
+                                  fontSize: "0.675rem",
+                                },
+                              }}
+                              control={
+                                <Checkbox
+                                  checked={selectedPermisos.includes(permiso.id)}
+                                  onChange={handleCheckboxChange(permiso.id)}
+                                  name={permiso.nombrePermiso}
+                                />
+                              }
+                              label={permiso.nombrePermiso}
+                            />
+                          ))}
+                        </div>
+                      </div>
 
                 <div className="sm:w-full md:w-full flex flex-col justify-end">
                   <div className="flex justify-center mt-4 mb-4 mx-2">
@@ -397,7 +425,9 @@ const AddUserModal = ({ isOpen, onClose, user }) => {
                     </button>
                   </div>
                 </div>
-              </div>
+                </>
+                {/* )} */}
+            </div>
             </div>
           </div>
         </div>

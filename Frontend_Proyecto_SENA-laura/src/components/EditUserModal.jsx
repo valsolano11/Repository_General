@@ -4,9 +4,10 @@ import { api } from "../api/token";
 import { FaTimes } from "react-icons/fa";
 import { FormControlLabel, Checkbox } from "@mui/material";
 import { toast, ToastContainer } from "react-toastify";
+import { useAuth } from "../context/AuthContext"; 
 import "react-toastify/dist/ReactToastify.css";
 
-const EditUserModal = ({ isOpen, onClose, user }) => {
+const EditUserModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState([]);
   const [estados, setEstados] = useState([]);
@@ -23,6 +24,8 @@ const EditUserModal = ({ isOpen, onClose, user }) => {
     DetallePermisos: [],
   });
 
+  const { user } = useAuth();
+
   useEffect(() => {
     if (isOpen && user) {
       fetchUserDetails(user.id);
@@ -32,20 +35,28 @@ const EditUserModal = ({ isOpen, onClose, user }) => {
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
-      Promise.all([api.get("/Rol"), api.get("/Estado/1"), api.get("/Estado/2"), api.get("/permisos")])
+      Promise.all([api.get("/Rol"), api.get("/Estado/1"), api.get("/Estado/2")])
         .then(([rolesResponse, estado1Response, estado2Response, permisosResponse]) => {
           setRoles(rolesResponse.data);
           setEstados([estado1Response.data, estado2Response.data]);
           setPermisos(permisosResponse.data);
         })
-        .catch((error) => {
-          toast.error("Error al cargar los datos", { position: "top-right" });
-        })
-        .finally(() => {
+        .catch(() => {
           setLoading(false);
         });
     }
-  }, [isOpen]);  
+  }, [isOpen]);
+
+  useEffect(() => {
+    const fetchPermisos = async () => {
+      try {
+        const response = await api.get("/permisos");
+        setPermisos(response.data);
+      } catch (error) {
+      }
+    };
+    fetchPermisos();
+  }, []);
 
   const fetchUserDetails = async (userId) => { 
     setLoading(true);
@@ -335,6 +346,7 @@ const EditUserModal = ({ isOpen, onClose, user }) => {
                 <h6 className="font-bold text-center text-xl mb-2">Permisos</h6>
                   <div>
                     <div className="text-center">
+                    {user.id === 1 ? (
                       <FormControlLabel
                         sx={{
                           "& .MuiFormControlLabel-label": {
@@ -351,6 +363,11 @@ const EditUserModal = ({ isOpen, onClose, user }) => {
                         }
                         label="Seleccionar todos"
                       />
+                      ) : (
+                        <p className="text-red-500 font-bold">
+                          Para editar permisos, comunicarse con el administrador.
+                        </p>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-4 gap-1">

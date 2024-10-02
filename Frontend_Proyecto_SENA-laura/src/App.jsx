@@ -24,7 +24,10 @@ import PedidosIntructores from "./pages/PedidosIntructores.jsx";
 import FirmaPedidos from "./pages/FirmaPedidos.jsx";
 import FormatoHerram from "./pages/FormatoHerram.jsx";
 import HomeCoord from "./pages/HomeCoord.jsx";
-
+import NoPermiso from "./components/NoPermiso.jsx";
+import Intructor_Ficha from "./pages/Instructor_Ficha.jsx";
+import FichasCoordi from "./pages/FichasCoordi.jsx";
+import Reportes from "./pages/Reportes.jsx";
 
 function App() {
   return (
@@ -38,28 +41,80 @@ function App() {
           <Route path="/formularios" element={<Formularios />} />
           <Route path="/pedInstructores" element={<PedidosIntructores />} />
           <Route path="/formatoHerramientas" element={<FormatoHerram />} />
+          <Route path="/no-permission" element={<NoPermiso />} />
 
+          {/* Rutas protegidas */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/usuarios" element={<Usuarios />} />
-            <Route path="/roles" element={<Roles />} />
-            <Route path="/categorias" element={<Categorias />} />
-            <Route path="/subcategorias" element={<Subcategorias />} />
+            <Route path="/roles" element={<Roles />} /> 
             <Route path="/instructores" element={<Instructores />} />
             <Route path="/fichas" element={<Fichas />} />
+            <Route path="/instructor-fichas" element={<Intructor_Ficha />} />
             <Route path="/excel" element={<ImportExcel />} />
-            <Route path="/unidadmedida" element={<UnidadMedida />} />
-            <Route path='/productos' element={<Productos/>}/>
-            <Route path='/herramientas' element={<Herramientas/>}/>
-            <Route path='/prestamos' element={<Prestamos/>}/>
-            <Route path='/pedidos' element={<Pedidos/>}/>
-            <Route path='/historial' element={<Historial/>}/>
-          </Route> 
+            <Route path="/historial" element={<Historial />} />
 
-          {/* Ruta protegida para el RolId 2 */}
+
+            {/* Ruta protegida por permiso */}
+            <Route
+              path="/usuarios"
+              element={<ProtectedRoute requiredPermission="Vista Usuario" />}
+            >
+              <Route path="" element={<Usuarios />} />
+            </Route>
+            <Route
+              path="/categorias"
+              element={<ProtectedRoute requiredPermission="vista Categorias" />}
+            >
+              <Route path="" element={<Categorias />} />
+            </Route>
+            <Route
+              path="/subcategorias"
+              element={<ProtectedRoute requiredPermission="vista Subcategorias" />}
+            >
+              <Route path="" element={<Subcategorias />} />
+            </Route>
+            <Route
+              path="/productos"
+              element={<ProtectedRoute requiredPermission="vista Productos" />}
+            >
+              <Route path="" element={<Productos />} />
+            </Route> 
+            <Route
+              path="/herramientas"
+              element={<ProtectedRoute requiredPermission="vista Herramientas" />}
+            >
+              <Route path="" element={<Herramientas />} />
+            </Route>
+            <Route
+              path="/prestamos"
+              element={<ProtectedRoute requiredPermission="vista Prestamos" />}
+            >
+              <Route path="" element={<Prestamos />} />
+            </Route>
+            <Route
+              path="/pedidos"
+              element={<ProtectedRoute requiredPermission="vista Pedidos" />}
+            >
+              <Route path="" element={<Pedidos />} />
+            </Route> 
+            <Route
+              path="/unidadmedida"
+              element={<ProtectedRoute requiredPermission="vista Unidades medida" />}
+            >
+              <Route path="" element={<UnidadMedida />} />
+            </Route> 
+          </Route>
+
+          {/* Rutas protegidas por RolId */}
           <Route element={<ProtectedRoute requiredRoleId={3} />}>
             <Route path="/homecoord" element={<HomeCoord />} />
             <Route path="/firmaPedidos" element={<FirmaPedidos />} />
+            <Route path="/fichasCoordi" element={<FichasCoordi />} />
+          </Route>
+          
+          {/* Rutas protegidas por RolId 1 y 3 */}
+          <Route element={<ProtectedRoute requiredRoleIds={[1, 3]} />}>
+            <Route path="/reportes" element={<Reportes />} />
           </Route>
 
         </Routes>

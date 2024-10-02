@@ -1,52 +1,43 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../api/token";
-import { saveAs } from "file-saver";
 import { toast } from "react-toastify";
-import { useAuth } from "../context/AuthContext"; 
-import Sidebar from "../components/Sidebar";
+import SidebarCoord from "../components/SidebarCoord";
 import Home from "../components/Home";
 import MUIDataTable from "mui-datatables";
+import clsx from "clsx";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
-import EditUserModal from "../components/EditUserModal";
-import AddUserModal from "../components/AddUserModal";
-import clsx from "clsx";
 import * as XLSX from "xlsx";
 import "react-toastify/dist/ReactToastify.css";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
 
-const Usuarios = () => {
-  const [sidebarToggle, setSidebarToggle] = useState(false);
-  const [data, setData] = useState([]);
+const FichasCoordi = () => {
+  const [sidebarToggleCoord, setsidebarToggleCoord] = useState(false);
   const [isOpenEditModal, setIsOpenEditModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedFicha, setSelectedFicha] = useState(null);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  const { user } = useAuth();
+  const [data, setData] = useState([]);
 
   const fetchData = async () => {
-    // console.time('fetchData');
     setLoading(true);
     try {
-      const response = await api.get("/usuarios", {
+      const response = await api.get("/Fichas", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
-      const usuariosConRolesYEstados = response.data.map((usuario) => ({
-        ...usuario,
-        rolName: usuario.Rol ? usuario.Rol.rolName : "Desconocido",
-        estadoName: usuario.Estado ? usuario.Estado.estadoName : "Desconocido",
+      const fichasConUsuariosYEstados = response.data.map((ficha) => ({
+        ...ficha,
+        nombre: ficha.Usuario ? ficha.Usuario.nombre : "Desconocido",
+        estadoName: ficha.Estado ? ficha.Estado.estadoName : "Desconocido",
       }));
 
-      usuariosConRolesYEstados.sort((a, b) => a.id - b.id);
-      setData(usuariosConRolesYEstados);
+      fichasConUsuariosYEstados.sort((a, b) => a.id - b.id);
+      setData(fichasConUsuariosYEstados);
     } catch (error) {
       console.error("Error fetching user data:", error);
-      toast.error("Error al cargar los datos de usuarios", {
+      toast.error("Error al cargar los datos de las fichas", {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -57,110 +48,76 @@ const Usuarios = () => {
       });
     }
     setLoading(false);
-    // console.timeEnd('fetchData');
   };
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const handleEditClick = (rowIndex) => {
-    const user = data[rowIndex];
-    console.log("Editando fila:", rowIndex);
-    setSelectedUser(user);
-    setIsOpenEditModal(true);
-  };
-
-  // Función para verificar permisos
-  const hasPermission = (permissionName) => {
-    return user.DetallePermisos.some(
-      (permiso) => permiso.Permiso.nombrePermiso === permissionName
-    );
-  };  
-
-  const handleCloseEditModal = (updatedUser) => {
-    if (updatedUser) {
-      fetchData();
-    }
-    setIsOpenEditModal(false);
-    setSelectedUser(null);
-  };
-
-  const handleOpenAddModal = () => {
-    setIsOpenAddModal(true);
-  };
-
-  const handleCloseAddModal = (newUser) => {
-    if (newUser) {
-      fetchData();
-    }
-    setIsOpenAddModal(false);
-  };
-
   const columns = [
     {
       name: "id",
       label: "ID",
       options: {
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
         customHeadRender: (columnMeta) => (
           <th 
-            key={columnMeta.label}  
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
-          </th>
-        )
-      },
-    },
-    {
-      name: "Documento",
-      label: "DOCUMENTO",
-      options: {
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
-        customHeadRender: (columnMeta) => (
-          <th 
-            key={columnMeta.label}  
+            key={columnMeta.label}
             className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
           </th>
         ),
+        customBodyRender: (value) => <div className="text-center">{value}</div>,
+      },
+    },
+    {
+      name: "NumeroFicha",
+      label: "FICHA",
+      options: {
+        customHeadRender: (columnMeta) => (
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
+        ),
+        customBodyRender: (value) => <div className="text-center">{value}</div>,
+      },
+    },
+    {
+      name: "Programa",
+      label: "PROGRAMA",
+      options: {
+        customHeadRender: (columnMeta) => (
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
+        ),
+        customBodyRender: (value) => <div className="text-center">{value}</div>,
+      },
+    },
+    {
+      name: "Jornada",
+      label: "JORNADA",
+      options: {
+        customHeadRender: (columnMeta) => (
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
+        ),
+        customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
       name: "nombre",
-      label: "NOMBRE",
+      label: "USUARIO",
       options: {
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
         customHeadRender: (columnMeta) => (
           <th 
-            key={columnMeta.label}  
+            key={columnMeta.label}
             className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
           </th>
         ),
-      },
-    },
-    {
-      name: "correo",
-      label: "CORREO",
-      options: {
         customBodyRender: (value) => <div className="text-center">{value}</div>,
-        customHeadRender: (columnMeta) => (
-          <th 
-            key={columnMeta.label}  
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
-          </th>
-        ),
-      },
-    },
-    {
-      name: "rolName",
-      label: "ROL",
-      options: {
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
-        customHeadRender: (columnMeta) => (
-          <th 
-            key={columnMeta.label}  
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
-          </th>
-        ),
       },
     },
     {
@@ -169,7 +126,7 @@ const Usuarios = () => {
       options: {
         customHeadRender: (columnMeta) => (
           <th 
-            key={columnMeta.label}  
+            key={columnMeta.label}
             className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
           </th>
         ),
@@ -183,17 +140,16 @@ const Usuarios = () => {
             {value}
           </div>
         ),
-        setCellHeaderProps: () => ({ style: { textAlign: 'center' } }),
       },
     },
-    ...(hasPermission("Modificar Usuario") ? [{
+    {
       name: "edit",
       label: "EDITAR",
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
           <th 
-            key={columnMeta.label} 
+            key={columnMeta.label}
             className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
           </th>
         ),
@@ -208,89 +164,29 @@ const Usuarios = () => {
             </IconButton>
           </div>
         ),
-        setCellHeaderProps: () => ({ style: { textAlign: 'center' } }),
       },
-    }] : []),
+    },
   ];
 
-  const handleCustomExport = (rows) => {
-    const exportData = rows.map((row) => ({
-      id: row.data[0],
-      Nombre: row.data[2],
-      Correo: row.data[3],
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Usuarios");
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(data, "Usuarios.xlsx");
-  };
-
-  const handleExportPDF = () => {
-    const doc = new jsPDF();
-    const tableColumn = ["ID", "Documento", "Nombre", "Correo", "Rol", "Estado"];
-    const tableRows = [];
-  
-    data.forEach((user) => {
-      const userData = [
-        user.id,
-        user.Documento || "",
-        user.nombre || "",
-        user.correo || "",
-        user.rolName || "",
-        user.estadoName || ""
-      ];
-      tableRows.push(userData);
-    });
-  
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-      theme: 'striped',
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [0, 57, 107] }, 
-      margin: { top: 10 }
-    });
-  
-    doc.text("Usuarios", 14, 15); 
-    doc.save("Usuarios.pdf");
-  };  
-
   return (
-    <div className="flex min-h-screen">
-      <Sidebar sidebarToggle={sidebarToggle} />
+    <div className="flex min-h-screen bg-grisClaro">
+      <SidebarCoord sidebarToggleCoord={sidebarToggleCoord} />
       <div
-        className={`flex flex-col flex-grow p-6 bg-gray-100 ${
-          sidebarToggle ? "ml-64" : ""
+        className={`flex flex-col flex-grow p-4 bg-grisClaro ${
+          sidebarToggleCoord ? "ml-64" : ""
         } mt-16`}
       >
         <Home
-          sidebarToggle={sidebarToggle}
-          setSidebarToggle={setSidebarToggle}
+          sidebarToggle={sidebarToggleCoord}
+          setSidebarToggle={setsidebarToggleCoord}
         />
-        <div className="flex justify-end mt-2">
-          <button className="btn-black mr-2" onClick={handleExportPDF}>
-            Exportar PDF
-          </button>
-          {hasPermission("Crear Usuario") && (
-            <button className="btn-primary" onClick={handleOpenAddModal}>
-              Agregar Usuario
-            </button>
-          )}
-        </div>
-        <div className="flex-grow flex items-center justify-center">
-          <div className="max-w-6xl mx-auto">
+                <div className="flex-grow flex items-center justify-center">
+          <div className="max-w-7xl overflow-auto">
             {loading ? (
-              <div className="text-center">Cargando usuarios...</div>
+              <div className="text-center">Cargando Fichas...</div>
             ) : (
               <MUIDataTable
-                title={<span className="custom-title">USUARIOS</span>} 
+                title={<span className="custom-title">FICHAS</span>} 
                 data={data}
                 columns={columns}
                 options={{
@@ -347,16 +243,8 @@ const Usuarios = () => {
           </div>
         </div>
       </div>
-      {selectedUser && (
-        <EditUserModal
-          isOpen={isOpenEditModal}
-          onClose={handleCloseEditModal}
-          user={selectedUser}
-        />
-      )}
-      <AddUserModal isOpen={isOpenAddModal} onClose={handleCloseAddModal} />
     </div>
   );
 };
 
-export default Usuarios;
+export default FichasCoordi;

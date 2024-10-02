@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { saveAs } from "file-saver";
+import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext"; 
 import MUIDataTable from "mui-datatables";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 import Sidebar from "../components/Sidebar";
 import Home from "../components/Home";
 import EditPedidoModal from "../components/EditPedidoModal";
 import AddPedidoModal from "../components/AddPedidoModal";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Pedidos = () => {
@@ -18,6 +19,8 @@ const Pedidos = () => {
   const [selectedPedido, setSelectedPedido] = useState(null);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const { user } = useAuth();
 
   const fetchData = async () => {
     setLoading(true);
@@ -87,7 +90,10 @@ const Pedidos = () => {
       label: "FECHA DE PEDIDO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -97,7 +103,10 @@ const Pedidos = () => {
       label: "CANTIDAD ENTREGADA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -107,7 +116,10 @@ const Pedidos = () => {
       label: "USUARIO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -117,7 +129,10 @@ const Pedidos = () => {
       label: "FICHA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -127,7 +142,10 @@ const Pedidos = () => {
       label: "ID",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -137,7 +155,10 @@ const Pedidos = () => {
       label: "CANTIDAD SOLICITADA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -147,7 +168,10 @@ const Pedidos = () => {
       label: "CÓDIGO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -157,7 +181,10 @@ const Pedidos = () => {
       label: "PRODUCTO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -167,7 +194,10 @@ const Pedidos = () => {
       label: "INSTRUCTOR",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -178,7 +208,10 @@ const Pedidos = () => {
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value, tableMeta, updateValue) => (
           <div className="flex items-center justify-center">
@@ -218,6 +251,13 @@ const Pedidos = () => {
     saveAs(data, "Pedidos.xlsx");
   };
 
+  // Función para verificar permisos
+  const hasPermission = (permissionName) => {
+    return user.DetallePermisos.some(
+      (permiso) => permiso.Permiso.nombrePermiso === permissionName
+    );
+  }; 
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -231,9 +271,11 @@ const Pedidos = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
-          <button className="btn-primary" onClick={handleOpenAddModal}>
-            Agregar Pedido
-          </button>
+          {hasPermission("Crear Pedido") && (
+            <button className="btn-primary" onClick={handleOpenAddModal}>
+              Agregar Pedido
+            </button>
+          )}
         </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="max-w-9xl mx-auto">

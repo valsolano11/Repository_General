@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../api/token";
+import { saveAs } from "file-saver";
+import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext"; 
 import Sidebar from "../components/Sidebar";
 import Home from "../components/Home";
 import MUIDataTable from "mui-datatables";
@@ -7,8 +10,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddSubcategoriaModal from "../components/AddSubcategoriaModal";
 import EditSubcategoriaModal from "../components/EditSubcategoriaModal";
@@ -20,6 +21,8 @@ const Subcategorias = () => {
   const [selectedSubcategoria, setSelectedSubcategoria] = useState(null);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const { user } = useAuth();
 
   const fetchData = async () => {
     setLoading(true);
@@ -87,7 +90,10 @@ const Subcategorias = () => {
       label: "ID",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -97,7 +103,10 @@ const Subcategorias = () => {
       label: "SUBCATEGORIA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -107,7 +116,10 @@ const Subcategorias = () => {
       label: "CATEGORIA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -117,7 +129,10 @@ const Subcategorias = () => {
       label: "ESTADO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => (
           <div
@@ -137,7 +152,10 @@ const Subcategorias = () => {
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value, tableMeta, updateValue) => (
           <div className="flex items-center justify-center">
@@ -172,6 +190,13 @@ const Subcategorias = () => {
     saveAs(data, "Subcategoria.xlsx");
   };
 
+  // Función para verificar permisos
+  const hasPermission = (permissionName) => {
+    return user.DetallePermisos.some(
+      (permiso) => permiso.Permiso.nombrePermiso === permissionName
+    );
+  };  
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -185,12 +210,14 @@ const Subcategorias = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
-          <button
-            className="btn-primary"
-            onClick={() => setIsOpenAddModal(true)}
-          >
-            Agregar Subcategoria
-          </button>
+          {hasPermission("Crear Subcategoria") && (
+            <button
+              className="btn-primary"
+              onClick={() => setIsOpenAddModal(true)}
+            >
+              Agregar Subcategoria
+            </button>
+          )}
         </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="max-w-4xl mx-auto">

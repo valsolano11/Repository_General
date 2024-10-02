@@ -2,7 +2,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import LinearProgress from "@mui/material/LinearProgress";
 
-const ProtectedRoute = ({ requiredRoleId }) => {
+const ProtectedRoute = ({ requiredRoleId, requiredRoleIds, requiredPermission }) => {
   const { isAuthenticated, loading, user } = useAuth();
 
   if (loading) {
@@ -13,13 +13,20 @@ const ProtectedRoute = ({ requiredRoleId }) => {
     );
   }
 
-  // Redirige a /homecoord si el usuario tiene RolId 2
-  if (user?.RolId === 2 && requiredRoleId !== 2) {
-    return <Navigate to="/homecoord" replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
   }
 
-  if (!isAuthenticated || (requiredRoleId && user?.RolId !== requiredRoleId)) {
-    return <Navigate to="/" replace />;
+  if (requiredRoleId && user?.RolId !== requiredRoleId) {
+    return <Navigate to="/no-permission" replace />;
+  }
+
+  if (requiredRoleIds && !requiredRoleIds.includes(user?.RolId)) {
+    return <Navigate to="/no-permission" replace />;
+  }
+
+  if (requiredPermission && !user?.DetallePermisos.some(p => p.Permiso.nombrePermiso === requiredPermission)) {
+    return <Navigate to="/no-permission" replace />;
   }
 
   return <Outlet />;

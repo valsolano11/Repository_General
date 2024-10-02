@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { saveAs } from "file-saver";
+import { useAuth } from "../context/AuthContext"; 
 import MUIDataTable from "mui-datatables";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
@@ -8,12 +10,14 @@ import Sidebar from "../components/Sidebar";
 import Home from "../components/Home";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 import "react-toastify/dist/ReactToastify.css";
-
 
 const Herramientas = () => {
   const [sidebarToggle, setSidebarToggle] = useState(false);
+  const [isOpenEditModal, setIsOpenEditModal] = useState(false);
+  const [selectedHerramienta, setSelectedHerramienta] = useState(null);
+  const [isOpenAddModal, setIsOpenAddModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [data, setData] = useState([
     {
       Código: "",
@@ -24,10 +28,8 @@ const Herramientas = () => {
       Descripción: "",
     },
   ]);
-  const [isOpenEditModal, setIsOpenEditModal] = useState(false);
-  const [selectedHerramienta, setSelectedHerramienta] = useState(null);
-  const [isOpenAddModal, setIsOpenAddModal] = useState(false);
-  const [loading, setLoading] = useState(false);
+
+  const { user } = useAuth();
 
   const handleEditClick = (rowIndex) => {
     const herramienta = data[rowIndex];
@@ -60,7 +62,10 @@ const Herramientas = () => {
       label: "CÓDIGO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -70,7 +75,10 @@ const Herramientas = () => {
       label: "NOMBRE",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -80,7 +88,10 @@ const Herramientas = () => {
       label: "FECHA DE INGRESO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -90,7 +101,10 @@ const Herramientas = () => {
       label: "MARCA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -100,7 +114,10 @@ const Herramientas = () => {
       label: "CONDICIÓN",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -110,7 +127,10 @@ const Herramientas = () => {
       label: "DESCRIPCIÓN",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -120,7 +140,10 @@ const Herramientas = () => {
       label: "EDITAR",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         filter: false,
         customBodyRender: (value, tableMeta, updateValue) => (
@@ -159,6 +182,13 @@ const Herramientas = () => {
     saveAs(data, "Herramientas.xlsx");
   };
 
+  // Función para verificar permisos
+  const hasPermission = (permissionName) => {
+    return user.DetallePermisos.some(
+      (permiso) => permiso.Permiso.nombrePermiso === permissionName
+    );
+  }; 
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -172,9 +202,11 @@ const Herramientas = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
-          <button className="btn-primary" onClick={handleOpenAddModal}>
-            Agregar Herramienta
-          </button>
+          {hasPermission("Crear Herramienta") && (
+            <button className="btn-primary" onClick={handleOpenAddModal}>
+              Agregar Herramienta
+            </button>
+          )}
         </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="max-w-6xl mx-auto">

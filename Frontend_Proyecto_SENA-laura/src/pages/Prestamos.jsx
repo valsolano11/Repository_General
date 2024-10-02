@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { saveAs } from "file-saver";
+import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext"; 
 import MUIDataTable from "mui-datatables";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 import Sidebar from "../components/Sidebar";
 import Home from "../components/Home";
 import EditPrestamoModal from "../components/EditPrestamoModal";
 import AddPrestamoModal from "../components/AddPrestamoModal";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Prestamos = () => {
@@ -18,7 +19,9 @@ const Prestamos = () => {
   const [isOpenEditModal, setIsOpenEditModal] = useState(false);
   const [selectedPrestamo, setSelectedPrestamo] = useState(null);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true)
+
+  const { user } = useAuth();
 
   const fetchData = async () => {
     setLoading(true);
@@ -54,14 +57,17 @@ const Prestamos = () => {
     }
     setLoading(false);
   };
+
   useEffect(() => {
     fetchData();
   }, []);
+
   const handleEditClick = (rowIndex) => {
     const prestamo = data[rowIndex];
     setSelectedPrestamo(prestamo);
     setIsOpenEditModal(true);
   };
+
   const handleCloseEditModal = (updatedPrestamo) => {
     if (updatedPrestamo) {
       fetchData();
@@ -69,22 +75,28 @@ const Prestamos = () => {
     setIsOpenEditModal(false);
     setSelectedPrestamo(null);
   };
+
   const handleOpenAddModal = () => {
     setIsOpenAddModal(true);
   };
+
   const handleCloseAddModal = (newPrestamo) => {
     if (newPrestamo) {
       fetchData();
     }
     setIsOpenAddModal(false);
   };
+
   const columns = [
     {
       name: "Codigo",
       label: "CÓDIGO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -94,7 +106,10 @@ const Prestamos = () => {
       label: "ID",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -104,7 +119,10 @@ const Prestamos = () => {
       label: "FICHA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -114,7 +132,10 @@ const Prestamos = () => {
       label: "USUARIO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -124,7 +145,10 @@ const Prestamos = () => {
       label: "INSTRUCTOR",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -134,7 +158,10 @@ const Prestamos = () => {
       label: "HERRAMIENTA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -144,7 +171,10 @@ const Prestamos = () => {
       label: "CANTIDAD",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -154,7 +184,10 @@ const Prestamos = () => {
       label: "FECHA DE PRÉSTAMO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -164,7 +197,10 @@ const Prestamos = () => {
       label: "FECHA DE DEVOLUCIÓN",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -174,7 +210,10 @@ const Prestamos = () => {
       label: "ESTADO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -184,7 +223,10 @@ const Prestamos = () => {
       label: "OBSERVACIONES",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -195,7 +237,10 @@ const Prestamos = () => {
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+          </th>
         ),
         customBodyRender: (value, tableMeta, updateValue) => (
           <div className="flex items-center justify-center">
@@ -211,6 +256,7 @@ const Prestamos = () => {
       },
     },
   ];
+
   const handleCustomExport = (rows) => {
     const exportData = rows.map((row) => ({
       Codigo: row.data[0],
@@ -236,6 +282,13 @@ const Prestamos = () => {
     saveAs(data, "Prestamos.xlsx");
   };
 
+  // Función para verificar permisos
+  const hasPermission = (permissionName) => {
+    return user.DetallePermisos.some(
+      (permiso) => permiso.Permiso.nombrePermiso === permissionName
+    );
+  }; 
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -249,9 +302,11 @@ const Prestamos = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
-          <button className="btn-primary" onClick={handleOpenAddModal}>
-            Agregar Préstamo
-          </button>
+          {hasPermission("Crear Prestamo") && (
+            <button className="btn-primary" onClick={handleOpenAddModal}>
+              Agregar Préstamo
+            </button>
+          )}
         </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="max-w-9xl mx-auto">
