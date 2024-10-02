@@ -8,8 +8,8 @@ import { validarPermiso } from "../middlewares/ValiadarPermisos.js";
 
 const FichaRouter = Router()
 
-FichaRouter.get("/Fichas", rutaProtegida, validarPermiso('Obtener Fichas'), getAllFichas);
-FichaRouter.get("/Fichas/:id", rutaProtegida,validarPermiso(), getFicha);
+FichaRouter.get("/Fichas", rutaProtegida, validarPermiso('Vista Fichas'), getAllFichas);
+FichaRouter.get("/Fichas/:id", rutaProtegida,validarPermiso('Obtener Fichas'), getFicha);
 FichaRouter.post("/Fichas",rutaProtegida, validarPermiso('Crear Ficha'), validarSchemas(FichaSchemas), crearFicha);
 FichaRouter.put("/Fichas/:id", rutaProtegida, validarPermiso('Modificar Ficha'), updateFicha); 
 

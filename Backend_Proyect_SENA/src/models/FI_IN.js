@@ -7,7 +7,7 @@ import Usuario from "./Usuario.js";
 const InstructorFicha = conexion.define(
   "InstructorFicha",
   {
-    id: {
+    id: { 
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
@@ -22,13 +22,6 @@ const InstructorFicha = conexion.define(
         },
       },
     },
-    UsuarioId: {
-      type: DataTypes.INTEGER,  // Llave foránea para relacionar con el usuario
-      references: {
-        model: Usuario, // Relacionar con la tabla Usuarios
-        key: 'id',
-      }
-    }
   },
   {
     tableName: "InstructorFicha",
@@ -44,5 +37,6 @@ const InstructorFicha = conexion.define(
 
 InstructorFicha.belongsTo(Instructores, { foreignKey: "InstructorId" });
 InstructorFicha.belongsTo(Fichas, { foreignKey: "FichaId" });
-InstructorFicha.belongsTo(Usuario, { foreignKey: "UsuarioId" }); 
+InstructorFicha.belongsTo(Usuario, { foreignKey: "UsuarioId" });
+
 export default InstructorFicha;

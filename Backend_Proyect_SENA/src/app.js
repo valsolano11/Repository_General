@@ -12,6 +12,9 @@ import permisoRouter from "./routes/Permiso.routes.js";
 import FichaRouter from "./routes/Fichas.routes.js";
 import InstructorRouter from "./routes/Instructores.routes.js";
 import Relacion from "./routes/Relacion.routes.js";
+import CategoriaRouter from "./routes/Categoria.routes.js"
+import SubcategoriaRouter from "./routes/Subcategoria.routes.js";
+
 const app = express();
 
 app.use(
@@ -26,18 +29,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(
-    
-    UsuarioRouter, 
-    RolRouter, 
-    EstadoRouter,
-    LoginRouter,
-    recuperacionRouter,
-    permisoRouter,
-    FichaRouter,
-    InstructorRouter,
-    Relacion
-    
-
+  UsuarioRouter,
+  RolRouter,
+  EstadoRouter,
+  LoginRouter,
+  recuperacionRouter,
+  permisoRouter,
+  FichaRouter,
+  InstructorRouter,
+  Relacion,
+  CategoriaRouter,
+  SubcategoriaRouter
 );
 
 export default app;

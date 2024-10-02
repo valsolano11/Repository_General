@@ -82,7 +82,8 @@ export const asignarInstructorAFichas = async (req, res) => {
         where: {
           InstructorId: instructor.id,
           FichaId: ficha.id,
-          semestre: semestre, 
+          semestre: semestre,
+          UsuarioId: UsuarioId,
         },
       });
     }

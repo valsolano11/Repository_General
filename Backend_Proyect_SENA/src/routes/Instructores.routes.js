@@ -8,8 +8,8 @@ import {InstructoresSchemas} from "../schemas/Instructores.schemas.js"
 
 const InstructorRouter = Router()
 
-InstructorRouter.get("/Instructor",rutaProtegida,validarPermiso('Obtener Intructores'), getAllInstructores);
-InstructorRouter.get("/Instructor/:id",rutaProtegida, getInstructor);
+InstructorRouter.get("/Instructor",rutaProtegida,validarPermiso('Vista Instructores'), getAllInstructores);
+InstructorRouter.get("/Instructor/:id",rutaProtegida,validarPermiso('Obtener Instructores'), getInstructor);
 InstructorRouter.post("/Instructor",rutaProtegida,validarPermiso('Crear Instructor'), validarSchemas(InstructoresSchemas), crearInstructor);
 InstructorRouter.put("/Instructor/:id", rutaProtegida,validarPermiso('Modificar Intructor'), actualizarInstructor);
 
