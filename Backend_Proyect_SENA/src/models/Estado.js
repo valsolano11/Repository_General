@@ -34,12 +34,15 @@ const Estado = conexion.define(
 );
 
 const datosEstados = [
+
   { estadoName: "ACTIVO" },
   { estadoName: "INACTIVO" },
   { estadoName: "AGOTADO" },
+  { estadoName: "EN USO"},
   { estadoName: "PENDIENTE" },
   { estadoName: "EN PROCESO" },
   { estadoName: "ENTREGADO" },
+
 ];
 
 const guardarEstados = async () => {

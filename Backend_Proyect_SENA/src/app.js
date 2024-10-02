@@ -14,6 +14,8 @@ import InstructorRouter from "./routes/Instructores.routes.js";
 import Relacion from "./routes/Relacion.routes.js";
 import CategoriaRouter from "./routes/Categoria.routes.js"
 import SubcategoriaRouter from "./routes/Subcategoria.routes.js";
+import ProductoRouter from "./routes/Producto.routes.js";
+import UnidadMedidaRouter from "./routes/UnidadMedida.routes.js";
 
 const app = express();
 
@@ -39,7 +41,9 @@ app.use(
   InstructorRouter,
   Relacion,
   CategoriaRouter,
-  SubcategoriaRouter
+  SubcategoriaRouter,
+  ProductoRouter,
+  UnidadMedidaRouter
 );
 
 export default app;
