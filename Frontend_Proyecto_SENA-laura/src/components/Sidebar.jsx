@@ -8,6 +8,9 @@ import { MdOutlineCategory, MdAssignmentReturned } from "react-icons/md";
 import { SiGoogleclassroom } from "react-icons/si";
 import { LiaDropbox } from "react-icons/lia";
 import { FiTool } from "react-icons/fi";
+import { MdDirectionsWalk } from "react-icons/md";
+import { RiAdminLine } from "react-icons/ri";
+import { FaArrowsDownToPeople } from "react-icons/fa6";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"; 
@@ -15,7 +18,14 @@ import fondo from "/logoSena.png";
 
 const Sidebar = ({ sidebarToggle }) => {
   const navigate = useNavigate();
-  const [expanded, setExpanded] = useState(null);
+  const [expanded, setExpanded] = useState({
+    usuarios: false,
+    formacion: false,
+    fichas: false,
+    categorias: false,
+    general: false,
+    subdireccion: false,
+  });  
 
   const { user } = useAuth();
 
@@ -24,8 +34,11 @@ const Sidebar = ({ sidebarToggle }) => {
   };
 
   const handleToggle = (panel) => {
-    setExpanded(expanded === panel ? null : panel);
-  };
+    setExpanded((prevExpanded) => ({
+      ...prevExpanded,
+      [panel]: !prevExpanded[panel],
+    }));
+  };  
 
   const hasPermission = (permissionName) => {
     return user.DetallePermisos.some(
@@ -70,9 +83,9 @@ const Sidebar = ({ sidebarToggle }) => {
               <FaUserLarge className="inline-block w-6 h-6 mr-2 -mt-2" />
               Usuarios
             </div>
-            <span>{expanded === "usuarios" ? "-" : "+"}</span>
+            <span>{expanded.usuarios ? "-" : "+"}</span>
           </div>
-          {expanded === "usuarios" && (
+          {expanded.usuarios && (
             <ul className="bg-black text-center text-white text-sm">
               {hasPermission("Vista Usuario") && (
                 <li className="py-1 hover:bg-gray-700 rounded mx-4">
@@ -102,26 +115,50 @@ const Sidebar = ({ sidebarToggle }) => {
               <SiGoogleclassroom className="inline-block w-6 h-6 mr-2 -mt-2" />
               Formación
             </div>
-            <span>{expanded === "formacion" ? "-" : "+"}</span>
+            <span>{expanded.formacion ? "-" : "+"}</span>
           </div>
-          {expanded === "formacion" && (
+          {expanded.formacion && (
             <ul className="bg-black text-center text-white text-sm">
               <li className="py-1 hover:bg-gray-700 rounded mx-4">
-                <a href="/fichas" className="px-3 flex items-center">
-                <SiGoogleclassroom className="inline-block w-4 h-4 mr-2 -mt-1"></SiGoogleclassroom>
-                Fichas
-                </a>
-              </li>
+                  <div
+                    className="flex items-center justify-between px-3 py-2 rounded hover:shadow hover:bg-gray-700 cursor-pointer"
+                    onClick={() => handleToggle("fichas")}
+                  >
+                    <div className="flex items-center">
+                      <SiGoogleclassroom className="inline-block w-4 h-4 mr-2 -mt-1"></SiGoogleclassroom>
+                      Fichas
+                    </div>
+                    <span>{expanded.fichas ? "-" : "+"}</span>
+                  </div>
+                </li>
+
+                {expanded.fichas && ( 
+                    <ul className="bg-black text-center text-white text-xs"> 
+                      <li className="py-1 px-2 hover:bg-gray-700 rounded mx-4">
+                        <a href="/fichas" className="px-3 flex items-center">
+                          <FaArrowsDownToPeople className="inline-block w-4 h-4 mr-2 -mt-1"></FaArrowsDownToPeople>
+                          Fichas
+                        </a>
+                      </li>
+                      <li className="py-1 px-2 hover:bg-gray-700 rounded mx-4">
+                        <a href="/instructor-fichas" className="px-3 flex items-center">
+                          <RiTokenSwapLine className="inline-block w-4 h-4 mr-2 -mt-1"></RiTokenSwapLine>
+                          Fichas por Instructor
+                        </a>
+                      </li>
+                        <li className="py-1 px-2 hover:bg-gray-700 rounded mx-4">
+                        <a href="/consumoFicha" className="px-3 flex items-center">
+                          <FiTool className="inline-block w-4 h-4 mr-2 -mt-1"></FiTool>
+                          Consumo por fichas
+                        </a>
+                      </li>
+                    </ul>
+                  )}
+
               <li className="py-1 hover:bg-gray-700 rounded mx-4">
                 <a href="/instructores" className="px-3 flex items-center">
                 <PiChalkboardTeacher className="inline-block w-4 h-4 mr-2 -mt-1"></PiChalkboardTeacher>
                 Instructores
-                </a>
-              </li>
-              <li className="py-1 hover:bg-gray-700 rounded mx-4">
-                <a href="/instructor-fichas" className="px-3 flex items-center">
-                <RiTokenSwapLine className="inline-block w-4 h-4 mr-2 -mt-1"></RiTokenSwapLine>
-                Fichas por Instructor
                 </a>
               </li>
             </ul>
@@ -129,7 +166,7 @@ const Sidebar = ({ sidebarToggle }) => {
         </li>
 
         {/* Categorías */}
-        {(hasPermission("vista Categorias") || hasPermission("vista Subcategorias")) && (
+        {(hasPermission("Vista Categorias") || (hasPermission("Vista Subcategorias"))) && (
           <li className="mb-2">
             <div
               className="flex items-center justify-between px-3 py-2 rounded hover:shadow hover:bg-gray-700 cursor-pointer"
@@ -139,48 +176,97 @@ const Sidebar = ({ sidebarToggle }) => {
                 <TbCategory className="inline-block w-6 h-6 mr-2 -mt-2" />
                 Categorías
               </div>
-              <span>{expanded === "categorias" ? "-" : "+"}</span>
+              <span>{expanded.categorias ? "-" : "+"}</span>
             </div>
-            {expanded === "categorias" && (
+            {expanded.categorias && (             
               <ul className="bg-black text-center text-white text-sm">
-                {hasPermission("vista Categorias") && (
                 <li className="py-1 hover:bg-gray-700 rounded mx-4">
-                  <a href="/categorias" className="px-3 flex items-center">
-                  <TbCategory className="inline-block w-4 h-4 mr-2 -mt-1"></TbCategory>
-                  Categorías
+                  <a href="/subcategorias" className="px-3 flex items-center">
+                    <RiAdminLine className="inline-block w-4 h-4 mr-2 -mt-1"></RiAdminLine>
+                    Administración
                   </a>
                 </li>
-                )}
-                {hasPermission("vista Subcategorias") && (
-                  <li className="py-1 hover:bg-gray-700 rounded mx-4">
-                    <a href="/subcategorias" className="px-3 flex items-center">
-                    <MdOutlineCategory className="inline-block w-4 h-4 mr-2 -mt-1"></MdOutlineCategory>
-                    Subcategorías
-                    </a>
-                  </li>
-                )}
+                
+                <li className="py-1 hover:bg-gray-700 rounded mx-4">
+                  <div
+                    className="flex items-center justify-between px-3 py-2 rounded hover:shadow hover:bg-gray-700 cursor-pointer"
+                    onClick={() => handleToggle("general")}
+                  >
+                    <div className="flex items-center">
+                      <MdOutlineCategory className="inline-block w-4 h-4 mr-2 -mt-1"></MdOutlineCategory>
+                      Inventario General
+                    </div>
+                    <span>{expanded.general ? "-" : "+"}</span>
+                  </div>
+                </li>
+
+                  {expanded.general && ( 
+                    <ul className="bg-black text-center text-white text-xs"> 
+                      <li className="py-1 px-2 hover:bg-gray-700 rounded mx-4">
+                        <a href="/ConsumoControladoGeneral" className="px-3 flex items-center">
+                          <LiaDropbox className="inline-block w-4 h-4 mr-2 -mt-1"></LiaDropbox>
+                          Consumo controlado
+                        </a>
+                      </li>
+                        <li className="py-1 px-2 hover:bg-gray-700 rounded mx-4">
+                        <a href="/ConsumoDevolutivoGeneral" className="px-3 flex items-center">
+                          <FiTool className="inline-block w-4 h-4 mr-2 -mt-1"></FiTool>
+                          Consumo devolutivo
+                        </a>
+                      </li>
+                    </ul>
+                  )}
+
+                <li className="py-1 hover:bg-gray-700 rounded mx-4">
+                  <div
+                    className="flex items-center justify-between px-3 py-2 rounded hover:shadow hover:bg-gray-700 cursor-pointer"
+                    onClick={() => handleToggle("subdireccion")}
+                  >
+                    <div className="flex items-center">
+                      <MdDirectionsWalk className="inline-block w-4 h-4 mr-2 -mt-1"></MdDirectionsWalk>
+                      Subdirección
+                    </div>
+                    <span>{expanded.subdireccion ? "-" : "+"}</span>
+                  </div>
+                </li>
+                  {expanded.subdireccion && (
+                    <ul className="bg-black text-center text-white text-xs"> 
+                      <li className="py-1 px-2 hover:bg-gray-700 rounded mx-4">
+                        <a href="/productos" className="px-3 flex items-center">
+                          <LiaDropbox className="inline-block w-4 h-4 mr-2 -mt-1"></LiaDropbox>
+                          Consumo controlado
+                        </a>
+                      </li>
+                        <li className="py-1 px-2 hover:bg-gray-700 rounded mx-4">
+                        <a href="/herramientas" className="px-3 flex items-center">
+                          <FiTool className="inline-block w-4 h-4 mr-2 -mt-1"></FiTool>
+                          Consumo devolutivo
+                        </a>
+                      </li>
+                    </ul>
+                  )}
               </ul>
             )}
           </li>
         )}
 
         {/* Otros enlaces */}
-        {hasPermission("vista Productos") && (
+        {/* {hasPermission("vista Productos") && (
           <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
             <a href="/productos" className="px-3">
               <LiaDropbox className="inline-block w-6 h-6 mr-2 -mt-2"></LiaDropbox>
               Productos
             </a>
           </li>
-        )}
-        {hasPermission("vista Herramientas") && (
+        )} */}
+        {/* {hasPermission("vista Herramientas") && (
           <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
             <a href="/herramientas" className="px-3">
               <FiTool className="inline-block w-6 h-6 mr-2 -mt-2"></FiTool>
               Herramientas
             </a>
           </li>
-        )}
+        )} */}
         {hasPermission("vista Prestamos") && (
           <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
             <a href="/prestamos" className="px-3">

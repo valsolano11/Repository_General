@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { api } from "../api/token";
 import { saveAs } from "file-saver";
 import { toast } from "react-toastify";
+import { api } from "../api/token";
 import { useAuth } from "../context/AuthContext";
-import Sidebar from "../components/Sidebar";
-import Home from "../components/Home";
 import MUIDataTable from "mui-datatables";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
-import EditProductModal from "../components/EditProductModal";
-import AddProductModal from "../components/AddProductModal";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
+import Sidebar from "../components/Sidebar";
+import Home from "../components/Home";
+import EditProductModal from "../components/EditProductModal";
+import AddProductModal from "../components/AddProductModal";
 import "react-toastify/dist/ReactToastify.css";
 
-const Productos = () => {
+const ConsumoControladoGeneral = () => {
   const [sidebarToggle, setSidebarToggle] = useState(false);
   const [data, setData] = useState([]);
   const [isOpenEditModal, setIsOpenEditModal] = useState(false);
@@ -27,7 +27,7 @@ const Productos = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/producto", {
+      const response = await api.get("/productos/categoria/:2", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -98,11 +98,10 @@ const Productos = () => {
       label: "ID",
       options: {
         customHeadRender: (columnMeta) => (
-          <th
+          <th 
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
+              {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -113,8 +112,10 @@ const Productos = () => {
       label: "Nombre del Producto",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
-            {columnMeta.label}
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
+              {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -125,11 +126,10 @@ const Productos = () => {
       label: "Codigo",
       options: {
         customHeadRender: (columnMeta) => (
-          <th
+          <th 
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
+              {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -140,11 +140,10 @@ const Productos = () => {
       label: "Descripcion",
       options: {
         customHeadRender: (columnMeta) => (
-          <th
+          <th 
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
+              {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -155,11 +154,10 @@ const Productos = () => {
       label: "Cantidad Entrada",
       options: {
         customHeadRender: (columnMeta) => (
-          <th
+          <th 
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
+              {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -170,11 +168,10 @@ const Productos = () => {
       label: "Cantidad Salida",
       options: {
         customHeadRender: (columnMeta) => (
-          <th
+          <th 
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
+              {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -186,26 +183,24 @@ const Productos = () => {
       label: "Cantidad Actual",
       options: {
         customHeadRender: (columnMeta) => (
-          <th
+          <th 
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
+              {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "VolumenTotal",
+      name: "volumenTotal",
       label: "volumen Total",
       options: {
         customHeadRender: (columnMeta) => (
-          <th
+          <th 
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
+              {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -216,11 +211,10 @@ const Productos = () => {
       label: "Marca",
       options: {
         customHeadRender: (columnMeta) => (
-          <th
+          <th 
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
+              {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -231,11 +225,10 @@ const Productos = () => {
       label: "Unidad de Medida",
       options: {
         customHeadRender: (columnMeta) => (
-          <th
+          <th 
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
+              {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -246,11 +239,10 @@ const Productos = () => {
       label: "Subcategoria",
       options: {
         customHeadRender: (columnMeta) => (
-          <th
+          <th 
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
+              {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -261,11 +253,10 @@ const Productos = () => {
       label: "Usuario",
       options: {
         customHeadRender: (columnMeta) => (
-          <th
+          <th 
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
+              {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -276,11 +267,10 @@ const Productos = () => {
       label: "ESTADO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th
+          <th 
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
+              {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => (
@@ -307,11 +297,10 @@ const Productos = () => {
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
-          <th
+          <th 
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
+              {columnMeta.label}
           </th>
         ),
         customBodyRender: (value, tableMeta, updateValue) => (
@@ -359,7 +348,7 @@ const Productos = () => {
     return user.DetallePermisos.some(
       (permiso) => permiso.Permiso.nombrePermiso === permissionName
     );
-  };
+  };  
 
   return (
     <div className="flex min-h-screen">
@@ -374,11 +363,11 @@ const Productos = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
-          {hasPermission("Crear Producto") && (
-            <button className="btn-primary" onClick={handleOpenAddModal}>
-              Agregar Producto
-            </button>
-          )}
+        {hasPermission("Crear Producto") && (
+          <button className="btn-primary" onClick={handleOpenAddModal}>
+            Agregar Producto
+          </button>
+        )}
         </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="w-full max-w-9xl mx-auto">
@@ -388,7 +377,7 @@ const Productos = () => {
               <MUIDataTable
                 title={
                   <span className="custom-title">
-                    Productos de consumo controlado - Subdirección
+                    Productos de consumo controlado - General
                   </span>
                 }
                 data={data}
@@ -462,5 +451,4 @@ const Productos = () => {
     </div>
   );
 };
-
-export default Productos;
+export default ConsumoControladoGeneral;

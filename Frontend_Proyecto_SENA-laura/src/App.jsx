@@ -14,8 +14,8 @@ import ImportExcel from "./pages/ImportExcel.jsx";
 import Subcategorias from "./pages/Subcategorias.jsx";
 import UnidadMedida from "./pages/UnidadMedida.jsx";
 import Productos from "./pages/Productos.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
 import Herramientas from "./pages/Herramientas.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
 import Prestamos from "./pages/Prestamos.jsx";
 import Pedidos from "./pages/Pedidos.jsx";
 import Historial from "./pages/Historial.jsx";
@@ -28,6 +28,9 @@ import NoPermiso from "./components/NoPermiso.jsx";
 import Intructor_Ficha from "./pages/Instructor_Ficha.jsx";
 import FichasCoordi from "./pages/FichasCoordi.jsx";
 import Reportes from "./pages/Reportes.jsx";
+import ConsumoDevolutivoGeneral from "./pages/ConsumoDevolutivoGeneral.jsx";
+import ConsumoControladoGeneral from "./pages/ConsumoControladoGeneral.jsx";
+import ConsumoFicha from "./pages/ConsumoFichas.jsx";
 
 function App() {
   return (
@@ -63,15 +66,35 @@ function App() {
             </Route>
             <Route
               path="/categorias"
-              element={<ProtectedRoute requiredPermission="vista Categorias" />}
+              element={<ProtectedRoute requiredPermission="Vista Categorias" />}
             >
               <Route path="" element={<Categorias />} />
             </Route>
             <Route
               path="/subcategorias"
-              element={<ProtectedRoute requiredPermission="vista Subcategorias" />}
+              element={<ProtectedRoute requiredPermission="Vista Subcategorias" />}
             >
               <Route path="" element={<Subcategorias />} />
+            </Route>
+            <Route
+              path="/ConsumoDevolutivoGeneral"
+              element={<ProtectedRoute requiredPermission="Vista Subcategorias" />}
+            >
+              <Route path="" element={<ConsumoDevolutivoGeneral />} />
+            </Route>
+
+            <Route
+              path="/ConsumoControladoGeneral"
+              element={<ProtectedRoute requiredPermission="Vista Subcategorias" />}
+            >
+              <Route path="" element={<ConsumoControladoGeneral />} />
+            </Route>
+
+            <Route
+              path="/consumoFicha"
+              element={<ProtectedRoute requiredPermission="Vista Subcategorias" />}
+            >
+              <Route path="" element={<ConsumoFicha />} />
             </Route>
             <Route
               path="/productos"

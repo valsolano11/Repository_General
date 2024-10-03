@@ -13,7 +13,6 @@ const AddFichasModal = ({ isOpen, onClose, ficha }) => {
     NumeroFicha: "",
     Programa: "",
     Jornada: "",
-    UsuarioId: "",
     EstadoId: "",
   });
 
@@ -29,35 +28,28 @@ const AddFichasModal = ({ isOpen, onClose, ficha }) => {
         NumeroFicha: ficha.NumeroFicha || "",
         Programa: ficha.Programa || "",
         Jornada: ficha.Jornada || "",
-        UsuarioId: ficha.UsuarioId || "",
         EstadoId: ficha.EstadoId || "",
       });
     }
   }, [ficha]);
 
   useEffect(() => {
-    const fetchusuarios = async () => {
-      try {
-        const response = await api.get("/usuarios");
-        setUsuarios(response.data);
-      } catch (error) {
-        showToastError("Error al cargar usuarios");
-      }
-    };
-
     const fetchStates = async () => {
       try {
         const response = await api.get("/Estado");
-        setEstados(response.data);
+        const filteredEstados = response.data.filter(
+          estado => estado.id === 1 || estado.id === 2
+        );
+        setEstados(filteredEstados);
       } catch (error) {
         showToastError("Error al cargar los estados");
       }
     };
-
-    fetchusuarios();
+  
     fetchStates();
   }, []);
-
+  
+  
   const showToastError = (message) => {
     toast.error(message, {
       position: "top-right",
@@ -75,7 +67,6 @@ const AddFichasModal = ({ isOpen, onClose, ficha }) => {
       NumeroFicha: "",
       Programa: "",
       Jornada: "",
-      UsuarioId: "",
       EstadoId: "",
     });
   };
@@ -121,7 +112,7 @@ const AddFichasModal = ({ isOpen, onClose, ficha }) => {
   };
 
   const handleCreate = async () => {
-    const { NumeroFicha, Jornada, Programa, UsuarioId, EstadoId } = formData;
+    const { NumeroFicha, Jornada, Programa, EstadoId } = formData;
     const NumeroFichaError = validateInput("NumeroFicha", NumeroFicha);
     const JornadaError = validateInput("Jornada", Jornada);
     const ProgramaError = validateInput("Programa", Programa);
@@ -136,7 +127,7 @@ const AddFichasModal = ({ isOpen, onClose, ficha }) => {
       return;
     }
 
-    if (!NumeroFicha || !Programa || !Jornada || !UsuarioId || !EstadoId) {
+    if (!NumeroFicha || !Programa || !Jornada || !EstadoId) {
       showToastError("Todos los campos son obligatorios.");
       return;
     }
@@ -236,36 +227,19 @@ const AddFichasModal = ({ isOpen, onClose, ficha }) => {
 
                 <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Jornada *</label>
-                  <input
+                  <select
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    type="text"
                     name="Jornada"
                     value={formData.Jornada}
                     onChange={handleInputChange}
-                  />
-                  {formErrors.Jornada && (
-                    <div className="text-red-400 text-sm mt-1">
-                      {formErrors.Jornada}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Usuario *</label>
-                  <select
-                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    name="UsuarioId"
-                    value={formData.UsuarioId}
-                    onChange={handleInputChange}
                   >
-                    <option value="">Seleccionar Usuario</option>
-                    {usuarios.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.nombre}
-                      </option>
-                    ))}
+                    <option value="">Seleccione una Jornada</option>
+                    <option value="MAÑANA">MAÑANA</option>
+                    <option value="TARDE">TARDE</option>
+                    <option value="NOCHE">NOCHE</option>
                   </select>
                 </div>
+
 
                 <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Estado *</label>

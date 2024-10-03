@@ -1527,6 +1527,11 @@ td{
   color: rgb(0 0 0 / var(--tw-text-opacity));
 }
 
+.text-blue-500{
+  --tw-text-opacity: 1;
+  color: rgb(59 130 246 / var(--tw-text-opacity));
+}
+
 .text-correo{
   --tw-text-opacity: 1;
   color: rgb(123 163 223 / var(--tw-text-opacity));
@@ -1562,6 +1567,11 @@ td{
   color: rgb(17 24 39 / var(--tw-text-opacity));
 }
 
+.text-green-300{
+  --tw-text-opacity: 1;
+  color: rgb(134 239 172 / var(--tw-text-opacity));
+}
+
 .text-green-500{
   --tw-text-opacity: 1;
   color: rgb(34 197 94 / var(--tw-text-opacity));
@@ -1580,6 +1590,16 @@ td{
 .text-noEdit{
   --tw-text-opacity: 1;
   color: rgb(165 156 156 / var(--tw-text-opacity));
+}
+
+.text-orange-500{
+  --tw-text-opacity: 1;
+  color: rgb(249 115 22 / var(--tw-text-opacity));
+}
+
+.text-purple-500{
+  --tw-text-opacity: 1;
+  color: rgb(168 85 247 / var(--tw-text-opacity));
 }
 
 .text-red-400{
@@ -1605,6 +1625,11 @@ td{
 .text-white{
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.text-yellow-500{
+  --tw-text-opacity: 1;
+  color: rgb(234 179 8 / var(--tw-text-opacity));
 }
 
 .opacity-0{
