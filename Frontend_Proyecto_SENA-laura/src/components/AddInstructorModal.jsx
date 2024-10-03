@@ -13,7 +13,6 @@ const AddInstructorModal = ({ isOpen, onClose, instructor }) => {
     nombre: "",
     correo: "",
     celular: "",
-    UsuarioId: "",
     EstadoId: "",
   });
 
@@ -29,21 +28,12 @@ const AddInstructorModal = ({ isOpen, onClose, instructor }) => {
         nombre: instructor.nombre || "",
         correo: instructor.correo || "",
         celular: instructor.celular || "",
-        UsuarioId: instructor.UsuarioId || "",
         EstadoId: instructor.EstadoId || "",
       });
     }
   }, [instructor]);
 
   useEffect(() => {
-    const fetchusuario = async () => {
-      try {
-        const response = await api.get("/usuarios");
-        setUsuario(response.data);
-      } catch (error) {
-        showToastError("Error al cargar usuario");
-      }
-    };
 
     const fetchStates = async () => {
       try {
@@ -53,7 +43,6 @@ const AddInstructorModal = ({ isOpen, onClose, instructor }) => {
         showToastError("Error al cargar los estados");
       }
     };
-    fetchusuario();
     fetchStates();
   }, []);
 
@@ -76,7 +65,7 @@ const AddInstructorModal = ({ isOpen, onClose, instructor }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const processedValue =
-      name === "UsuarioId" || name === "EstadoId" || name === "celular"
+      name === "EstadoId" || name === "celular"
         ? Number(value)
         : value;
 
@@ -109,13 +98,12 @@ const AddInstructorModal = ({ isOpen, onClose, instructor }) => {
       nombre: "",
       correo: "",
       celular: "",
-      UsuarioId: "",
       EstadoId: "",
     });
   };
 
   const handleCreateInstructor = async () => {
-    const { nombre, correo, celular, UsuarioId, EstadoId } = formData;
+    const { nombre, correo, celular, EstadoId } = formData;
     const nombreError = validateInput("nombre", nombre);
     const correoError = validateInput("correo", correo);
 
@@ -128,7 +116,7 @@ const AddInstructorModal = ({ isOpen, onClose, instructor }) => {
       return;
     }
 
-    if (!nombre || !correo || !celular || !UsuarioId || !EstadoId) {
+    if (!nombre || !correo || !celular ||  !EstadoId) {
       showToastError("Todos los campos son obligatorios.");
       return;
     }
@@ -247,22 +235,6 @@ const AddInstructorModal = ({ isOpen, onClose, instructor }) => {
                   />
                 </div>
 
-                <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Usuario *</label>
-                  <select
-                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    name="UsuarioId"
-                    value={formData.UsuarioId}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Seleccionar Usuario</option>
-                    {usuario.map((usuario) => (
-                      <option key={usuario.id} value={usuario.id}>
-                        {usuario.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
 
                 <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Estado *</label>

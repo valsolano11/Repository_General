@@ -16,7 +16,6 @@ const EditFichasModal = ({ isOpen, onClose, ficha }) => {
     NumeroFicha: "",
     Programa: "",
     Jornada: "",
-    usuarioId: "",
     estadoId: "",
   });
 
@@ -29,26 +28,19 @@ const EditFichasModal = ({ isOpen, onClose, ficha }) => {
   }, [isOpen, ficha]);
 
   useEffect(() => {
-    const fetchusuarios = async () => {
-      try {
-        const response = await api.get("/usuarios");
-        setUsuarios(response.data);
-      } catch (error) {
-        toast.error("Error al cargar usuarios", { position: "top-right" });
-      }
-    };
-
-    const fetchEstados = async () => {
+    const fetchStates = async () => {
       try {
         const response = await api.get("/Estado");
-        setEstados(response.data);
+        const filteredEstados = response.data.filter(
+          estado => estado.id === 1 || estado.id === 2
+        );
+        setEstados(filteredEstados);
       } catch (error) {
-        toast.error("Error al cargar los estados", { position: "top-right" });
+        showToastError("Error al cargar los estados");
       }
     };
-
-    fetchusuarios();
-    fetchEstados();
+  
+    fetchStates();
   }, []);
 
   const fetchUserDetails = async (userId) => {
@@ -56,13 +48,12 @@ const EditFichasModal = ({ isOpen, onClose, ficha }) => {
     try {
       const response = await api.get(`/Fichas/${userId}`);
       if (response.status === 200) {
-        const { NumeroFicha, Programa, Jornada, UsuarioId, EstadoId } =
+        const { NumeroFicha, Programa, Jornada, EstadoId } =
           response.data;
         setFormData({
           NumeroFicha: NumeroFicha || "",
           Programa: Programa || "",
           Jornada: Jornada || "",
-          usuarioId: UsuarioId || "",
           estadoId: EstadoId || "",
         });
         setLoading(false);
@@ -117,9 +108,9 @@ const EditFichasModal = ({ isOpen, onClose, ficha }) => {
   };
 
   const handleUpdate = async () => {
-    const { NumeroFicha, Jornada, Programa, usuarioId, estadoId } = formData;
+    const { NumeroFicha, Jornada, Programa, estadoId } = formData;
 
-    if (!NumeroFicha || !Jornada || !Programa || !usuarioId || !estadoId) {
+    if (!NumeroFicha || !Jornada || !Programa ||!estadoId) {
       toast.error("Todos los campos son obligatorios.", {
         position: "top-right",
       });
@@ -134,7 +125,6 @@ const EditFichasModal = ({ isOpen, onClose, ficha }) => {
           NumeroFicha,
           Jornada,
           Programa,
-          UsuarioId: usuarioId,
           EstadoId: estadoId,
         },
         {
@@ -237,36 +227,19 @@ const EditFichasModal = ({ isOpen, onClose, ficha }) => {
 
                 <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Jornada *</label>
-                  <input
+                  <select
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    type="text"
                     name="Jornada"
                     value={formData.Jornada}
                     onChange={handleInputChange}
-                  />
-                  {formErrors.Jornada && (
-                    <div className="text-red-400 text-sm mt-1">
-                      {formErrors.Jornada}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Usuario *</label>
-                  <select
-                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    name="UsuarioId"
-                    value={formData.UsuarioId}
-                    onChange={handleInputChange}
                   >
-                    <option value="">Seleccionar Rol</option>
-                    {usuarios.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.nombre}
-                      </option>
-                    ))}
+                    <option value="">Seleccione una Jornada</option>
+                    <option value="MAÑANA">MAÑANA</option>
+                    <option value="TARDE">TARDE</option>
+                    <option value="NOCHE">NOCHE</option>
                   </select>
                 </div>
+
 
                 <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Estado *</label>

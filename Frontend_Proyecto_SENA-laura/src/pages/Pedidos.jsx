@@ -1,47 +1,50 @@
 import React, { useState, useEffect } from "react";
+import { api } from "../api/token";
 import { saveAs } from "file-saver";
 import { toast } from "react-toastify";
-import { useAuth } from "../context/AuthContext"; 
+import Sidebar from "../components/Sidebar";
+import Home from "../components/Home";
 import MUIDataTable from "mui-datatables";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
-import * as XLSX from "xlsx";
-import Sidebar from "../components/Sidebar";
-import Home from "../components/Home";
 import EditPedidoModal from "../components/EditPedidoModal";
-import AddPedidoModal from "../components/AddPedidoModal";
+import clsx from "clsx";
+import * as XLSX from "xlsx";
 import "react-toastify/dist/ReactToastify.css";
+
+
 
 const Pedidos = () => {
   const [sidebarToggle, setSidebarToggle] = useState(false);
   const [data, setData] = useState([]);
   const [isOpenEditModal, setIsOpenEditModal] = useState(false);
   const [selectedPedido, setSelectedPedido] = useState(null);
-  const [isOpenAddModal, setIsOpenAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const { user } = useAuth();
-
   const fetchData = async () => {
+    // console.time('fetchData');
     setLoading(true);
     try {
-      const response = [
-        {
-          FechaPedido: "",
-          CantidadEntregada: "",
-          IDUsuario: "",
-          IDFicha: "",
-          Id: "",
-          CantidadSolicitada: "",
-          Codigo: "",
-          IDProducto: "",
-          IDInstructor: "",
+      const response = await api.get("/pedido", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      ];
+      });
 
-      setData(response);
+      const pedidosConRolesYEstados = response.data.map((pedido) => ({
+        ...pedido,
+        nombreUsuario: pedido.Usuario ? pedido.Usuario.nombre : "Desconocido",
+        nombreinstructor: pedido.Instructores? pedido.Instructores.nombre : "Desconocido",
+        ficha: pedido.Fichas? pedido.Fichas.NumeroFicha : "Desconocido",
+        nombreproducto: pedido.Producto? pedido.Producto.nombre : "Desconocido",
+        unidadNombre: pedido.UnidadMedida ? pedido.UnidadMedida.nombre : "Desconocido",
+        estadoName: pedido.Estado ? pedido.Estado.estadoName : "Desconocido",
+      }));
+
+      pedidosConRolesYEstados.sort((a, b) => a.id - b.id);
+      setData(pedidosConRolesYEstados);
     } catch (error) {
-      console.error("Error fetching loan data:", error);
+      console.error("Error fetching user data:", error);
       toast.error("Error al cargar los datos de pedidos", {
         position: "top-right",
         autoClose: 2000,
@@ -53,6 +56,7 @@ const Pedidos = () => {
       });
     }
     setLoading(false);
+    // console.timeEnd('fetchData');
   };
 
   useEffect(() => {
@@ -69,12 +73,8 @@ const Pedidos = () => {
     if (updatedPedido) {
       fetchData();
     }
-    setIsOpenEditModal(false);
-    setSelectedPedido(null);
-  };
 
-  const handleOpenAddModal = () => {
-    setIsOpenAddModal(true);
+    setSelectedPedido(null);
   };
 
   const handleCloseAddModal = (newPedido) => {
@@ -86,133 +86,103 @@ const Pedidos = () => {
 
   const columns = [
     {
-      name: "FechaPedido",
-      label: "FECHA DE PEDIDO",
+      name: "id",
+      label: "id",
       options: {
-        customHeadRender: (columnMeta) => (
-          <th 
-            key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
-          </th>
-        ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "CantidadEntregada",
-      label: "CANTIDAD ENTREGADA",
+      name: "nombreproducto",
+      label: "Producto",
       options: {
-        customHeadRender: (columnMeta) => (
-          <th 
-            key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
-          </th>
-        ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "IDUsuario",
-      label: "USUARIO",
+      name: "codigo",
+      label: "codigo",
       options: {
-        customHeadRender: (columnMeta) => (
-          <th 
-            key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
-          </th>
-        ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "IDFicha",
-      label: "FICHA",
+      name: "cantidadSolicitada",
+      label: "Cantidad solicitada",
       options: {
-        customHeadRender: (columnMeta) => (
-          <th 
-            key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
-          </th>
-        ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "Id",
-      label: "ID",
+      name: "cantidadEntregada",
+      label: "cantidad entregada",
       options: {
-        customHeadRender: (columnMeta) => (
-          <th 
-            key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
-          </th>
-        ),
+        customBodyRender: (value) => <div className="text-center">{value}</div>,
+      },
+    },
+
+    {
+      name: "unidadNombre",
+      label: "unidad de medida",
+      options: {
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "CantidadSolicitada",
-      label: "CANTIDAD SOLICITADA",
+      name: "nombreinstructor",
+      label: "instructor",
       options: {
-        customHeadRender: (columnMeta) => (
-          <th 
-            key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
-          </th>
-        ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "Codigo",
-      label: "CÓDIGO",
+      name: "ficha",
+      label: "ficha",
       options: {
-        customHeadRender: (columnMeta) => (
-          <th 
-            key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
-          </th>
-        ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "IDProducto",
-      label: "PRODUCTO",
+      name: "fechaPedido",
+      label: "fecha",
       options: {
-        customHeadRender: (columnMeta) => (
-          <th 
-            key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
-          </th>
-        ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "IDInstructor",
-      label: "INSTRUCTOR",
+      name: "nombreUsuario",
+      label: "usuario",
       options: {
-        customHeadRender: (columnMeta) => (
-          <th 
-            key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
-          </th>
-        ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
+      },
+    },
+    {
+      name: "estadoName",
+      label: "Estado",
+      options: {
+        customBodyRender: (value) => (
+          <div
+            className={clsx("text-center", {
+              "text-green-500": value === "ACTIVO",
+              "text-red-500": value === "INACTIVO",
+              "text-gray-500": value === "AGOTADO",
+              "text-yellow-500": value === "PENDIENTE",
+              "text-blue-500": value === "EN PROCESO",
+              "text-orange-500": value === "EN USO",
+              "text-green-300": value === "ENTREGADO",
+              "text-purple-500": value === "DEVUELTO",
+            })}
+          >
+            {value}
+          </div>
+        ),
       },
     },
     {
       name: "edit",
-      label: "EDITAR",
+      label: "Editar",
       options: {
         filter: false,
-        customHeadRender: (columnMeta) => (
-          <th 
-            key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
-          </th>
-        ),
         customBodyRender: (value, tableMeta, updateValue) => (
           <div className="flex items-center justify-center">
             <IconButton
@@ -232,7 +202,7 @@ const Pedidos = () => {
     const exportData = rows.map((row) => ({
       FechaPedido: row.data[0],
       CantidadEntregada: row.data[1],
-      IDUsuario: row.data[2],
+      IDpedido: row.data[2],
       IDFicha: row.data[3],
       Id: row.data[4],
       CantidadSolicitada: row.data[5],
@@ -251,13 +221,6 @@ const Pedidos = () => {
     saveAs(data, "Pedidos.xlsx");
   };
 
-  // Función para verificar permisos
-  const hasPermission = (permissionName) => {
-    return user.DetallePermisos.some(
-      (permiso) => permiso.Permiso.nombrePermiso === permissionName
-    );
-  }; 
-
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -271,11 +234,9 @@ const Pedidos = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
-          {hasPermission("Crear Pedido") && (
-            <button className="btn-primary" onClick={handleOpenAddModal}>
-              Agregar Pedido
-            </button>
-          )}
+          <button className="btn-primary" onClick={handleOpenAddModal}>
+            Agregar Pedido
+          </button>
         </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="max-w-9xl mx-auto">
@@ -351,7 +312,6 @@ const Pedidos = () => {
           pedido={selectedPedido}
         />
       )}
-      <AddPedidoModal isOpen={isOpenAddModal} onClose={handleCloseAddModal}/>
     </div>
   );
 };

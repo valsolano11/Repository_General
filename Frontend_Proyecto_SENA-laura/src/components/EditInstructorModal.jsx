@@ -29,26 +29,19 @@ const EditinstructorModal = ({ isOpen, onClose, instructor }) => {
   }, [isOpen, instructor]);
 
   useEffect(() => {
-    const fetchusuarios = async () => {
-      try {
-        const response = await api.get("/usuarios");
-        setUsuarios(response.data);
-      } catch (error) {
-        toast.error("Error al cargar usuarios", { position: "top-right" });
-      }
-    };
-
-    const fetchEstados = async () => {
+    const fetchStates = async () => {
       try {
         const response = await api.get("/Estado");
-        setEstados(response.data);
+        const filteredEstados = response.data.filter(
+          estado => estado.id === 1 || estado.id === 2
+        );
+        setEstados(filteredEstados);
       } catch (error) {
-        toast.error("Error al cargar los estados", { position: "top-right" });
+        showToastError("Error al cargar los estados");
       }
     };
-
-    fetchusuarios();
-    fetchEstados();
+  
+    fetchStates();
   }, []);
 
   const fetchInstructorDetails = async (instructorId) => {
@@ -56,12 +49,11 @@ const EditinstructorModal = ({ isOpen, onClose, instructor }) => {
     try {
       const response = await api.get(`/Instructor/${instructorId}`);
       if (response.status === 200) {
-        const { nombre, correo, celular, UsuarioId, EstadoId } = response.data;
+        const { nombre, correo, celular, EstadoId } = response.data;
         setFormData({
           nombre: nombre || "",
           correo: correo || "",
           celular: celular || "",
-          usuarioId: UsuarioId || "",
           EstadoId: EstadoId || "",
         });
         setLoading(false);
@@ -115,9 +107,9 @@ const EditinstructorModal = ({ isOpen, onClose, instructor }) => {
   };
 
   const handleUpdateInstructor = async () => {
-    const { nombre, correo, celular, usuarioId, EstadoId } = formData;
+    const { nombre, correo, celular,  EstadoId } = formData;
 
-    if (!nombre || !correo || !celular || !usuarioId || !EstadoId) {
+    if (!nombre || !correo || !celular || !EstadoId) {
       toast.error("Todos los campos son obligatorios.", {
         position: "top-right",
       });
@@ -132,7 +124,6 @@ const EditinstructorModal = ({ isOpen, onClose, instructor }) => {
           nombre,
           correo,
           celular,
-          UsuarioId: usuarioId,
           EstadoId: EstadoId,
         },
         {
@@ -254,23 +245,6 @@ const EditinstructorModal = ({ isOpen, onClose, instructor }) => {
                     }}
                     maxLength={10}
                   />
-                </div>
-
-                <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Usuario *</label>
-                  <select
-                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    name="UsuarioId"
-                    value={formData.usuarioId}
-                    onChange={handleInputChangeInstructor}
-                  >
-                    <option value="">Seleccionar Usuario</option>
-                    {usuarios.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.nombre}
-                      </option>
-                    ))}
-                  </select>
                 </div>
 
                 <div className="flex flex-col">

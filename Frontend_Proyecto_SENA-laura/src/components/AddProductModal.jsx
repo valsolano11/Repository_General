@@ -5,92 +5,81 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const AddProductModal = ({ isOpen, onClose, product }) => {
-  const [formData, setFormData] = useState({
-    usuarioId: "",
-    marca: "",
-    cantidad_actual: "",
-    cantidad_entrada: "",
-    descripcion: "",
-    unidadmedidaId: "",
-    subcategoriaId: "",
-    estadoId: "",
-    cantidad_salida: "",
-    nombre: "",
-    codigo: "",
-  });
-  const [roles, setRoles] = useState([]);
+
+  const [subcategorias, setSubcategorias] = useState([]);
   const [estados, setEstados] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
+  const [unidades, setUnidad] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    nombre: "",
+    codigo: "",
+    descripcion: "",
+    cantidadEntrada: "",
+    marca: "",
+    UnidadMedidaId: "",
+    SubcategoriaId: "",
+    EstadoId: "",
+  });
 
   useEffect(() => {
     if (isOpen) {
-      fetchProductProfile();
-    } else {
-      resetForm();
+      setLoading(true);
     }
   }, [isOpen]);
+
+
   useEffect(() => {
     if (product) {
       setFormData({
-        usuarioId: product.usuarioId || "",
-        marca: product.marca || "",
-        cantidad_actual: product.cantidad_actual || "",
-        cantidad_entrada: product.cantidad_entrada || "",
-        descripcion: product.descripcion || "",
-        unidadmedidaId: product.unidadmedidaId || "",
-        subcategoriaId: product.subcategoriaId || "",
-        estadoId: product.estadoId || "",
-        cantidad_salida: product.cantidad_salida || "",
         nombre: product.nombre || "",
         codigo: product.codigo || "",
+        descripcion: product.descripcion || "",
+        cantidadEntrada: product.cantidad_entrada || "",
+        marca: product.marca || "",
+        UnidadMedidaId: product.UnidadMedidaId || "",
+        SubcategoriaId: product.SubcategoriaId || "",
+        EstadoId: product.EstadoId || "",
+
       });
     }
   }, [product]);
   useEffect(() => {
+    const fetchsubcategorias = async () => {
+      try {
+        const response = await api.get("/subcategoria/estado");
+        setSubcategorias(response.data);
+      } catch (error) {
+        showToastError("Error al cargar subcategorías");
+      }
+    };
+
     const fetchEstados = async () => {
       try {
-        const response = await api.get("/estados"); 
+        const response = await api.get("/Estado/tipo/producto");
         setEstados(response.data);
       } catch (error) {
         showToastError("Error al cargar los estados");
       }
     };
-    const fetchRoles = async () => {
+
+    const fetchUnidad = async () => {
       try {
-        const response = await api.get("/roles"); 
-        setRoles(response.data);
+        const response = await api.get("/units");
+        setUnidad(response.data);
       } catch (error) {
-        showToastError("Error al cargar los roles");
+        showToastError("Error al cargar la unidad de medida");
       }
     };
-    fetchEstados();
-    fetchRoles();
-  }, []);
-  const fetchProductProfile = async () => {
-    setLoading(true);
-    try {
-      const token = document.cookie.replace(
-        /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-        "$1"
-      );
-      const response = await api.get("/productos/perfil", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
 
-      if (response.status === 200) {
-      } else {
-        setFormErrors({ fetch: response.data.message });
-      }
-    } catch (error) {
-      setFormErrors({ fetch: "Error al cargar la información del producto." });
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchsubcategorias();
+    fetchEstados();
+    fetchUnidad();
+  }, []);
+
+
   const validateInput = (name, value) => {
     let errorMessage = "";
     if (name === "nombre") {
@@ -101,18 +90,27 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
     }
     return errorMessage;
   };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const errorMessage = validateInput(name, value);
+    const processedValue =
+      name === "UnidadMedidaId" || name === "EstadoId" || name === "SubcategoriaId"
+        ? Number(value)
+        : value;
+
+    const errorMessage = validateInput(name, processedValue);
     setFormErrors((prevErrors) => ({
       ...prevErrors,
       [name]: errorMessage,
     }));
+
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: processedValue,
     }));
   };
+
+
   const showToastError = (message) => {
     toast.error(message, {
       position: "top-right",
@@ -124,42 +122,41 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
       progress: undefined,
     });
   };
+
+  const resetForm = () => {
+    setFormData({
+      nombre: "",
+      codigo: "",
+      descripcion: "",
+      cantidadEntrada: "",
+      marca: "",
+      UsuarioId: "",
+      UnidadMedidaId: "",
+      SubcategoriaId: "",
+      EstadoId: "",
+    });
+  };
+
   const handleCreate = async () => {
-    const {
-      usuarioId,
-      marca,
-      cantidad_actual,
-      cantidad_entrada,
-      descripcion,
-      unidadmedidaId,
-      subcategoriaId,
-      estadoId,
-      cantidad_salida,
-      nombre,
-      codigo,
-    } = formData;
+    const {nombre, codigo, descripcion, cantidadEntrada, marca, UnidadMedidaId, SubcategoriaId, EstadoId,} = formData;
+    const codigoError = validateInput("codigo", codigo);
     const nombreError = validateInput("nombre", nombre);
+    const descripcionError = validateInput("fechaDeIngreso", descripcion);
+    const cantidadEntradaError = validateInput("fechaDeIngreso", cantidadEntrada);
+    const marcaError = validateInput("marca", marca);
     if (nombreError) {
       setFormErrors((prevErrors) => ({
         ...prevErrors,
         nombre: nombreError,
+        codigo: codigoError,
+        descripcion: descripcionError,
+        cantidadEntrada:cantidadEntradaError,
+        marca: marcaError,
       }));
       showToastError("Por favor, corrige los errores antes de agregar.");
       return;
     }
-    if (
-      !usuarioId ||
-      !marca ||
-      !cantidad_actual ||
-      !cantidad_entrada ||
-      !descripcion ||
-      !unidadmedidaId ||
-      !subcategoriaId ||
-      !estadoId ||
-      !cantidad_salida ||
-      !nombre ||
-      !codigo
-    ) {
+    if (!nombre  || !codigo || !descripcion || !cantidadEntrada || !marca ||!UnidadMedidaId || !SubcategoriaId || !EstadoId) {
       showToastError("Todos los campos son obligatorios.");
       return;
     }
@@ -168,14 +165,13 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
       const token = document.cookie.replace(
         /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,"$1"
       );
-      const response = await api.post("/productos", formData, {
+      const response = await api.post("/producto", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       if (response.status === 201) {
-        setFormSubmitted(true);
-        toast.success("Producto agregado exitosamente", {
+        toast.success("producto agregado exitosamente", {
           position: "top-right",
           autoClose: 2000,
           hideProgressBar: false,
@@ -184,13 +180,11 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
           draggable: true,
           progress: undefined,
         });
-        setTimeout(() => {
-          resetForm();
-          onClose(); 
-        }, 2000);
+        resetForm();
+        setTimeout(() => {}, 2000);
       } else {
         showToastError(
-          "Ocurrió un error, por favor intenta con valores diferentes."
+          "Ocurrió un error!, por favor intenta con un documento o correo diferente."
         );
       }
     } catch (error) {
@@ -201,23 +195,7 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
       setLoading(false);
     }
   };
-  const resetForm = () => {
-    setFormData({
-      usuarioId: "",
-      marca: "",
-      cantidad_actual: "",
-      cantidad_entrada: "",
-      descripcion: "",
-      unidadmedidaId: "",
-      subcategoriaId: "",
-      estadoId: "",
-      cantidad_salida: "",
-      nombre: "",
-      codigo: "",
-    });
-    setFormErrors({});
-    setFormSubmitted(false);
-  };
+
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center bg-fondo bg-opacity-50 ${
@@ -237,151 +215,167 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
                 <h6 className="font-bold text-center text-lg mb-1">
                   Registro Producto
                 </h6>
+
                 <div className="flex flex-col">
-                  <label className="mb-0.5 font-bold text-xs">Usuario ID *</label>
+                  <label className="mb-1 font-bold text-sm">Nombre *</label>
                   <input
-                    className="bg-grisClaro text-xs rounded-lg px-2 py-1"
-                    type="text"
-                    name="usuarioId"
-                    value={formData.usuarioId}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label className="mb-0.5 font-bold text-xs">Marca *</label>
-                  <input
-                    className="bg-grisClaro text-xs rounded-lg px-2 py-1"
-                    type="text"
-                    name="marca"
-                    value={formData.marca}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label className="mb-0.5 font-bold text-xs">Cantidad Actual *</label>
-                  <input
-                    className="bg-grisClaro text-xs rounded-lg px-2 py-1"
-                    type="number"
-                    name="cantidad_actual"
-                    value={formData.cantidad_actual}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label className="mb-0.5 font-bold text-xs">Cantidad Entrada *</label>
-                  <input
-                    className="bg-grisClaro text-xs rounded-lg px-2 py-1"
-                    type="number"
-                    name="cantidad_entrada"
-                    value={formData.cantidad_entrada}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label className="mb-0.5 font-bold text-xs">Descripción *</label>
-                  <input
-                    className="bg-grisClaro text-xs rounded-lg px-2 py-1"
-                    type="text"
-                    name="descripcion"
-                    value={formData.descripcion}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label className="mb-0.5 font-bold text-xs">Unidad de Medida *</label>
-                  <select
-                    className="bg-grisClaro text-xs rounded-lg px-2 py-1"
-                    name="unidadmedidaId"
-                    value={formData.unidadmedidaId}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Seleccione una unidad</option>
-                    {roles.map((unidad) => (
-                      <option key={unidad.id} value={unidad.id}>
-                        {unidad.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex flex-col">
-                  <label className="mb-0.5 font-bold text-xs">Subcategoría *</label>
-                  <select
-                    className="bg-grisClaro text-xs rounded-lg px-2 py-1"
-                    name="subcategoriaId"
-                    value={formData.subcategoriaId}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Seleccione una subcategoría</option>
-                    {estados.map((estado) => (
-                      <option key={estado.id} value={estado.id}>
-                        {estado.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex flex-col">
-                  <label className="mb-0.5 font-bold text-xs">Estado *</label>
-                  <select
-                    className="bg-grisClaro text-xs rounded-lg px-2 py-1"
-                    name="estadoId"
-                    value={formData.estadoId}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Seleccione un estado</option>
-                    {estados.map((estado) => (
-                      <option key={estado.id} value={estado.id}>
-                        {estado.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex flex-col">
-                  <label className="mb-0.5 font-bold text-xs">Cantidad Salida *</label>
-                  <input
-                    className="bg-grisClaro text-xs rounded-lg px-2 py-1"
-                    type="number"
-                    name="cantidad_salida"
-                    value={formData.cantidad_salida}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label className="mb-0.5 font-bold text-xs">Nombre *</label>
-                  <input
-                    className="bg-grisClaro text-xs rounded-lg px-2 py-1"
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
                     type="text"
                     name="nombre"
                     value={formData.nombre}
                     onChange={handleInputChange}
+                    onKeyPress={(e) => {
+                      if (/\d/.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
                   />
                   {formErrors.nombre && (
-                    <p className="text-red-400 text-xs">{formErrors.nombre}</p>
+                    <div className="text-red-400 text-sm mt-1 px-2">
+                      {formErrors.nombre}
+                    </div>
                   )}
                 </div>
+
                 <div className="flex flex-col">
-                  <label className="mb-0.5 font-bold text-xs">Código *</label>
+                  <label className="mb-1 font-bold text-sm">Código *</label>
                   <input
-                    className="bg-grisClaro text-xs rounded-lg px-2 py-1"
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
                     type="text"
                     name="codigo"
                     value={formData.codigo}
                     onChange={handleInputChange}
                   />
+                  {formErrors.codigo && (
+                    <div className="text-red-400 text-sm mt-1 px-2">
+                      {formErrors.codigo}
+                    </div>
+                  )}
                 </div>
-                <div className="flex justify-center mt-2 mb-2">
-                  <button
-                    className="btn-danger2 mx-2 text-xs py-2 px-4 rounded"
-                    onClick={onClose}
+
+                <div className="flex flex-col">
+                  <label className="mb-1 font-bold text-sm">Marca *</label>
+                  <input
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
+                    type="text"
+                    name="marca"
+                    value={formData.marca}
+                    onChange={handleInputChange}
+                  />
+                  {formErrors.marca && (
+                    <div className="text-red-400 text-sm mt-1 px-2">
+                      {formErrors.marca}
+                    </div>
+                  )}
+                </div>
+
+
+                <div className="flex flex-col">
+                  <label className="mb-1 font-bold text-sm">Descripcion *</label>
+                  <input
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
+                    type="text"
+                    name="descripcion"
+                    value={formData.descripcion}
+                    onChange={handleInputChange}
+                  />
+                  {formErrors.descripcion && (
+                    <div className="text-red-400 text-sm mt-1 px-2">
+                      {formErrors.descripcion}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="mb-1 font-bold text-sm">Cantidad Entrada *</label>
+                  <input
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
+                    type="text"
+                    name="cantidadEntrada"
+                    value={formData.cantidadEntrada}
+                    onChange={handleInputChange}
+                  />
+                  {formErrors.cantidadEntrada && (
+                    <div className="text-red-400 text-sm mt-1 px-2">
+                      {formErrors.cantidadEntrada}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="mb-1 font-bold text-sm">Subcategoría *</label>
+                  <select
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
+                    name="SubcategoriaId"
+                    value={formData.SubcategoriaId}
+                    onChange={handleInputChange}
                   >
-                    Cancelar
-                  </button>
-                  <button
-                    className="btn-primary2 mx-2 text-xs py-2 px-4 rounded"
-                    onClick={handleCreate}
-                    disabled={loading}
+                    <option value="">Seleccione una Subcategoría</option>
+                    {subcategorias.map((categoria) => (
+                      <option key={categoria.id} value={categoria.id}>
+                        {categoria.subcategoriaName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="mb-1 font-bold text-sm">Unidad de Medida *</label>
+                  <select
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
+                    name="UnidadMedidaId"
+                    value={formData.UnidadMedidaId}
+                    onChange={handleInputChange}
                   >
-                    {loading ? "Cargando..." : "Agregar"}
-                  </button>
+                    <option value="">Seleccione una Unidad de medida</option>
+                    {unidades.map((uni) => (
+                      <option key={uni.id} value={uni.id}>
+                        {uni.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+
+                <div className="flex flex-col">
+                  <label className="mb-1 font-bold text-sm">Estado *</label>
+                  <select
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
+                    name="EstadoId"
+                    value={formData.EstadoId}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Seleccione un estado</option>
+                    {estados.map((estado) => (
+                      <option
+                        key={estado.id}
+                        value={estado.id}
+                        style={{
+                          color:
+                            estado.nombre === "ACTIVO"
+                              ? "green"
+                              : estado.nombre === "INACTIVO"
+                              ? "red"
+                              : "inherit",
+                        }}
+                      >
+                        {estado.estadoName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="sm:w-full md:w-full flex flex-col justify-end">
+                  <div className="flex justify-center mt-4 mb-4 mx-2">
+                    <button className="btn-danger2 mx-2" onClick={onClose}>
+                      Cancelar
+                    </button>
+                    <button
+                      className="btn-primary2 mx-2"
+                      onClick={handleCreate}
+                    >
+                      Agregar
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -392,4 +386,5 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
     </div>
   );
 };
+
 export default AddProductModal;

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { saveAs } from "file-saver";
-import { useAuth } from "../context/AuthContext"; 
+import { useAuth } from "../context/AuthContext";
 import MUIDataTable from "mui-datatables";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
@@ -12,7 +12,7 @@ import clsx from "clsx";
 import * as XLSX from "xlsx";
 import "react-toastify/dist/ReactToastify.css";
 
-const Herramientas = () => {
+const ConsumoDevolutivoGeneral = () => {
   const [sidebarToggle, setSidebarToggle] = useState(false);
   const [isOpenEditModal, setIsOpenEditModal] = useState(false);
   const [selectedHerramienta, setSelectedHerramienta] = useState(null);
@@ -22,7 +22,7 @@ const Herramientas = () => {
     {
       Código: "",
       Nombre: "",
-      "Fecha_de_Ingreso": "",
+      Fecha_de_Ingreso: "",
       Marca: "",
       Condición: "",
       Descripción: "",
@@ -51,7 +51,6 @@ const Herramientas = () => {
 
   const handleCloseAddModal = (newHerramienta) => {
     if (newHerramienta) {
-      // Add new data logic here
     }
     setIsOpenAddModal(false);
   };
@@ -62,9 +61,11 @@ const Herramientas = () => {
       label: "CÓDIGO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -75,9 +76,11 @@ const Herramientas = () => {
       label: "NOMBRE",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -88,9 +91,11 @@ const Herramientas = () => {
       label: "FECHA DE INGRESO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -101,35 +106,41 @@ const Herramientas = () => {
       label: "MARCA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "Condición",
+      name: "Condicion",
       label: "CONDICIÓN",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "Descripción",
+      name: "Descripcion",
       label: "DESCRIPCIÓN",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -140,9 +151,11 @@ const Herramientas = () => {
       label: "EDITAR",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         filter: false,
@@ -182,12 +195,11 @@ const Herramientas = () => {
     saveAs(data, "Herramientas.xlsx");
   };
 
-  // Función para verificar permisos
   const hasPermission = (permissionName) => {
     return user.DetallePermisos.some(
       (permiso) => permiso.Permiso.nombrePermiso === permissionName
     );
-  }; 
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -214,7 +226,7 @@ const Herramientas = () => {
               <div className="text-center">Cargando herramientas...</div>
             ) : (
               <MUIDataTable
-                title={<span className="custom-title">Herramientas de consumo devolutivo - Subdirección</span>}
+                title={<span className="custom-title">Herramientas de consumo devolutivo - General</span>}
                 data={data}
                 columns={columns}
                 options={{
@@ -278,9 +290,12 @@ const Herramientas = () => {
           herramienta={selectedHerramienta}
         />
       )}
-      <AddHerramientaModal isOpen={isOpenAddModal} onClose={handleCloseAddModal} />
+      <AddHerramientaModal
+        isOpen={isOpenAddModal}
+        onClose={handleCloseAddModal}
+      />
     </div>
   );
 };
 
-export default Herramientas;
+export default ConsumoDevolutivoGeneral;
