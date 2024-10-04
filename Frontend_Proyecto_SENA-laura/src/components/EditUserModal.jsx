@@ -7,7 +7,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { useAuth } from "../context/AuthContext"; 
 import "react-toastify/dist/ReactToastify.css";
 
-const EditUserModal = ({ isOpen, onClose }) => {
+const EditUserModal = ({ isOpen, onClose, selectedUser }) => {
   const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState([]);
   const [estados, setEstados] = useState([]);
@@ -27,10 +27,10 @@ const EditUserModal = ({ isOpen, onClose }) => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (isOpen && user) {
-      fetchUserDetails(user.id);
+    if (isOpen && selectedUser) {
+      fetchUserDetails(selectedUser.id);
     }
-  }, [isOpen, user]);
+  }, [isOpen, selectedUser]);
 
   useEffect(() => {
     if (isOpen) {
@@ -58,7 +58,9 @@ const EditUserModal = ({ isOpen, onClose }) => {
     fetchPermisos();
   }, []);
 
-  const fetchUserDetails = async (userId) => { 
+
+
+  const fetchUserDetails = async (userId) => {
     setLoading(true);
     try {
       const response = await api.get(`/usuarios/${userId}`);
@@ -72,20 +74,20 @@ const EditUserModal = ({ isOpen, onClose }) => {
           estadoId: EstadoId || "",
           DetallePermisos: DetallePermisos || [],
         });
+
         if (DetallePermisos && DetallePermisos.length > 0) {
           const permisoIds = DetallePermisos.map((detalle) => detalle.PermisoId);
           setSelectedPermisos(permisoIds);
         } else {
           setSelectedPermisos([]);
         }
-  
         setLoading(false);
       } else {
-        toast.error("Error al cargar la información del usuario.", { position: "top-right" });
+        toast.error("Error al cargar la información del usuario.");
         setLoading(false);
       }
     } catch (error) {
-      toast.error("Error al cargar la información del usuario.", { position: "top-right" });
+      toast.error("Error al cargar la información del usuario.");
       setLoading(false);
     }
   };

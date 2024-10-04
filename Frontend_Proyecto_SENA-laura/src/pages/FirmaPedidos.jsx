@@ -24,10 +24,11 @@ const FirmaPedidos = () => {
     cedCoordi: "",
     instructor: "",
     cedInstructor: "",
+    correo: "",
     item: "",
     codigoSena: "",
   });
-  const [firmaAdjunta, setFirmaAdjunta] = useState(false); // Estado para controlar la firma
+  const [firmaAdjunta, setFirmaAdjunta] = useState(false);
   const navigate = useNavigate();
 
   const handleFirmaChange = (isFirmaAdjunta) => {
@@ -103,6 +104,7 @@ const FirmaPedidos = () => {
       cedCoordi,
       instructor,
       cedInstructor,
+      correo,
     } = formData;
     const areaError = validateInput("area", area);
     const coordiError = validateInput("coordi", coordi);
@@ -127,13 +129,13 @@ const FirmaPedidos = () => {
       !coordi ||
       !cedCoordi ||
       !instructor ||
-      !cedInstructor
+      !cedInstructor ||
+      !correo
     ) {
       showToastError("Todos los campos son obligatorios, incluyendo la fecha.");
       return;
     }
 
-    // Cerrar el acordeón actual y abrir el siguiente
     if (currentSection === "datos") {
       setAccordionStates({
         datos: false,
@@ -153,33 +155,6 @@ const FirmaPedidos = () => {
         firmas: false,
       });
     }
-
-    // setLoading(true);
-    // try {
-    //   if (response.status === 201) {
-    //     toast.success("Usuario agregado exitosamente", {
-    //       position: "top-right",
-    //       autoClose: 2000,
-    //       hideProgressBar: false,
-    //       closeOnClick: true,
-    //       pauseOnHover: true,
-    //       draggable: true,
-    //       progress: undefined,
-    //     });
-    //     resetForm();
-    //     setTimeout(() => {}, 2000);
-    //   } else {
-    //     showToastError(
-    //       "Ocurrió un error!, por favor intenta con un documento o correo diferente."
-    //     );
-    //   }
-    // } catch (error) {
-    //   showToastError(
-    //     "Ocurrió un error!, por favor intenta con un documento o correo diferente."
-    //   );
-    // } finally {
-    //   setLoading(false);
-    // }
   };
 
   return (
@@ -459,6 +434,25 @@ const FirmaPedidos = () => {
                             </div>
                           )}
                         </div>
+                      </div>
+                      <div>
+                      <div className="flex flex-row w-full md:w-3/4 mb-2">
+                          <label className="mb-1 font-bold text-xs mt-2">
+                            Correo electrónico a quien se le asignará el bien*
+                          </label>
+                          <div className="flex flex-col">
+                            <input
+                              className=" border-b border-black text-xs text-center px-2 h-8"
+                              type="text"
+                              name="correo"
+                              value={formData.correo}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+
                       </div>
                     </div>
                   )}

@@ -113,7 +113,6 @@ const Roles = () => {
 
   const handleCustomExport = (rows) => {
     const exportData = rows.map((row) => ({
-      id: row.data[0],
       rolName: row.data[1],
     }));
 
@@ -130,12 +129,11 @@ const Roles = () => {
 
   const handleExportPDF = () => {
     const doc = new jsPDF();
-    const tableColumn = ["ID", "Rol"];
+    const tableColumn = ["Rol"];
     const tableRows = [];
   
     roles.forEach((rol) => {
       const rolData = [
-        rol.id,
         rol.rolName || "", 
       ];
       tableRows.push(rolData);
@@ -155,7 +153,6 @@ const Roles = () => {
     doc.save("Roles.pdf");
   };
 
-  // Función para verificar permisos
   const hasPermission = (permissionName) => {
     return user.DetallePermisos.some(
       (permiso) => permiso.Permiso.nombrePermiso === permissionName
