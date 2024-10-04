@@ -51,6 +51,7 @@ export const crearProductos = async (req, res) => {
         const cantidadActual = cantidadEntrada;
         let estadoIdActual;
 
+        // Determinar el estado inicial basado en la cantidad actual
         if (cantidadActual < 2) {
             const estadoAgotado = await Estado.findOne({ where: { estadoName: "AGOTADO" } });
             if (estadoAgotado) {
@@ -123,9 +124,7 @@ export const getProductos = async (req, res) => {
 };
 
 export const putProductos = async (req, res) => {
-
     try {
-      
         const { id } = req.params;
         const { nombre, descripcion, cantidadEntrada, volumen, marca, UnidadMedidaId, SubcategoriaId, EstadoId } = req.body;
         const UsuarioId = req.usuario.id;
@@ -175,10 +174,26 @@ export const putProductos = async (req, res) => {
             }
         }
 
+        // Actualizar cantidad y estado
         if (cantidadEntrada !== undefined) {
             producto.cantidadEntrada = cantidadEntrada;
             producto.cantidadSalida = 0;
             producto.cantidadActual = cantidadEntrada;
+
+            // Determinar el nuevo estado
+            let estadoIdActual;
+            if (cantidadEntrada < 2) {
+                const estadoAgotado = await Estado.findOne({ where: { estadoName: "AGOTADO" } });
+                if (estadoAgotado) {
+                    estadoIdActual = estadoAgotado.id;
+                }
+            } else {
+                const estadoActivo = await Estado.findOne({ where: { estadoName: "ACTIVO" } });
+                if (estadoActivo) {
+                    estadoIdActual = estadoActivo.id;
+                }
+            }
+            producto.EstadoId = estadoIdActual; // Actualizar estado
         }
 
         producto.nombre = nombre !== undefined ? nombre : producto.nombre;
@@ -187,11 +202,30 @@ export const putProductos = async (req, res) => {
         producto.marca = marca !== undefined ? marca : producto.marca;
         producto.UnidadMedidaId = UnidadMedidaId !== undefined ? UnidadMedidaId : producto.UnidadMedidaId;
         producto.SubcategoriaId = SubcategoriaId !== undefined ? SubcategoriaId : producto.SubcategoriaId;
-        producto.EstadoId = EstadoId !== undefined ? EstadoId : producto.EstadoId;
         producto.UsuarioId = UsuarioId;
 
+        await producto.save(); // Guardar los cambios en el producto
 
-        await producto.save();
+        // Verificar si hay otros productos con cantidad actual < 2 y actualizar su estado a AGOTADO
+        const productosAgotados = await Producto.findAll({
+            where: {
+                cantidadActual: {
+                    [Op.lt]: 2,
+                },
+                EstadoId: {
+                    [Op.ne]: estadoIdActual, // No modificar el estado del producto que acabamos de actualizar
+                },
+            },
+        });
+
+        const estadoAgotado = await Estado.findOne({ where: { estadoName: "AGOTADO" } });
+        if (estadoAgotado) {
+            await Promise.all(productosAgotados.map(async (prod) => {
+                prod.EstadoId = estadoAgotado.id;
+                await prod.save();
+            }));
+        }
+
         res.json(producto);
     } catch (error) {
         console.error("Error al actualizar el producto", error);
@@ -199,7 +233,8 @@ export const putProductos = async (req, res) => {
     }
 }
 
-//Porpiedad de Valentina
+
+// Propiedad de Valentina
 export const BusquedaProductos = async (req, res) => {
   try {
     const { query } = req.query; 

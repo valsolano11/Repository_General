@@ -16,6 +16,7 @@ import CategoriaRouter from "./routes/Categoria.routes.js"
 import SubcategoriaRouter from "./routes/Subcategoria.routes.js";
 import ProductoRouter from "./routes/Producto.routes.js";
 import UnidadMedidaRouter from "./routes/UnidadMedida.routes.js";
+import Pedido from "./routes/Pedidos.routes.js";
 
 const app = express();
 
@@ -43,7 +44,8 @@ app.use(
   CategoriaRouter,
   SubcategoriaRouter,
   ProductoRouter,
-  UnidadMedidaRouter
+  UnidadMedidaRouter,
+  Pedido
 );
 
 export default app;
