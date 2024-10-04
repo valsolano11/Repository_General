@@ -11,7 +11,6 @@ import TablaHerramientas from "../components/TablaHerramientas";
 
 const FormatoHerram = () => {
   const [formErrors, setFormErrors] = useState({});
-  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     nombre: "",
     Documento: "",
@@ -22,6 +21,7 @@ const FormatoHerram = () => {
     cedCoordi: "",
     instructor: "",
     cedInstructor: "",
+    correo: "",
     item: "",
     codigoSena: "",
   });
@@ -55,7 +55,7 @@ const FormatoHerram = () => {
       if (!nameRegex.test(value) || /\d/.test(value)) {
         errorMessage = "No puede contener caracteres especiales.";
       }
-    } 
+    }
     return errorMessage;
   };
 
@@ -86,7 +86,18 @@ const FormatoHerram = () => {
   };
 
   const handleCreate = (currentSection) => {
-    const {nombre, Documento, ficha, fecha, area, coordi, cedCoordi, instructor, cedInstructor } = formData;
+    const {
+      nombre,
+      Documento,
+      ficha,
+      fecha,
+      area,
+      coordi,
+      cedCoordi,
+      instructor,
+      cedInstructor,
+      correo,
+    } = formData;
     const areaError = validateInput("area", area);
     const coordiError = validateInput("coordi", coordi);
     const instructorError = validateInput("instructor", instructor);
@@ -101,58 +112,41 @@ const FormatoHerram = () => {
       return;
     }
 
-    if (!nombre || !Documento || !fecha || !ficha || !area || !coordi || !cedCoordi || !instructor || !cedInstructor) {
+    if (
+      !nombre ||
+      !Documento ||
+      !fecha ||
+      !ficha ||
+      !area ||
+      !coordi ||
+      !cedCoordi ||
+      !instructor ||
+      !cedInstructor ||
+      !correo
+    ) {
       showToastError("Todos los campos son obligatorios, incluyendo la fecha.");
       return;
     }
 
-      // Cerrar el acordeón actual y abrir el siguiente
-  if (currentSection === "datos") {
-    setAccordionStates({
-      datos: false,
-      herramientas: true,
-      firmas: false,
-    });
-  } else if (currentSection === "herramientas") {
-    setAccordionStates({
-      datos: false,
-      herramientas: false,
-      firmas: true,
-    });
-  } else if (currentSection === "firmas") {
-    setAccordionStates({
-      datos: false,
-      herramientas: false,
-      firmas: false,
-    });
-  }
-
-    // setLoading(true);
-    // try {
-    //   if (response.status === 201) {
-    //     toast.success("Usuario agregado exitosamente", {
-    //       position: "top-right",
-    //       autoClose: 2000,
-    //       hideProgressBar: false,
-    //       closeOnClick: true,
-    //       pauseOnHover: true,
-    //       draggable: true,
-    //       progress: undefined,
-    //     });
-    //     resetForm();
-    //     setTimeout(() => {}, 2000);
-    //   } else {
-    //     showToastError(
-    //       "Ocurrió un error!, por favor intenta con un documento o correo diferente."
-    //     );
-    //   }
-    // } catch (error) {
-    //   showToastError(
-    //     "Ocurrió un error!, por favor intenta con un documento o correo diferente."
-    //   );
-    // } finally {
-    //   setLoading(false);
-    // }
+    if (currentSection === "datos") {
+      setAccordionStates({
+        datos: false,
+        herramientas: true,
+        firmas: false,
+      });
+    } else if (currentSection === "herramientas") {
+      setAccordionStates({
+        datos: false,
+        herramientas: false,
+        firmas: true,
+      });
+    } else if (currentSection === "firmas") {
+      setAccordionStates({
+        datos: false,
+        herramientas: false,
+        firmas: false,
+      });
+    }
   };
 
   return (
@@ -160,7 +154,7 @@ const FormatoHerram = () => {
       <div className="hidden md:flex items-star justify-center md:w-2/3 bg-grisClaro mx-4">
         <div className="w-full mt-10">
           <div className={"px-4 py-3 w-full"}>
-          <div className="flex justify-between text-xs w-full">
+            <div className="flex justify-between text-xs w-full">
               <img
                 className="w-10 h-10 object-cover ml-4 mr-2 mt-2"
                 src={fondo}
@@ -169,16 +163,16 @@ const FormatoHerram = () => {
               <div className="flex flex-col items-center text-base">
                 <span className="text-black text-center text-xs font-semibold hidden md:inline">
                   SERVICIO NACIONAL DE APRENDIZAJE SENA
-                  </span>
+                </span>
                 <span className="text-black text-center text-xs font-semibold hidden md:inline">
-                    GESTIÓN DE INFRAESTRUCTURA Y LOGÍSTICA
-                  </span>
-                  <span className="text-black text-center text-xs font-semibold hidden md:inline">
-                    FORMATO DE SOLICITUD DE SALIDA DE BIENES PARA EL USO DE LOS
-                  </span>
-                  <span className="text-black text-center text-xs font-semibold hidden md:inline">
-                    CUENTADANTES QUE TIENEN VÍNCULO CON LA ENTIDAD
-                  </span>
+                  GESTIÓN DE INFRAESTRUCTURA Y LOGÍSTICA
+                </span>
+                <span className="text-black text-center text-xs font-semibold hidden md:inline">
+                  FORMATO DE SOLICITUD DE SALIDA DE BIENES PARA EL USO DE LOS
+                </span>
+                <span className="text-black text-center text-xs font-semibold hidden md:inline">
+                  CUENTADANTES QUE TIENEN VÍNCULO CON LA ENTIDAD
+                </span>
               </div>
               <img
                 className="flex justify-end w-auto h-10 object-cover mt-2 ml-2 mr-2"
@@ -186,20 +180,19 @@ const FormatoHerram = () => {
                 alt="siga"
               />
               <div className="flex flex-col mt-2">
-                  <span className="text-black font-semibold hidden md:inline">
-                    SBHNo.:
-                  </span>
-                  <span className="text-black font-semibold hidden md:inline">
-                    Versión: 04
-                  </span>
-                  <span className="text-black font-semibold hidden md:inline">
-                    Código: GIL-F-014
-                  </span>
-                </div>            
+                <span className="text-black font-semibold hidden md:inline">
+                  SBHNo.:
+                </span>
+                <span className="text-black font-semibold hidden md:inline">
+                  Versión: 04
+                </span>
+                <span className="text-black font-semibold hidden md:inline">
+                  Código: GIL-F-014
+                </span>
+              </div>
             </div>
-            
 
-          {/* DATOS FIJOS */}
+            {/* DATOS FIJOS */}
             <div className={"px-2 py-2 w-full mt-6"}>
               <div className="flex flex-col space-y-4 md:space-y-0 text-xs w-full">
                 <div className="w-full font-inter text-left">
@@ -350,7 +343,7 @@ const FormatoHerram = () => {
                             {formErrors.coordi}
                           </div>
                         )}
-                      </div>                      
+                      </div>
                     </div>
 
                     <label className="mb-1 font-bold text-xs mt-2">
@@ -395,7 +388,7 @@ const FormatoHerram = () => {
                             {formErrors.instructor}
                           </div>
                         )}
-                      </div>                      
+                      </div>
                     </div>
 
                     <div className="flex flex-row w-full md:w-1/4">
@@ -423,9 +416,30 @@ const FormatoHerram = () => {
                     </div>
                   </div>
 
+                  <div>
+                    <div className="flex flex-row w-full md:w-3/4">
+                      <label className="mb-1 font-bold text-xs mt-2">
+                        Correo electrónico a quien se le asignará el bien*
+                      </label>
+                      <div className="flex flex-col">
+                        <input
+                          className=" border-b border-black text-xs text-center px-2 h-8"
+                          type="text"
+                          name="correo"
+                          value={formData.correo}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="flex justify-end mt-2">
-                    <button className="btn-black2 mb-4" onClick={() => handleCreate("datos")}>
-                      Guardar y continuar</button>
+                    <button
+                      className="btn-black2 mb-4"
+                      onClick={() => handleCreate("datos")}
+                    >
+                      Guardar y continuar
+                    </button>
                   </div>
                 </div>
               )}
@@ -451,31 +465,6 @@ const FormatoHerram = () => {
                   </div>
                 </div>
               )}
-            </div>
-
-            {/*FIRMAS */}
-            <div className="flex flex-col rounded-lg w-full bg-white px-8 mx-auto border-2 border-black mb-4">
-              <button
-                onClick={() => toggleAccordion("firmas")}
-                className="font-bold text-lg py-2 flex justify-between items-center w-full"
-              >
-                <span>Firmas</span>
-                <ExpandMoreIcon className="mr-2" />
-              </button>
-
-              {accordionStates.firmas && (
-                <div className="flex flex-col rounded-lg w-full">
-                  <div className="flex flex-row justify-between w-auto mb-4">
-                    <Firmas
-                      accordionStates={accordionStates}
-                      toggleAccordion={toggleAccordion}
-                    />
-                  </div>
-                  <div className="flex justify-end mt-2">
-                  <button className="btn-black2 mb-4" onClick={() => handleCreate("firmas")}>Guardar</button>
-                  </div>
-                </div>
-              )}              
             </div>
 
             <div className="flex justify-center items-center w-2/4 mt-10 mx-auto">

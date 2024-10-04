@@ -6,11 +6,11 @@ import fondo from "/logoSena.png";
 import siga from "/Siga.png";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FirmasDos from "./../components/FirmasDos";
-import TablaPedidosFirma from "../components/TablaPedidosFirma";
 import SidebarCoord from "../components/SidebarCoord";
 import Home from "../components/Home";
+import TablaPrestamosFirma from "../components/TablaPrestamosFirma";
 
-const FirmaPedidos = () => {
+const FirmaPrestamos = () => {
   const [sidebarToggleCoord, setsidebarToggleCoord] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [loading, setLoading] = useState(true);
@@ -436,7 +436,7 @@ const FirmaPedidos = () => {
                         </div>
                       </div>
                       <div>
-                      <div className="flex flex-row w-full md:w-3/4 mb-2">
+                        <div className="flex flex-row w-full md:w-3/4 mb-2">
                           <label className="mb-1 font-bold text-xs mt-2">
                             Correo electrónico a quien se le asignará el bien*
                           </label>
@@ -451,27 +451,25 @@ const FirmaPedidos = () => {
                           </div>
                         </div>
                       </div>
-                      <div>
-
-                      </div>
+                      <div></div>
                     </div>
                   )}
                 </div>
 
-                {/* PEDIDOS */}
+                {/* PRESTAMOS */}
                 <div className="flex flex-col rounded-lg w-full bg-white px-8 mx-auto border-2 border-black mb-4">
                   <button
                     onClick={() => toggleAccordion("productos")}
                     className="font-bold text-lg py-2 flex justify-between items-center w-full"
                   >
-                    <span>Pedidos</span>
+                    <span>Préstamos</span>
                     <ExpandMoreIcon className="mr-2" />
                   </button>
 
                   {accordionStates.productos && (
                     <div className="flex flex-col rounded-lg w-full">
                       <div className="flex flex-row justify-center w-full mb-4">
-                        <TablaPedidosFirma
+                        <TablaPrestamosFirma
                           accordionStates={accordionStates}
                           toggleAccordion={toggleAccordion}
                         />
@@ -524,4 +522,4 @@ const FirmaPedidos = () => {
   );
 };
 
-export default FirmaPedidos;
+export default FirmaPrestamos;

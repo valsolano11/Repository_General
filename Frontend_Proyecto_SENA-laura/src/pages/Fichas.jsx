@@ -12,7 +12,9 @@ import clsx from "clsx";
 import * as XLSX from "xlsx";
 import EditFichasModal from "../components/EditFichasModal";
 import AddFichasModal from "../components/AddFichasModal";
+import jsPDF from "jspdf";
 import "react-toastify/dist/ReactToastify.css";
+import "jspdf-autotable";
 
 const Fichas = () => {
   const [sidebarToggle, setSidebarToggle] = useState(false);
@@ -198,10 +200,10 @@ const Fichas = () => {
 
   const handleCustomExport = (rows) => {
     const exportData = rows.map((row) => ({
-      id: row.data[0],
       Ficha: row.data[1],
       Programa: row.data[2],
       Jornada: row.data[3],
+      nombre: row.data[4],
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -215,12 +217,40 @@ const Fichas = () => {
     saveAs(data, "Fichas.xlsx");
   };
 
-  // Función para verificar permisos
   const hasPermission = (permissionName) => {
     return user.DetallePermisos.some(
       (permiso) => permiso.Permiso.nombrePermiso === permissionName
     );
   };  
+
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const tableColumn = ["Ficha", "Programa", "Jornada", "Usuario"];
+    const tableRows = [];
+
+    data.forEach((row) => {  
+        const rowData = [
+            row.NumeroFicha,      
+            row.Programa,         
+            row.Jornada,          
+            row.nombre,           
+        ];
+        tableRows.push(rowData);
+    });
+
+    doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 20,
+        theme: 'striped',
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [0, 57, 107] },
+        margin: { top: 10 },
+    });
+
+    doc.text("Fichas", 14, 15);
+    doc.save("Fichas.pdf");
+};
 
   return (
     <div className="flex min-h-screen">
@@ -235,6 +265,12 @@ const Fichas = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
+          <button 
+            className="btn-black mr-2" 
+            onClick={handleExportPDF}
+          >
+            Exportar PDF
+          </button>
           {hasPermission("Crear Ficha") && (
             <button
               className="btn-primary"

@@ -105,7 +105,9 @@ const Sidebar = ({ sidebarToggle }) => {
           )}
         </li>
 
+
         {/* Formación */}
+        {(hasPermission("Vista Fichas") || (hasPermission("Vista Instructores"))) && (
         <li className="mb-2">
           <div
             className="flex items-center justify-between px-3 py-2 rounded hover:shadow hover:bg-gray-700 cursor-pointer"
@@ -146,12 +148,6 @@ const Sidebar = ({ sidebarToggle }) => {
                           Fichas por Instructor
                         </a>
                       </li>
-                        <li className="py-1 px-2 hover:bg-gray-700 rounded mx-4">
-                        <a href="/consumoFicha" className="px-3 flex items-center">
-                          <FiTool className="inline-block w-4 h-4 mr-2 -mt-1"></FiTool>
-                          Consumo por fichas
-                        </a>
-                      </li>
                     </ul>
                   )}
 
@@ -164,6 +160,7 @@ const Sidebar = ({ sidebarToggle }) => {
             </ul>
           )}
         </li>
+        )}
 
         {/* Categorías */}
         {(hasPermission("Vista Categorias") || (hasPermission("Vista Subcategorias"))) && (
