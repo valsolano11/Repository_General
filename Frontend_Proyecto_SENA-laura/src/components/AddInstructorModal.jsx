@@ -34,15 +34,18 @@ const AddInstructorModal = ({ isOpen, onClose, instructor }) => {
   }, [instructor]);
 
   useEffect(() => {
-
     const fetchStates = async () => {
       try {
         const response = await api.get("/Estado");
-        setEstados(response.data);
+        const filteredEstados = response.data.filter(
+          estado => estado.id === 1 || estado.id === 2
+        );
+        setEstados(filteredEstados);
       } catch (error) {
         showToastError("Error al cargar los estados");
       }
     };
+  
     fetchStates();
   }, []);
 
@@ -144,7 +147,9 @@ const AddInstructorModal = ({ isOpen, onClose, instructor }) => {
           progress: undefined,
         });
         resetForm();
-        setTimeout(() => {}, 2000);
+        setTimeout(() => {
+          onClose(response.data);
+        }, 2000);
       } else {
         showToastError(
           "Ocurrió un error!, por favor intenta con un correo diferente."
