@@ -692,6 +692,11 @@ td{
   margin-right: 0.5rem;
 }
 
+.mx-20{
+  margin-left: 5rem;
+  margin-right: 5rem;
+}
+
 .mx-4{
   margin-left: 1rem;
   margin-right: 1rem;
@@ -1054,6 +1059,10 @@ td{
 
 .animate-bounce{
   animation: bounce 1s infinite;
+}
+
+.cursor-not-allowed{
+  cursor: not-allowed;
 }
 
 .cursor-pointer{
@@ -1617,6 +1626,11 @@ td{
   color: rgb(220 38 38 / var(--tw-text-opacity));
 }
 
+.text-red700{
+  --tw-text-opacity: 1;
+  color: rgb(178 34 34 / var(--tw-text-opacity));
+}
+
 .text-sena{
   --tw-text-opacity: 1;
   color: rgb(1 175 8 / var(--tw-text-opacity));
@@ -1638,6 +1652,10 @@ td{
 
 .opacity-100{
   opacity: 1;
+}
+
+.opacity-50{
+  opacity: 0.5;
 }
 
 .shadow{

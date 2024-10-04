@@ -31,6 +31,9 @@ import Reportes from "./pages/Reportes.jsx";
 import ConsumoDevolutivoGeneral from "./pages/ConsumoDevolutivoGeneral.jsx";
 import ConsumoControladoGeneral from "./pages/ConsumoControladoGeneral.jsx";
 import ConsumoFicha from "./pages/ConsumoFichas.jsx";
+import AutorizarPedidos from "./pages/AutorizarPedidos.jsx";
+import AutorizarPrestamos from "./pages/AutorizarPrestamos.jsx";
+import FirmaPrestamos from "./pages/FirmaPrestamos.jsx";
 
 function App() {
   return (
@@ -49,13 +52,9 @@ function App() {
           {/* Rutas protegidas */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/roles" element={<Roles />} /> 
-            <Route path="/instructores" element={<Instructores />} />
-            <Route path="/fichas" element={<Fichas />} />
-            <Route path="/instructor-fichas" element={<Intructor_Ficha />} />
-            <Route path="/excel" element={<ImportExcel />} />
             <Route path="/historial" element={<Historial />} />
-
+            <Route path="/roles" element={<Roles />} /> 
+            <Route path="/excel" element={<ImportExcel />} />
 
             {/* Ruta protegida por permiso */}
             <Route
@@ -63,6 +62,24 @@ function App() {
               element={<ProtectedRoute requiredPermission="Vista Usuario" />}
             >
               <Route path="" element={<Usuarios />} />
+            </Route>
+            <Route
+              path="/fichas"
+              element={<ProtectedRoute requiredPermission="Vista Fichas" />}
+            >
+              <Route path="" element={<Fichas />} />
+            </Route>
+            <Route
+              path="/instructor-fichas"
+              element={<ProtectedRoute requiredPermission="Vista Fichas" />}
+            >
+              <Route path="" element={<Intructor_Ficha />} />
+            </Route>
+            <Route
+              path="/instructores"
+              element={<ProtectedRoute requiredPermission="Vista Instructores" />}
+            >
+              <Route path="" element={<Instructores />} />
             </Route>
             <Route
               path="/categorias"
@@ -131,7 +148,10 @@ function App() {
           {/* Rutas protegidas por RolId */}
           <Route element={<ProtectedRoute requiredRoleId={3} />}>
             <Route path="/homecoord" element={<HomeCoord />} />
+            <Route path="/autPedidos" element={<AutorizarPedidos />} />
+            <Route path="/autPrestamos" element={<AutorizarPrestamos />} />
             <Route path="/firmaPedidos" element={<FirmaPedidos />} />
+            <Route path="/firmaPrestamos" element={<FirmaPrestamos />} />
             <Route path="/fichasCoordi" element={<FichasCoordi />} />
           </Route>
           

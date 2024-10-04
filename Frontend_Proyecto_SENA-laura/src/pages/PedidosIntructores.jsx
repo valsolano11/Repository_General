@@ -453,31 +453,6 @@ const PedidosIntructores = () => {
               )}
             </div>
 
-            {/*FIRMAS */}
-            <div className="flex flex-col rounded-lg w-full bg-white px-8 mx-auto border-2 border-black mb-4">
-              <button
-                onClick={() => toggleAccordion("firmas")}
-                className="font-bold text-lg py-2 flex justify-between items-center w-full"
-              >
-                <span>Firmas</span>
-                <ExpandMoreIcon className="mr-2" />
-              </button>
-
-              {accordionStates.firmas && (
-                <div className="flex flex-col rounded-lg w-full">
-                  <div className="flex flex-row justify-between w-auto mb-4">
-                    <Firmas
-                      accordionStates={accordionStates}
-                      toggleAccordion={toggleAccordion}
-                    />
-                  </div>
-                  <div className="flex justify-end mt-2">
-                  <button className="btn-black2 mb-4" onClick={() => handleCreate("firmas")}>Guardar</button>
-                  </div>
-                </div>
-              )}              
-            </div>
-
             <div className="flex justify-center items-center w-2/4 mt-10 mx-auto">
               <button className="btn-black2">Enviar solicitud</button>
               <FaGripLinesVertical className="h-24 mx-4" />

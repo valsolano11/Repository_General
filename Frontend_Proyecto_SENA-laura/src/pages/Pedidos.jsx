@@ -12,8 +12,6 @@ import clsx from "clsx";
 import * as XLSX from "xlsx";
 import "react-toastify/dist/ReactToastify.css";
 
-
-
 const Pedidos = () => {
   const [sidebarToggle, setSidebarToggle] = useState(false);
   const [data, setData] = useState([]);
@@ -34,10 +32,16 @@ const Pedidos = () => {
       const pedidosConRolesYEstados = response.data.map((pedido) => ({
         ...pedido,
         nombreUsuario: pedido.Usuario ? pedido.Usuario.nombre : "Desconocido",
-        nombreinstructor: pedido.Instructores? pedido.Instructores.nombre : "Desconocido",
-        ficha: pedido.Fichas? pedido.Fichas.NumeroFicha : "Desconocido",
-        nombreproducto: pedido.Producto? pedido.Producto.nombre : "Desconocido",
-        unidadNombre: pedido.UnidadMedida ? pedido.UnidadMedida.nombre : "Desconocido",
+        nombreinstructor: pedido.Instructores
+          ? pedido.Instructores.nombre
+          : "Desconocido",
+        ficha: pedido.Fichas ? pedido.Fichas.NumeroFicha : "Desconocido",
+        nombreproducto: pedido.Producto
+          ? pedido.Producto.nombre
+          : "Desconocido",
+        unidadNombre: pedido.UnidadMedida
+          ? pedido.UnidadMedida.nombre
+          : "Desconocido",
         estadoName: pedido.Estado ? pedido.Estado.estadoName : "Desconocido",
       }));
 

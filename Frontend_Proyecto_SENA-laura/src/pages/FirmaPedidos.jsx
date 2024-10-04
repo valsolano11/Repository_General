@@ -27,7 +27,12 @@ const FirmaPedidos = () => {
     item: "",
     codigoSena: "",
   });
+  const [firmaAdjunta, setFirmaAdjunta] = useState(false); // Estado para controlar la firma
   const navigate = useNavigate();
+
+  const handleFirmaChange = (isFirmaAdjunta) => {
+    setFirmaAdjunta(isFirmaAdjunta);
+  };
 
   const handleClick = () => {
     navigate("/formatoHerramientas");
@@ -189,8 +194,8 @@ const FirmaPedidos = () => {
           sidebarToggle={sidebarToggleCoord}
           setSidebarToggle={setsidebarToggleCoord}
         />
-        <div className="flex flex-col md:flex-row h-screen bg-grisClaro">
-          <div className="hidden md:flex items-star justify-center md:w-full bg-grisClaro mx-4">
+        <div className="flex flex-col justify-center md:flex-row h-screen bg-grisClaro">
+          <div className="hidden md:flex items-star justify-center md:w-3/4 bg-grisClaro mx-4">
             <div className="w-full mt-10">
               <div className={"px-4 py-3 w-full"}>
                 <div className="flex items-center justify-between text-sm w-auto">
@@ -481,7 +486,7 @@ const FirmaPedidos = () => {
                   )}
                 </div>
 
-                {/*FIRMAS */}
+                {/* Firmas */}
                 <div className="flex flex-col rounded-lg w-full bg-white px-8 mx-auto border-2 border-black mb-4">
                   <button
                     onClick={() => toggleAccordion("firmas")}
@@ -497,22 +502,23 @@ const FirmaPedidos = () => {
                         <FirmasDos
                           accordionStates={accordionStates}
                           toggleAccordion={toggleAccordion}
+                          onFirmaChange={handleFirmaChange}
                         />
-                      </div>
-                      <div className="flex justify-end mt-2">
-                        <button
-                          className="btn-black2 mb-4"
-                          onClick={() => handleCreate("firmas")}
-                        >
-                          Guardar
-                        </button>
                       </div>
                     </div>
                   )}
                 </div>
 
+                {/* Botón Enviar */}
                 <div className="flex justify-center items-center w-2/4 mt-10 mx-auto">
-                  <button className="btn-black2">Enviar Pedido</button>
+                  <button
+                    className={`btn-black2 ${
+                      !firmaAdjunta ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    disabled={!firmaAdjunta}
+                  >
+                    Enviar Pedido
+                  </button>
                 </div>
               </div>
             </div>

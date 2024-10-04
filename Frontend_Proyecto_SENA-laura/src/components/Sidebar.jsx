@@ -105,7 +105,9 @@ const Sidebar = ({ sidebarToggle }) => {
           )}
         </li>
 
+
         {/* Formación */}
+        {(hasPermission("Vista Fichas") || (hasPermission("Vista Instructores"))) && (
         <li className="mb-2">
           <div
             className="flex items-center justify-between px-3 py-2 rounded hover:shadow hover:bg-gray-700 cursor-pointer"
@@ -164,6 +166,7 @@ const Sidebar = ({ sidebarToggle }) => {
             </ul>
           )}
         </li>
+        )}
 
         {/* Categorías */}
         {(hasPermission("Vista Categorias") || (hasPermission("Vista Subcategorias"))) && (
