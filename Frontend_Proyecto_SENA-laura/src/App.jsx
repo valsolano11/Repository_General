@@ -30,7 +30,6 @@ import FichasCoordi from "./pages/FichasCoordi.jsx";
 import Reportes from "./pages/Reportes.jsx";
 import ConsumoDevolutivoGeneral from "./pages/ConsumoDevolutivoGeneral.jsx";
 import ConsumoControladoGeneral from "./pages/ConsumoControladoGeneral.jsx";
-import ConsumoFicha from "./pages/ConsumoFichas.jsx";
 import AutorizarPedidos from "./pages/AutorizarPedidos.jsx";
 import AutorizarPrestamos from "./pages/AutorizarPrestamos.jsx";
 import FirmaPrestamos from "./pages/FirmaPrestamos.jsx";
@@ -105,13 +104,6 @@ function App() {
               element={<ProtectedRoute requiredPermission="Vista Subcategorias" />}
             >
               <Route path="" element={<ConsumoControladoGeneral />} />
-            </Route>
-
-            <Route
-              path="/consumoFicha"
-              element={<ProtectedRoute requiredPermission="Vista Subcategorias" />}
-            >
-              <Route path="" element={<ConsumoFicha />} />
             </Route>
             <Route
               path="/productos"

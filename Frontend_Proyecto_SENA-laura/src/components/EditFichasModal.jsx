@@ -8,7 +8,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 const EditFichasModal = ({ isOpen, onClose, ficha }) => {
   const [loading, setLoading] = useState(false);
-  const [usuarios, setUsuarios] = useState([]);
   const [estados, setEstados] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const navigate = useNavigate();
@@ -103,7 +102,7 @@ const EditFichasModal = ({ isOpen, onClose, ficha }) => {
     }));
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: value.toUpperCase(),
     }));
   };
 
@@ -135,7 +134,7 @@ const EditFichasModal = ({ isOpen, onClose, ficha }) => {
       );
 
       if (response.status === 200) {
-        toast.success("Usuario actualizado exitosamente", {
+        toast.success("Ficha actualizada exitosamente", {
           position: "top-right",
           autoClose: 2000,
           hideProgressBar: false,
@@ -169,7 +168,6 @@ const EditFichasModal = ({ isOpen, onClose, ficha }) => {
     }
   };
 
-  // Función para verificar permisos
   const hasPermission = (permissionName) => {
     return user.DetallePermisos.some(
       (permiso) => permiso.Permiso.nombrePermiso === permissionName

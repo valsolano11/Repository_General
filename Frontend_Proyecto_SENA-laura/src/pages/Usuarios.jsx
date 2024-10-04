@@ -27,7 +27,6 @@ const Usuarios = () => {
   const { user } = useAuth();
 
   const fetchData = async () => {
-    // console.time('fetchData');
     setLoading(true);
     try {
       const response = await api.get("/usuarios", {
@@ -57,7 +56,6 @@ const Usuarios = () => {
       });
     }
     setLoading(false);
-    // console.timeEnd('fetchData');
   };
 
   useEffect(() => {
@@ -66,12 +64,10 @@ const Usuarios = () => {
 
   const handleEditClick = (rowIndex) => {
     const user = data[rowIndex];
-    console.log("Editando fila:", rowIndex);
     setSelectedUser(user);
     setIsOpenEditModal(true);
   };
 
-  // Función para verificar permisos
   const hasPermission = (permissionName) => {
     return user.DetallePermisos.some(
       (permiso) => permiso.Permiso.nombrePermiso === permissionName
@@ -215,7 +211,6 @@ const Usuarios = () => {
 
   const handleCustomExport = (rows) => {
     const exportData = rows.map((row) => ({
-      id: row.data[0],
       Nombre: row.data[2],
       Correo: row.data[3],
     }));
@@ -233,17 +228,13 @@ const Usuarios = () => {
 
   const handleExportPDF = () => {
     const doc = new jsPDF();
-    const tableColumn = ["ID", "Documento", "Nombre", "Correo", "Rol", "Estado"];
+    const tableColumn = ["Nombre", "Correo"];
     const tableRows = [];
   
     data.forEach((user) => {
       const userData = [
-        user.id,
-        user.Documento || "",
         user.nombre || "",
         user.correo || "",
-        user.rolName || "",
-        user.estadoName || ""
       ];
       tableRows.push(userData);
     });
@@ -351,7 +342,7 @@ const Usuarios = () => {
         <EditUserModal
           isOpen={isOpenEditModal}
           onClose={handleCloseEditModal}
-          user={selectedUser}
+          selectedUser={selectedUser}
         />
       )}
       <AddUserModal isOpen={isOpenAddModal} onClose={handleCloseAddModal} />

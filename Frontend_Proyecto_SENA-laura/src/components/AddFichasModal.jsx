@@ -5,7 +5,6 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const AddFichasModal = ({ isOpen, onClose, ficha }) => {
-  const [usuarios, setUsuarios] = useState([]);
   const [estados, setEstados] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const [loading, setLoading] = useState(true);
@@ -155,7 +154,9 @@ const AddFichasModal = ({ isOpen, onClose, ficha }) => {
           progress: undefined,
         });
         resetForm();
-        setTimeout(() => {}, 2000);
+        setTimeout(() => {
+          onClose(response.data);
+        }, 2000);
       } else {
         showToastError(
           "Ocurrió un error!, por favor intenta con un Programa o Jornada diferente."
@@ -239,7 +240,6 @@ const AddFichasModal = ({ isOpen, onClose, ficha }) => {
                     <option value="NOCHE">NOCHE</option>
                   </select>
                 </div>
-
 
                 <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Estado *</label>
