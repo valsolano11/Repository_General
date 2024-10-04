@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { api } from "../api/token";
 import { saveAs } from "file-saver";
 import { toast } from "react-toastify";
-import { useAuth } from "../context/AuthContext"; 
+import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
 import Home from "../components/Home";
 import MUIDataTable from "mui-datatables";
@@ -13,6 +13,8 @@ import * as XLSX from "xlsx";
 import "react-toastify/dist/ReactToastify.css";
 import EditInstructorModal from "../components/EditInstructorModal";
 import AddInstructorModal from "../components/AddInstructorModal";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const Instructores = () => {
   const [sidebarToggle, setSidebarToggle] = useState(false);
@@ -24,39 +26,7 @@ const Instructores = () => {
 
   const { user } = useAuth();
 
-  // CODIGO USANDO INDICES, AUN NO SE PUEDE SIN TENER EL NUEVO BACK END.
-  //   const fetchData = async () => {
-  //     console.time('fetchData');
-  //     setLoading(true);
-  //     try {
-  //       const response = await api.get('/Instructor', {
-  //         headers: {
-  //           Authorization: `Bearer ${localStorage.getItem('token')}`,
-  //         },
-  //       });
-
-  //       const InstructoresConUsuariosyEstados = response.data.map(instructor => ({
-  //         ...instructor,
-  //       nombre: instructor.Usuario ? instructor.Usuario.nombre : 'Desconocido',
-  //       estadoName: instructor.Estado ? instructor.Estado.estadoName : 'Desconocido',
-  //       }));
-
-  //       InstructoresConUsuariosyEstados.sort((a, b) => a.id - b.id);
-  //       setData(InstructoresConUsuariosyEstados);
-
-  //     } catch (error) {
-  //         console.error('Error fetching categoria data:', error);
-  //     }
-  //     setLoading(false);
-  //     console.timeEnd('fetchData');
-  // };
-
-  // useEffect(() => {
-  //     fetchData();
-  // }, []);
-
   const fetchData = async () => {
-    //  console.time('fetchData');
     setLoading(true);
     try {
       const response = await api.get("/Instructor", {
@@ -64,24 +34,26 @@ const Instructores = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
+  
+      const [usuariosResponse, estadosResponse] = await Promise.all([
+        api.get("/usuarios", { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }),
+        api.get("/Estado", { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } })
+      ]);
+  
+      const usuarios = usuariosResponse.data;
+      const estados = estadosResponse.data;
 
-      const InstructoresyCreador = await Promise.all(
-        response.data.map(async (instructor) => {
-          const usuarioResponse = await api.get(
-            `/usuarios/${instructor.UsuarioId}`
-          );
-          const estadoResponse = await api.get(
-            `/Estado/${instructor.EstadoId}`
-          );
-
-          return {
-            ...instructor,
-            usuarioname: usuarioResponse.data.nombre,
-            estadoName: estadoResponse.data.estadoName,
-          };
-        })
-      );
-
+      const InstructoresyCreador = response.data.map((instructor) => {
+        const usuario = usuarios.find((u) => u.id === instructor.UsuarioId);
+        const estado = estados.find((e) => e.id === instructor.EstadoId);
+  
+        return {
+          ...instructor,
+          usuarioname: usuario ? usuario.nombre : 'Desconocido',
+          estadoName: estado ? estado.estadoName : 'Desconocido',
+        };
+      });
+  
       InstructoresyCreador.sort((a, b) => a.id - b.id);
       setData(InstructoresyCreador);
     } catch (error) {
@@ -96,9 +68,12 @@ const Instructores = () => {
         progress: undefined,
       });
     }
-    // console.timeEnd('fetchData');
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -136,9 +111,11 @@ const Instructores = () => {
       label: "ID",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -149,9 +126,11 @@ const Instructores = () => {
       label: "NOMBRE",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -162,9 +141,11 @@ const Instructores = () => {
       label: "CORREO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -175,9 +156,11 @@ const Instructores = () => {
       label: "TELEFONO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -188,9 +171,11 @@ const Instructores = () => {
       label: "USUARIO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -201,9 +186,11 @@ const Instructores = () => {
       label: "ESTADO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => (
@@ -224,9 +211,11 @@ const Instructores = () => {
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value, tableMeta, updateValue) => (
@@ -246,9 +235,9 @@ const Instructores = () => {
 
   const handleCustomExport = (rows) => {
     const exportData = rows.map((row) => ({
-      id: row.data[0],
       Nombre: row.data[1],
       Correo: row.data[2],
+      Usuario: row.data[4],
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -262,13 +251,40 @@ const Instructores = () => {
     saveAs(data, "Instructores.xlsx");
   };
 
-  // Función para verificar permisos
   const hasPermission = (permissionName) => {
     return user.DetallePermisos.some(
       (permiso) => permiso.Permiso.nombrePermiso === permissionName
     );
-  };  
+  };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const tableColumn = ["Nombre", "Correo", "Usuario"];
+    const tableRows = [];
+  
+    data.forEach((instructor) => {
+      const instructorData = [
+        instructor.nombre || "N/A", 
+        instructor.correo || "N/A", 
+        instructor.usuarioname || "N/A", 
+      ];
+      tableRows.push(instructorData);
+    });
+  
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      theme: 'striped',
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [0, 57, 107] }, 
+      margin: { top: 10 },
+    });
+  
+    doc.text("Instructores", 14, 15)
+    doc.save("Instructores.pdf");
+  };
+  
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -282,6 +298,9 @@ const Instructores = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
+          <button className="btn-black mr-2" onClick={handleExportPDF}>
+            Exportar PDF
+          </button>
           {hasPermission("Crear Instructor") && (
             <button className="btn-primary" onClick={handleOpenAddModal}>
               Agregar Instructor
@@ -294,7 +313,7 @@ const Instructores = () => {
               <div className="text-center">Cargando Instructores...</div>
             ) : (
               <MUIDataTable
-                title={<span className="custom-title">INSTRUCTORES</span>} 
+                title={<span className="custom-title">INSTRUCTORES</span>}
                 data={data}
                 columns={columsInstructor}
                 options={{

@@ -13,6 +13,8 @@ import * as XLSX from "xlsx";
 import "react-toastify/dist/ReactToastify.css";
 import AddSubcategoriaModal from "../components/AddSubcategoriaModal";
 import EditSubcategoriaModal from "../components/EditSubcategoriaModal";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const Subcategorias = () => {
   const [sidebarToggle, setSidebarToggle] = useState(false);
@@ -190,13 +192,39 @@ const Subcategorias = () => {
     saveAs(data, "Subcategoria.xlsx");
   };
 
-  // Función para verificar permisos
   const hasPermission = (permissionName) => {
     return user.DetallePermisos.some(
       (permiso) => permiso.Permiso.nombrePermiso === permissionName
     );
   };  
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const tableColumn = ["Subcategoria", "Categoria"];
+    const tableRows = [];
+  
+    data.forEach((subcategoria) => {
+      const subcategoriaData = [
+        subcategoria.subcategoriaName || "",
+        subcategoria.categoriaName || "",
+      ];
+      tableRows.push(subcategoriaData); 
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      theme: "striped",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [0, 57, 107] }, 
+      margin: { top: 10 },
+    });
+
+    doc.text("Subcategorias", 14, 15);
+    doc.save("Subcategorias.pdf");
+  };
+  
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -210,6 +238,9 @@ const Subcategorias = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
+          <button className="btn-black mr-2" onClick={handleExportPDF}>
+            Exportar PDF
+          </button>
           {hasPermission("Crear Subcategoria") && (
             <button
               className="btn-primary"

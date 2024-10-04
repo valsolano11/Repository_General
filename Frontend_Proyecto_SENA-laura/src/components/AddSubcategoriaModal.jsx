@@ -34,15 +34,19 @@ const AddSubcategoriaModal = ({ isOpen, onClose }) => {
   }, []);
 
   useEffect(() => {
-    const fetchEstados = async () => {
+    const fetchStates = async () => {
       try {
         const response = await api.get("/Estado");
-        setEstados(response.data);
+        const filteredEstados = response.data.filter(
+          estado => estado.id === 1 || estado.id === 2
+        );
+        setEstados(filteredEstados);
       } catch (error) {
-        toast.error("Error al cargar los estados", { position: "top-right" });
+        showToastError("Error al cargar los estados");
       }
     };
-    fetchEstados();
+  
+    fetchStates();
   }, []);
 
   const validateInput = (name, value) => {
@@ -82,6 +86,7 @@ const AddSubcategoriaModal = ({ isOpen, onClose }) => {
       progress: undefined,
     });
   };
+
   const resetForm = () => {
     setFormData({
       subcategoriaName: "",
@@ -133,7 +138,9 @@ const AddSubcategoriaModal = ({ isOpen, onClose }) => {
           progress: undefined,
         });
         resetForm();
-        setTimeout(() => {}, 2000);
+        setTimeout(() => {
+          onClose(response.data);
+        }, 2000);
       } else {
         showToastError("Ocurrió un error!, por favor intenta con otro nombre.");
       }
