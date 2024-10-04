@@ -14,8 +14,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 const AutorizarPedidos = () => {
   const [sidebarToggleCoord, setsidebarToggleCoord] = useState(false);
-  const [selectedPedido, setSelectedPedido] = useState(null);
-  const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [data, setData] = useState([
@@ -27,22 +25,6 @@ const AutorizarPedidos = () => {
       EstadoId: "",
     },
   ]);
-
-  useEffect(() => {
-    const fetchPedidos = async () => {
-      try {
-        const response = await api.get("/pedidos"); 
-        setPedidos(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error al obtener pedidos:", error);
-        toast.error("Error al cargar los pedidos.", { position: "top-right" });
-        setLoading(false);
-      }
-    };
-
-    fetchPedidos();
-  }, []);
 
   useEffect(() => {
     const fetchStates = async () => {
@@ -60,17 +42,60 @@ const AutorizarPedidos = () => {
     fetchStates();
   }, []);
 
-  const handleViewClick = (rowIndex) => {
-    // const Pedido = data[rowIndex];
-    // setSelectedPedido(Pedido);
-    navigate("/FirmaPedidos");
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get("/pedido");
+      const data = response.data;
+
+      const pedidosFormatted = data.map((pedido) => ({
+        id: pedido.id,
+        createdAt: pedido.createdAt,
+        servidorAsignado: pedido.servidorAsignado,
+        codigoFicha: pedido.codigoFicha,
+        area: pedido.area,
+        estadoName: pedido.Estado?.estadoName || "",
+      }));
+
+      setData(pedidosFormatted);
+    } catch (error) {
+      console.error("Error fetching pedidos data:", error);
+      toast.error("Error al cargar los datos de pedidos", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+    setLoading(false);
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleViewClick = (rowIndex) => {
+    const Pedido = data[rowIndex]; 
+    navigate("/firmaPedidos", { state: { pedidoId: Pedido.id } }); 
+  }; 
+
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); 
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
 
   const columns = [
     {
       name: "createdAt",
       label: "FECHA",
       options: {
+
         customHeadRender: (columnMeta) => (
           <th
             key={columnMeta.label}
@@ -79,7 +104,11 @@ const AutorizarPedidos = () => {
             {columnMeta.label}
           </th>
         ),
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
+        customBodyRender: (value) => (
+        <div className="text-center"> 
+         {formatDate(value)} 
+         </div>
+        ),
       },
     },
     {
