@@ -33,6 +33,7 @@ import ConsumoControladoGeneral from "./pages/ConsumoControladoGeneral.jsx";
 import AutorizarPedidos from "./pages/AutorizarPedidos.jsx";
 import AutorizarPrestamos from "./pages/AutorizarPrestamos.jsx";
 import FirmaPrestamos from "./pages/FirmaPrestamos.jsx";
+import GestionarPedidos from "./pages/GestionarPedidos.jsx";
 
 function App() {
   return (
@@ -138,6 +139,10 @@ function App() {
           </Route>
 
           {/* Rutas protegidas por RolId */}
+          <Route element={<ProtectedRoute requiredRoleId={1} />}>
+            <Route path="/gestionarPedidos" element={<GestionarPedidos />} />
+          </Route>
+
           <Route element={<ProtectedRoute requiredRoleId={3} />}>
             <Route path="/homecoord" element={<HomeCoord />} />
             <Route path="/autPedidos" element={<AutorizarPedidos />} />
@@ -146,7 +151,7 @@ function App() {
             <Route path="/firmaPrestamos" element={<FirmaPrestamos />} />
             <Route path="/fichasCoordi" element={<FichasCoordi />} />
           </Route>
-          
+
           {/* Rutas protegidas por RolId 1 y 3 */}
           <Route element={<ProtectedRoute requiredRoleIds={[1, 3]} />}>
             <Route path="/reportes" element={<Reportes />} />
