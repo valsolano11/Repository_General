@@ -125,35 +125,3 @@ export const actualizarPedido = async (req, res) => {
     return res.status(500).json({ message: "Error al actualizar el pedido." });
   }
 };
-
-//FUNCION PARA PROBAR 
-export const obtenerPedidos = async (req, res) => {
-  try {
-    const pedidos = await Pedido.findAll({
-      include: [
-        {
-          model: Estado,
-          attributes: ["estadoName"], // Aquí seleccionas el nombre del estado
-        },
-        {
-          model: PedidoProducto,
-          include: [
-            {
-              model: Producto,
-              attributes: ["nombre"], // Aquí seleccionas el nombre del producto
-            },
-          ],
-        },
-      ],
-    });
-
-    if (pedidos.length === 0) {
-      return res.status(404).json({ message: "No se encontraron pedidos" });
-    }
-
-    return res.status(200).json(pedidos);
-  } catch (error) {
-    console.error("Error al obtener los pedidos:", error);
-    return res.status(500).json({ message: "Error al obtener los pedidos" });
-  }
-};
