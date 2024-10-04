@@ -5,17 +5,14 @@ import Instructores from "../../models/Instructores.js";
 
 export const crearInstructor = async (req, res) => {
   try {
-    const { nombre, correo, celular, EstadoId, UsuarioId } = req.body;
+    const { nombre, correo, celular, EstadoId } = req.body;
+    const UsuarioId = req.usuario.id;
 
     const consultaCorreo = await Instructores.findOne({ where: { correo } });
     if (consultaCorreo) {
       return res.status(400).json({ message: "El instructor con ese correo ya existe" });
     }
 
-    const consultaUsuario = await Usuario.findByPk(UsuarioId);
-    if (!consultaUsuario) {
-      return res.status(400).json({ message: "Usuario no encontrado" });
-    }
     const consultaCelular = await Instructores.findOne({
       where: {
         celular: celular,
@@ -33,7 +30,7 @@ export const crearInstructor = async (req, res) => {
         .json({ message: "El estado especificado no existe" });
     }
 
-    const nuevoInstructor = { nombre, correo, celular, EstadoId, UsuarioId };
+    const nuevoInstructor = { nombre, correo, celular, EstadoId, UsuarioId};
 
     const instructorCreado = await Instructores.create(nuevoInstructor);
 
@@ -82,7 +79,8 @@ export const getInstructor = async (req, res) => {
 export const actualizarInstructor = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, correo, celular, EstadoId, UsuarioId } = req.body;
+    const { nombre, correo, celular, EstadoId } = req.body;
+    const UsuarioId = req.usuario.id;
 
     const instructor = await Instructores.findByPk(id);
 
@@ -111,13 +109,6 @@ export const actualizarInstructor = async (req, res) => {
       }
     }
 
-    if (UsuarioId) {
-      const consultaUsuario = await Usuario.findByPk(UsuarioId);
-      if (!consultaUsuario) {
-        return res.status(400).json({ message: "Usuario no encontrado" });
-      }
-    }
-
     if (EstadoId) {
       const consultaEstado = await Estado.findByPk(EstadoId);
       if (!consultaEstado) {
@@ -131,7 +122,7 @@ export const actualizarInstructor = async (req, res) => {
     if (correo) instructor.correo = correo;
     if (celular) instructor.celular = celular;
     if (EstadoId) instructor.EstadoId = EstadoId;
-    if (UsuarioId) instructor.UsuarioId = UsuarioId;
+    instructor.UsuarioId = UsuarioId;
 
     await instructor.save();
 

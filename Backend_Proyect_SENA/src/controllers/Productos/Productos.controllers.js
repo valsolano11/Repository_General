@@ -74,7 +74,7 @@ export const crearProductos = async (req, res) => {
             cantidadActual,
             marca,
             VolumenTotal: volumenTotalCalculado,
-            UsuarioId,
+            UsuarioId: UsuarioId,
             UnidadMedidaId,
             SubcategoriaId,
             EstadoId: estadoIdActual || EstadoId, 
@@ -89,7 +89,7 @@ export const crearProductos = async (req, res) => {
         console.error("Error al crear el producto", error);
         res.status(500).json({ message: error.message });
     }
-};
+}
 
 export const getAllProductos = async (req, res) => {
     try {
@@ -121,3 +121,80 @@ export const getProductos = async (req, res) => {
         res.status(500).json({ message: error.message});
     }
 };
+
+export const putProductos = async (req, res) => {
+
+    try {
+      
+        const { id } = req.params;
+        const { nombre, descripcion, cantidadEntrada, volumen, marca, UnidadMedidaId, SubcategoriaId, EstadoId } = req.body;
+        const UsuarioId = req.usuario.id;
+
+        const producto = await Producto.findByPk(id);
+
+        if (!producto) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
+
+        if (nombre && nombre !== producto.nombre) {
+            const existingProductoNombre = await Producto.findOne({ where: { nombre } });
+            if (existingProductoNombre) {
+                return res.status(400).json({ error: 'El nombre del producto ya existe' });
+            }
+        }
+
+        if (descripcion && descripcion.trim() === '') {
+            return res.status(400).json({ error: 'La descripción no puede estar vacía' });
+        }
+
+        if (UsuarioId) {
+            const usuario = await Usuario.findByPk(UsuarioId);
+            if (!usuario) {
+                return res.status(400).json({ error: 'El UsuarioId no existe' });
+            }
+        }
+
+        if (UnidadMedidaId) {
+            const unidadMedida = await UnidadDeMedida.findByPk(UnidadMedidaId);
+            if (!unidadMedida) {
+                return res.status(400).json({ error: 'El UnidadMedidaId no existe' });
+            }
+        }
+
+        if (SubcategoriaId) {
+            const subcategoria = await Subcategoria.findByPk(SubcategoriaId);
+            if (!subcategoria) {
+                return res.status(400).json({ error: 'El SubcategoriaId no existe' });
+            }
+        }
+
+        if (EstadoId) {
+            const estado = await Estado.findByPk(EstadoId);
+            if (!estado) {
+                return res.status(400).json({ error: 'El EstadoId no existe' });
+            }
+        }
+
+        if (cantidadEntrada !== undefined) {
+            producto.cantidadEntrada = cantidadEntrada;
+            producto.cantidadSalida = 0;
+            producto.cantidadActual = cantidadEntrada;
+        }
+
+        producto.nombre = nombre !== undefined ? nombre : producto.nombre;
+        producto.volumen = volumen !== undefined ? volumen : producto.volumen;
+        producto.descripcion = descripcion !== undefined ? descripcion : producto.descripcion;
+        producto.marca = marca !== undefined ? marca : producto.marca;
+        producto.UnidadMedidaId = UnidadMedidaId !== undefined ? UnidadMedidaId : producto.UnidadMedidaId;
+        producto.SubcategoriaId = SubcategoriaId !== undefined ? SubcategoriaId : producto.SubcategoriaId;
+        producto.EstadoId = EstadoId !== undefined ? EstadoId : producto.EstadoId;
+        producto.UsuarioId = UsuarioId;
+
+
+        await producto.save();
+        res.json(producto);
+    } catch (error) {
+        console.error("Error al actualizar el producto", error);
+        res.status(500).json({ error: 'Error al actualizar el producto' });
+    }
+}

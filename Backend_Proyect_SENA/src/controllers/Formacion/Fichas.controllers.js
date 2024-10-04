@@ -5,7 +5,8 @@ import Usuario from "../../models/Usuario.js";
 
 export const crearFicha = async (req, res) => {
   try {
-    const { UsuarioId, EstadoId, NumeroFicha, Programa, Jornada } = req.body;
+    const { EstadoId, NumeroFicha, Programa, Jornada } = req.body;
+    const UsuarioId = req.usuario.id;
 
     const consultaId = await Ficha.findOne({
       where: { NumeroFicha },
@@ -26,7 +27,7 @@ export const crearFicha = async (req, res) => {
         .json({ message: "El estado especificado no existe" });
     }
 
-    const nuevaFicha = { NumeroFicha, Programa, Jornada, EstadoId, UsuarioId };
+    const nuevaFicha = { NumeroFicha, Programa, Jornada, EstadoId, UsuarioId: UsuarioId, };
 
     const fichaCreada = await Ficha.create(nuevaFicha);
 
@@ -76,7 +77,8 @@ export const getFicha = async (req, res) => {
 export const updateFicha = async (req, res) => {
   try {
     const { id } = req.params;
-    const { UsuarioId, EstadoId, NumeroFicha, Programa, Jornada } = req.body;
+    const { EstadoId, NumeroFicha, Programa, Jornada } = req.body;
+    const UsuarioId = req.usuario.id;
 
     const ficha = await Ficha.findByPk(id);
     if (!ficha) {
@@ -98,14 +100,6 @@ export const updateFicha = async (req, res) => {
       ficha.NumeroFicha = NumeroFicha;
     }
 
-    if (UsuarioId) {
-      const consultaUsuario = await Usuario.findByPk(UsuarioId);
-      if (!consultaUsuario) {
-        return res.status(400).json({ message: "Usuario no encontrado" });
-      }
-      ficha.UsuarioId = UsuarioId;
-    }
-
     if (EstadoId) {
       const consultaEstado = await Estado.findByPk(EstadoId);
       if (!consultaEstado) {
@@ -115,6 +109,7 @@ export const updateFicha = async (req, res) => {
       }
       ficha.EstadoId = EstadoId;
     }
+    ficha.UsuarioId = UsuarioId;
 
     if (Programa !== undefined) {
       ficha.Programa = Programa;
@@ -130,4 +125,4 @@ export const updateFicha = async (req, res) => {
     console.error("Error al actualizar la ficha", error);
     res.status(500).json({ message: error.message });
   }
-};
+}

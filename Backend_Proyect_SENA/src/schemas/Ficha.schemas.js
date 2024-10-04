@@ -7,9 +7,7 @@ export const FichaSchemas = z.object({
   EstadoId: z.number({
     required_error: "Es necesario colocar un estado",
   }),
-  UsuarioId: z.number({
-    required_error: "El usuario que va registrarlo es requerido",
-  }),
+
   Programa: z.string({
     required_error: "El programa es requerido",
   }),
