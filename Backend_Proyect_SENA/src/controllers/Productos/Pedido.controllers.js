@@ -87,6 +87,59 @@ export const crearPedido = async (req, res) => {
     return res.status(500).json({ message: "Error al crear el pedido." });
   }
 };
+export const getAllPedidos = async (req, res) => {
+  try {
+    const pedidos = await Pedido.findAll({
+      include: [
+        {
+          model: Producto,
+          through: {
+            attributes: [
+              "cantidadSolicitar",
+              "cantidadSalida",
+              "observaciones",
+            ],
+          },
+        },
+        { model: Estado },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    return res.status(200).json(pedidos);
+  } catch (error) {
+    console.error("Error al obtener los pedidos:", error);
+    return res.status(500).json({ message: "Error al obtener los pedidos." });
+  }
+};
+
+export const getPedido = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const pedido = await Pedido.findByPk(id, {
+      include: [
+        {
+          model: Producto,
+          through: {
+            attributes: ['cantidadSolicitar', 'cantidadSalida', 'observaciones'],
+          },
+        },
+        { model: Estado },
+      ],
+    });
+
+    if (!pedido) {
+      return res.status(404).json({ message: `Pedido con id ${id} no encontrado.` });
+    }
+
+    return res.status(200).json(pedido);
+  } catch (error) {
+    console.error("Error al obtener el pedido:", error);
+    return res.status(500).json({ message: "Error al obtener el pedido." });
+  }
+};
+
 
 export const actualizarPedido = async (req, res) => {
 
