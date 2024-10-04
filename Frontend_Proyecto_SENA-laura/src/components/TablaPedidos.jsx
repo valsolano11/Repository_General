@@ -42,7 +42,6 @@ const TablaPedidos = ({ accordionStates, toggleAccordion }) => {
                 <tr>
                   <th className="border border-black px-2">ITEM</th>
                   <th className="border border-black px-2">NOMBRE DEL PRODUCTO</th>
-                  <th className="border border-black px-2">DESCRIPCIÓN</th>
                   <th className="border border-black px-2">UNIDAD DE MEDIDA</th>
                   <th className="border border-black px-2">CANTIDAD A SOLICITAR</th>
                   <th className="border border-black px-2">OBSERVACIONES</th>
@@ -60,15 +59,6 @@ const TablaPedidos = ({ accordionStates, toggleAccordion }) => {
                         className="w-full px-2 py-1 rounded"
                         name="nombreProducto"
                         value={producto.nombreProducto}
-                        onChange={(event) => handleInputChange(index, event)}
-                      />
-                    </td>
-                    <td className="border border-black px-4 py-2">
-                      <input
-                        type="text"
-                        className="w-full px-2 py-1 rounded"
-                        name="descripcion"
-                        value={producto.descripcion}
                         onChange={(event) => handleInputChange(index, event)}
                       />
                     </td>

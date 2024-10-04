@@ -1,23 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { saveAs } from "file-saver";
-import { useAuth } from "../context/AuthContext"; 
-import MUIDataTable from "mui-datatables";
-import EditIcon from "@mui/icons-material/Edit";
-import IconButton from "@mui/material/IconButton";
-import AddHerramientaModal from "../components/AddHerramientaModal";
-import EditHerramientaModal from "../components/EditHerramientaModal";
-import Sidebar from "../components/Sidebar";
+import SidebarCoord from "../components/SidebarCoord";
 import Home from "../components/Home";
-import clsx from "clsx";
+import MUIDataTable from "mui-datatables";
+import IconButton from "@mui/material/IconButton";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import * as XLSX from "xlsx";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const Herramientas = () => {
-  const [sidebarToggle, setSidebarToggle] = useState(false);
-  const [isOpenEditModal, setIsOpenEditModal] = useState(false);
-  const [selectedHerramienta, setSelectedHerramienta] = useState(null);
-  const [isOpenAddModal, setIsOpenAddModal] = useState(false);
+const AutorizarPedidos = () => {
+  const [sidebarToggleCoord, setsidebarToggleCoord] = useState(false);
+  const [selectedPedido, setSelectedPedido] = useState(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const [data, setData] = useState([
     {
       Código: "",
@@ -29,42 +26,23 @@ const Herramientas = () => {
     },
   ]);
 
-  const { user } = useAuth();
-
-  const handleEditClick = (rowIndex) => {
-    const herramienta = data[rowIndex];
-    setSelectedHerramienta(herramienta);
-    setIsOpenEditModal(true);
-  };
-
-  const handleCloseEditModal = (updatedHerramienta) => {
-    if (updatedHerramienta) {
-      // Update data logic here
-    }
-    setIsOpenEditModal(false);
-    setSelectedHerramienta(null);
-  };
-
-  const handleOpenAddModal = () => {
-    setIsOpenAddModal(true);
-  };
-
-  const handleCloseAddModal = (newHerramienta) => {
-    if (newHerramienta) {
-      // Add new data logic here
-    }
-    setIsOpenAddModal(false);
+  const handleViewClick = (rowIndex) => {
+    // const Pedido = data[rowIndex];
+    // setSelectedPedido(Pedido);
+    navigate("/FirmaPedidos");
   };
 
   const columns = [
     {
       name: "Código",
-      label: "CÓDIGO",
+      label: "FECHA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -72,12 +50,14 @@ const Herramientas = () => {
     },
     {
       name: "Nombre",
-      label: "NOMBRE",
+      label: "NOMBRE SOLICITANTE",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -85,12 +65,14 @@ const Herramientas = () => {
     },
     {
       name: "Fecha_de_Ingreso",
-      label: "FECHA DE INGRESO",
+      label: "FICHA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -98,38 +80,29 @@ const Herramientas = () => {
     },
     {
       name: "Marca",
-      label: "MARCA",
+      label: "ÁREA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "Condición",
-      label: "CONDICIÓN",
+      name: "Marca",
+      label: "ESTADO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
-          </th>
-        ),
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
-      },
-    },
-    {
-      name: "Descripción",
-      label: "DESCRIPCIÓN",
-      options: {
-        customHeadRender: (columnMeta) => (
-          <th 
-            key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -137,23 +110,25 @@ const Herramientas = () => {
     },
     {
       name: "edit",
-      label: "EDITAR",
+      label: "VER DETALLE",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         filter: false,
         customBodyRender: (value, tableMeta, updateValue) => (
           <div className="flex items-center justify-center">
             <IconButton
-              onClick={() => handleEditClick(tableMeta.rowIndex)}
+              onClick={() => handleViewClick(tableMeta.rowIndex)}
               color="primary"
-              aria-label="edit"
+              aria-label="view"
             >
-              <EditIcon />
+              <VisibilityIcon />
             </IconButton>
           </div>
         ),
@@ -173,48 +148,38 @@ const Herramientas = () => {
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Herramientas");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Pedidos");
     const excelBuffer = XLSX.write(workbook, {
       bookType: "xlsx",
       type: "array",
     });
     const data = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(data, "Herramientas.xlsx");
+    saveAs(data, "Pedidos.xlsx");
   };
 
-  // Función para verificar permisos
-  const hasPermission = (permissionName) => {
-    return user.DetallePermisos.some(
-      (permiso) => permiso.Permiso.nombrePermiso === permissionName
-    );
-  }; 
-
   return (
-    <div className="flex min-h-screen">
-      <Sidebar sidebarToggle={sidebarToggle} />
+    <div className="flex min-h-screen bg-fondo">
+      <SidebarCoord sidebarToggleCoord={sidebarToggleCoord} />
       <div
-        className={`flex flex-col flex-grow p-6 bg-gray-100 ${
-          sidebarToggle ? "ml-64" : ""
+        className={`flex flex-col flex-grow p-4 bg-fondo ${
+          sidebarToggleCoord ? "ml-64" : ""
         } mt-16`}
       >
         <Home
-          sidebarToggle={sidebarToggle}
-          setSidebarToggle={setSidebarToggle}
+          sidebarToggle={sidebarToggleCoord}
+          setSidebarToggle={setsidebarToggleCoord}
         />
-        <div className="flex justify-end mt-2">
-          {hasPermission("Crear Herramienta") && (
-            <button className="btn-primary" onClick={handleOpenAddModal}>
-              Agregar Herramienta
-            </button>
-          )}
-        </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="max-w-6xl mx-auto">
             {loading ? (
-              <div className="text-center">Cargando herramientas...</div>
+              <div className="text-center">Cargando Pedidos...</div>
             ) : (
               <MUIDataTable
-                title={<span className="custom-title">Herramientas de consumo devolutivo - Subdirección</span>}
+                title={
+                  <span className="custom-title">
+                    Pedidos de Productos consumibles
+                  </span>
+                }
                 data={data}
                 columns={columns}
                 options={{
@@ -270,17 +235,16 @@ const Herramientas = () => {
             )}
           </div>
         </div>
+        <div className="flex-grow flex items-center justify-center text-red700 mx-20">
+          <p>
+            NOTA: Los pedidos que no se firmen, es decir, que permanezcan en
+            estado PENDIENTE. Tienen 3 días desde la fecha de creación para que
+            cambien de estado a EN PROCESO, de lo contrario serán descartados.
+          </p>
+        </div>
       </div>
-      {selectedHerramienta && (
-        <EditHerramientaModal
-          isOpen={isOpenEditModal}
-          onClose={handleCloseEditModal}
-          herramienta={selectedHerramienta}
-        />
-      )}
-      <AddHerramientaModal isOpen={isOpenAddModal} onClose={handleCloseAddModal} />
     </div>
   );
 };
 
-export default Herramientas;
+export default AutorizarPedidos;
