@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { api } from "../api/token";
 import "react-toastify/dist/ReactToastify.css";
@@ -14,10 +14,12 @@ import Home from "../components/Home";
 const FirmaPedidos = () => {
   const [sidebarToggleCoord, setsidebarToggleCoord] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { pedidoId } = location.state || {};
   const [pedidoData, setPedidoData] = useState(null);
   const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState({
+  const [firmaImagen, setFirmaImagen] = useState(null);
+  const [formData, setFormData] = useState({
     createdAt: "",
     servidorAsignado: "",
     codigoFicha: "",
@@ -33,8 +35,9 @@ const FirmaPedidos = () => {
   });
   const [firmaAdjunta, setFirmaAdjunta] = useState(false);
 
-  const handleFirmaChange = (isFirmaAdjunta) => {
+  const handleFirmaChange = (isFirmaAdjunta, file) => {
     setFirmaAdjunta(isFirmaAdjunta);
+    setFirmaImagen(file); 
   };
 
   const [accordionStates, setAccordionStates] = useState({
@@ -78,12 +81,11 @@ const FirmaPedidos = () => {
             servidorAsignado: data.servidorAsignado,
             cedulaServidor: data.cedulaServidor,
             correo: data.correo,
-            
           };
-          setPedidoData(pedidoFormatted); 
+          setPedidoData(pedidoFormatted);
           setFormData({
             fecha: formatDateForInput(data.createdAt),
-            codigoFicha: data.codigoFicha, 
+            codigoFicha: data.codigoFicha,
             area: data.area,
             jefeOficina: data.jefeOficina,
             cedulaJefeOficina: data.cedulaJefeOficina,
@@ -95,17 +97,60 @@ const FirmaPedidos = () => {
           console.error("Error fetching pedido data:", error);
         }
       }
-      setLoading(false); 
+      setLoading(false);
     };
 
-    fetchData(); 
-  }, [pedidoId]); 
+    fetchData();
+  }, [pedidoId]);
 
   const formatDateForInput = (dateString) => {
     const date = new Date(dateString);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-  }; 
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}-${String(date.getDate()).padStart(2, "0")}`;
+  };
 
+  const handleSubmit = async () => {
+    if (!firmaAdjunta) {
+      showToastError("Debe adjuntar una firma antes de enviar el pedido.");
+      return;
+    }
+  
+    try {
+      const formData = new FormData();
+      formData.append('firma', firmaImagen); 
+  
+      setLoading(true);
+  
+      const response = await api.put(`/pedido/${pedidoId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      if (response.status === 200) {
+        toast.success("Pedido enviado correctamente.", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        navigate('/autPedidos'); 
+      } else {
+        showToastError("Error al enviar el pedido.");
+      }
+    } catch (error) {
+      console.error("Error al enviar el pedido:", error);
+      showToastError("Error al enviar el pedido.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   return (
     <div className="flex min-h-screen bg-grisClaro">
       <SidebarCoord sidebarToggleCoord={sidebarToggleCoord} />
@@ -228,7 +273,7 @@ const FirmaPedidos = () => {
                               type="date"
                               name="fecha"
                               value={formData.fecha}
-                              readOnly 
+                              readOnly
                             />
                           </div>
                         </div>
@@ -289,6 +334,7 @@ const FirmaPedidos = () => {
                               type="text"
                               name="jefeOficina"
                               value={formData.jefeOficina}
+                              readOnly
                             />
                           </div>
                         </div>
@@ -301,6 +347,7 @@ const FirmaPedidos = () => {
                           type="text"
                           name="cedulaJefeOficina"
                           value={formData.cedulaJefeOficina}
+                          readOnly
                         />
                       </div>
 
@@ -316,6 +363,7 @@ const FirmaPedidos = () => {
                               type="text"
                               name="servidorAsignado"
                               value={formData.servidorAsignado}
+                              readOnly
                             />
                           </div>
                         </div>
@@ -329,11 +377,12 @@ const FirmaPedidos = () => {
                             type="text"
                             name="cedulaServidor"
                             value={formData.cedulaServidor}
+                            readOnly
                           />
                         </div>
                       </div>
                       <div>
-                      <div className="flex flex-row w-full md:w-3/4 mb-2">
+                        <div className="flex flex-row w-full md:w-3/4 mb-2">
                           <label className="mb-1 font-bold text-xs mt-2">
                             Correo electrónico a quien se le asignará el bien*
                           </label>
@@ -343,12 +392,10 @@ const FirmaPedidos = () => {
                               type="text"
                               name="correo"
                               value={formData.correo}
+                              readOnly
                             />
                           </div>
                         </div>
-                      </div>
-                      <div>
-
                       </div>
                     </div>
                   )}
@@ -368,6 +415,7 @@ const FirmaPedidos = () => {
                     <div className="flex flex-col rounded-lg w-full">
                       <div className="flex flex-row justify-center w-full mb-4">
                         <TablaPedidosFirma
+                          pedidoId={pedidoId}
                           accordionStates={accordionStates}
                           toggleAccordion={toggleAccordion}
                         />
@@ -390,6 +438,7 @@ const FirmaPedidos = () => {
                     <div className="flex flex-col rounded-lg w-full">
                       <div className="flex flex-row justify-between w-auto mb-4">
                         <FirmasDos
+                          pedidoId={pedidoId}
                           accordionStates={accordionStates}
                           toggleAccordion={toggleAccordion}
                           onFirmaChange={handleFirmaChange}
@@ -401,14 +450,13 @@ const FirmaPedidos = () => {
 
                 {/* Botón Enviar */}
                 <div className="flex justify-center items-center w-2/4 mt-10 mx-auto">
-                  <button
-                    className={`btn-black2 ${
-                      !firmaAdjunta ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    disabled={!firmaAdjunta}
-                  >
-                    Enviar Pedido
-                  </button>
+                <button
+                  className={`btn-black2 ${!firmaAdjunta ? "opacity-50 cursor-not-allowed" : ""}`}
+                  disabled={!firmaAdjunta || loading}
+                  onClick={handleSubmit}
+                >
+                  {loading ? "Enviando..." : "Enviar Pedido"}
+                </button>
                 </div>
               </div>
             </div>
