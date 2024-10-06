@@ -87,7 +87,7 @@ const AutorizarPedidos = () => {
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0"); 
     const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    return `${year}/${month}/${day}`;
   }
 
   const columns = [
@@ -231,6 +231,7 @@ const AutorizarPedidos = () => {
     saveAs(data, "Pedidos.xlsx");
   };
 
+
   return (
     <div className="flex min-h-screen bg-fondo">
       <SidebarCoord sidebarToggleCoord={sidebarToggleCoord} />
@@ -254,7 +255,7 @@ const AutorizarPedidos = () => {
                     Pedidos de Productos consumibles
                   </span>
                 }
-                data={data}
+                data={data} 
                 columns={columns}
                 options={{
                   responsive: "standard",

@@ -1,146 +1,188 @@
 import React, { useState, useEffect } from "react";
-import MUIDataTable from "mui-datatables";
+import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
+import { api } from "../api/token";
+import MUIDataTable from "mui-datatables";
 import "react-toastify/dist/ReactToastify.css";
 
-const TablaPedidosGestion = () => {
-    const [loading, setLoading] = useState(true);
-    const [data, setData] = useState([]);
-  
-    const fetchData = async () => {
-      setLoading(true);
+const TablaPedidosGestion = ({ actualizarCantidadSalida }) => {
+  const [unidades, setUnidades] = useState([]);
+  const location = useLocation();
+  const { pedidoId } = location.state || {};
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const fetchUnidades = async () => {
       try {
-        const response = [
-          {
-            FechaPedido: "",
-            CantidadEntregada: "",
-            IDUsuario: "",
-            IDFicha: "",
-            Id: "",
-            CantidadSolicitada: "",
-            Codigo: "",
-            IDProducto: "",
-            IDInstructor: "",
-          },
-        ];
-  
-        setData(response);
-      } catch (error) {
-        console.error("Error fetching loan data:", error);
-        toast.error("Error al cargar los datos de pedidos", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        const response = await api.get(`/units`);
+        setUnidades(response.data);
+      } catch (err) {
+        console.error("Error fetching unidades:", err);
       }
-      setLoading(false);
     };
-  
-    useEffect(() => {
-      fetchData();
-    }, []);
-  
-    const columns = [
-      {
-        name: "FechaPedido",
-        label: "ITEM",
-        options: {
-          customHeadRender: (columnMeta) => (
-            <th
-              key={columnMeta.label}
-              className="text-center bg-white text-black uppercase text-xs font-bold"
-            >
-              {columnMeta.label}
-            </th>
-          ),
-          customBodyRender: (value) => <div className="text-center">{value}</div>,
+
+    fetchUnidades();
+  }, []);
+
+  useEffect(() => {
+    const fetchProductos = async () => {
+      if (!pedidoId || unidades.length === 0) return;
+
+      try {
+        setLoading(true);
+        const response = await api.get(`/pedido/${pedidoId}`);
+
+        const productosData = response.data.Productos;
+
+        const pedidosFormatted = productosData.map((producto, index) => {
+          const unidad = unidades.find(
+            (unit) => unit.id === producto.UnidadMedidaId
+          );
+          return {
+            item: index + 1,
+            nombre: producto.nombre,
+            UnidadMedidaId: unidad ? unidad.nombre : "",
+            cantidadSolicitar: producto.PedidoProducto.cantidadSolicitar,
+            observaciones: producto.PedidoProducto.observaciones,
+          };
+        });
+
+        setData(pedidosFormatted);
+      } catch (err) {
+        console.error("Error fetching productos:", err);
+        toast.error("Error al cargar productos.");
+      } finally {
+        setLoading(false);
+      }
+    };
+      fetchProductos();
+  }, [pedidoId, unidades]);
+
+  const handleCantidadSalidaChange = (index, value) => {
+    const numericValue = parseInt(value);
+    if (isNaN(numericValue) || numericValue < 0) return;
+
+    const updatedData = [...data];
+    updatedData[index].cantidadSalida = numericValue;
+    setData(updatedData);
+    actualizarCantidadSalida(numericValue);
+  };
+
+  const columns = [
+    {
+      name: "item",
+      label: "ITEM",
+      options: {
+        customHeadRender: (columnMeta) => (
+          <th
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
+          </th>
+        ),
+        customBodyRender: (value) => <div className="text-center">{value}</div>,
+      },
+    },
+    {
+      name: "nombre",
+      label: "NOMBRE PRODUCTO",
+      options: {
+        customHeadRender: (columnMeta) => (
+          <th
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
+          </th>
+        ),
+        customBodyRender: (value) => <div className="text-center">{value}</div>,
+      },
+    },
+    {
+      name: "UnidadMedidaId",
+      label: "UNIDAD DE MEDIDA",
+      options: {
+        customHeadRender: (columnMeta) => (
+          <th
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
+          </th>
+        ),
+        customBodyRender: (value) => <div className="text-center">{value}</div>,
+      },
+    },
+    {
+      name: "cantidadSolicitar",
+      label: "CANTIDAD SOLICITADA",
+      options: {
+        customHeadRender: (columnMeta) => (
+          <th
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
+          </th>
+        ),
+        customBodyRender: (value) => <div className="text-center">{value}</div>,
+      },
+    },
+    {
+      name: "cantidadSalida",
+      label: "CANTIDAD ENTREGADA",
+      options: {
+        customHeadRender: (columnMeta) => (
+          <th
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
+          </th>
+        ),
+        customBodyRender: (value, tableMeta) => {
+          const rowIndex = tableMeta.rowIndex; 
+          return (
+            <div className="text-center">
+              <input
+                type="number"
+                value={value}
+                onChange={(e) =>
+                  handleCantidadSalidaChange(rowIndex, e.target.value)
+                }
+                className="border px-2 py-1 rounded"
+              />
+            </div>
+          );
         },
       },
-      {
-        name: "CantidadEntregada",
-        label: "NOMBRE PRODUCTO",
-        options: {
-          customHeadRender: (columnMeta) => (
-            <th
-              key={columnMeta.label}
-              className="text-center bg-white text-black uppercase text-xs font-bold"
-            >
-              {columnMeta.label}
-            </th>
-          ),
-          customBodyRender: (value) => <div className="text-center">{value}</div>,
-        },
+    },
+    {
+      name: "observaciones",
+      label: "OBSERVACIONES",
+      options: {
+        customHeadRender: (columnMeta) => (
+          <th
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
+          </th>
+        ),
+        customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
-      {
-        name: "IDUsuario",
-        label: "UNIDAD DE MEDIDA",
-        options: {
-          customHeadRender: (columnMeta) => (
-            <th
-              key={columnMeta.label}
-              className="text-center bg-white text-black uppercase text-xs font-bold"
-            >
-              {columnMeta.label}
-            </th>
-          ),
-          customBodyRender: (value) => <div className="text-center">{value}</div>,
-        },
-      },
-      {
-        name: "IDFicha",
-        label: "CANTIDAD SOLICITADA",
-        options: {
-          customHeadRender: (columnMeta) => (
-            <th
-              key={columnMeta.label}
-              className="text-center bg-white text-black uppercase text-xs font-bold"
-            >
-              {columnMeta.label}
-            </th>
-          ),
-          customBodyRender: (value) => <div className="text-center">{value}</div>,
-        },
-      },
-      {
-        name: "IDFicha",
-        label: "CANTIDAD ENTREGADA",
-        options: {
-          customHeadRender: (columnMeta) => (
-            <th
-              key={columnMeta.label}
-              className="text-center bg-white text-black uppercase text-xs font-bold"
-            >
-              {columnMeta.label}
-            </th>
-          ),
-          customBodyRender: (value) => <div className="text-center">{value}</div>,
-        },
-      },
-      {
-        name: "Id",
-        label: "OBSERVACIONES",
-        options: {
-          customHeadRender: (columnMeta) => (
-            <th
-              key={columnMeta.label}
-              className="text-center bg-white text-black uppercase text-xs font-bold"
-            >
-              {columnMeta.label}
-            </th>
-          ),
-          customBodyRender: (value) => <div className="text-center">{value}</div>,
-        },
-      },
-    ];
-  
-    return (
-      <div>
-        <div className="flex-grow flex items-center justify-center">
-          <div className="max-w-9xl mx-auto">
+    },
+  ];
+
+  return (
+    <div>
+      <div className="flex-grow flex items-center justify-center">
+        <div className="max-w-9xl mx-auto">
+          {loading ? (
+            <div>Cargando productos...</div>
+          ) : (
             <MUIDataTable
               data={data}
               columns={columns}
@@ -198,9 +240,10 @@ const TablaPedidosGestion = () => {
                 },
               }}
             />
-          </div>
+          )}
         </div>
       </div>
-    );
-  };
-export default TablaPedidosGestion
+    </div>
+  );
+};
+export default TablaPedidosGestion;
