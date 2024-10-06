@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import { api } from "../api/token";
 import "react-toastify/dist/ReactToastify.css";
 import fondo from "/logoSena.png";
 import siga from "/Siga.png";
@@ -12,35 +13,28 @@ import Home from "../components/Home";
 
 const FirmaPedidos = () => {
   const [sidebarToggleCoord, setsidebarToggleCoord] = useState(false);
-  const [formErrors, setFormErrors] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({
+  const location = useLocation();
+  const { pedidoId } = location.state || {};
+  const [pedidoData, setPedidoData] = useState(null);
+  const [loading, setLoading] = useState(false);
+    const [formData, setFormData] = useState({
+    createdAt: "",
+    servidorAsignado: "",
+    codigoFicha: "",
+    area: "",
+    EstadoId: "",
     nombre: "",
     Documento: "",
-    fecha: "",
-    ficha: "",
-    area: "",
-    coordi: "",
-    cedCoordi: "",
-    instructor: "",
-    cedInstructor: "",
+    jefeOficina: "",
+    cedulaJefeOficina: "",
+    cedulaServidor: "",
     correo: "",
-    item: "",
     codigoSena: "",
   });
   const [firmaAdjunta, setFirmaAdjunta] = useState(false);
-  const navigate = useNavigate();
 
   const handleFirmaChange = (isFirmaAdjunta) => {
     setFirmaAdjunta(isFirmaAdjunta);
-  };
-
-  const handleClick = () => {
-    navigate("/formatoHerramientas");
-  };
-
-  const handleNavigate = () => {
-    navigate("/");
   };
 
   const [accordionStates, setAccordionStates] = useState({
@@ -56,31 +50,6 @@ const FirmaPedidos = () => {
     }));
   };
 
-  const validateInput = (name, value) => {
-    let errorMessage = "";
-    if (name === "area" || name === "coordi" || name === "instructor") {
-      const nameRegex = /^[A-Za-z\s-_\u00C0-\u017F]+$/;
-      if (!nameRegex.test(value) || /\d/.test(value)) {
-        errorMessage = "No puede contener caracteres especiales.";
-      }
-    }
-    return errorMessage;
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    const errorMessage = validateInput(name, value);
-    setFormErrors((prevErrors) => ({
-      ...prevErrors,
-      [name]: errorMessage,
-    }));
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
   const showToastError = (message) => {
     toast.error(message, {
       position: "top-right",
@@ -93,69 +62,49 @@ const FirmaPedidos = () => {
     });
   };
 
-  const handleCreate = (currentSection) => {
-    const {
-      nombre,
-      Documento,
-      ficha,
-      fecha,
-      area,
-      coordi,
-      cedCoordi,
-      instructor,
-      cedInstructor,
-      correo,
-    } = formData;
-    const areaError = validateInput("area", area);
-    const coordiError = validateInput("coordi", coordi);
-    const instructorError = validateInput("instructor", instructor);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (pedidoId) {
+        try {
+          const response = await api.get(`/pedido/${pedidoId}`);
+          const data = response.data;
 
-    if (areaError || coordiError || instructorError) {
-      setFormErrors({
-        area: areaError,
-        coordi: coordiError,
-        instructor: instructorError,
-      });
-      showToastError("Por favor, corrige los errores antes de agregar.");
-      return;
-    }
+          const pedidoFormatted = {
+            id: data.id,
+            createdAt: data.createdAt,
+            codigoFicha: data.codigoFicha,
+            jefeOficina: data.jefeOficina,
+            cedulaJefeOficina: data.cedulaJefeOficina,
+            servidorAsignado: data.servidorAsignado,
+            cedulaServidor: data.cedulaServidor,
+            correo: data.correo,
+            
+          };
+          setPedidoData(pedidoFormatted); 
+          setFormData({
+            fecha: formatDateForInput(data.createdAt),
+            codigoFicha: data.codigoFicha, 
+            area: data.area,
+            jefeOficina: data.jefeOficina,
+            cedulaJefeOficina: data.cedulaJefeOficina,
+            servidorAsignado: data.servidorAsignado,
+            cedulaServidor: data.cedulaServidor,
+            correo: data.correo,
+          });
+        } catch (error) {
+          console.error("Error fetching pedido data:", error);
+        }
+      }
+      setLoading(false); 
+    };
 
-    if (
-      !nombre ||
-      !Documento ||
-      !fecha ||
-      !ficha ||
-      !area ||
-      !coordi ||
-      !cedCoordi ||
-      !instructor ||
-      !cedInstructor ||
-      !correo
-    ) {
-      showToastError("Todos los campos son obligatorios, incluyendo la fecha.");
-      return;
-    }
+    fetchData(); 
+  }, [pedidoId]); 
 
-    if (currentSection === "datos") {
-      setAccordionStates({
-        datos: false,
-        productos: true,
-        firmas: false,
-      });
-    } else if (currentSection === "productos") {
-      setAccordionStates({
-        datos: false,
-        productos: false,
-        firmas: true,
-      });
-    } else if (currentSection === "firmas") {
-      setAccordionStates({
-        datos: false,
-        productos: false,
-        firmas: false,
-      });
-    }
-  };
+  const formatDateForInput = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }; 
 
   return (
     <div className="flex min-h-screen bg-grisClaro">
@@ -279,7 +228,7 @@ const FirmaPedidos = () => {
                               type="date"
                               name="fecha"
                               value={formData.fecha}
-                              onChange={handleInputChange}
+                              readOnly 
                             />
                           </div>
                         </div>
@@ -308,15 +257,9 @@ const FirmaPedidos = () => {
                           <input
                             className=" border-b border-black text-xs text-center h-8 w-20"
                             type="text"
-                            name="ficha"
-                            value={formData.ficha}
-                            onChange={handleInputChange}
-                            onKeyPress={(e) => {
-                              if (!/[0-9]/.test(e.key)) {
-                                e.preventDefault();
-                              }
-                            }}
-                            maxLength={7}
+                            name="codigoFicha"
+                            value={formData.codigoFicha}
+                            readOnly
                           />
                         </div>
                         <div className="flex flex-row min-w-[200px] w-full md:w-1/3">
@@ -329,18 +272,8 @@ const FirmaPedidos = () => {
                               type="text"
                               name="area"
                               value={formData.area}
-                              onChange={handleInputChange}
-                              onKeyPress={(e) => {
-                                if (/[0-9]/.test(e.key)) {
-                                  e.preventDefault();
-                                }
-                              }}
+                              readOnly
                             />
-                            {formErrors.area && (
-                              <div className="text-red-400 text-xs mt-1 px-2">
-                                {formErrors.area}
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -354,15 +287,9 @@ const FirmaPedidos = () => {
                             <input
                               className=" border-b border-black text-xs text-center px-2 h-8"
                               type="text"
-                              name="coordi"
-                              value={formData.coordi}
-                              onChange={handleInputChange}
+                              name="jefeOficina"
+                              value={formData.jefeOficina}
                             />
-                            {formErrors.coordi && (
-                              <div className="text-red-400 text-xs mt-1 px-2">
-                                {formErrors.coordi}
-                              </div>
-                            )}
                           </div>
                         </div>
 
@@ -372,21 +299,9 @@ const FirmaPedidos = () => {
                         <input
                           className=" border-b border-black text-xs text-center h-8 w-20"
                           type="text"
-                          name="cedCoordi"
-                          value={formData.cedCoordi}
-                          onChange={handleInputChange}
-                          onKeyPress={(e) => {
-                            if (!/[0-9]/.test(e.key)) {
-                              e.preventDefault();
-                            }
-                          }}
-                          maxLength={10}
+                          name="cedulaJefeOficina"
+                          value={formData.cedulaJefeOficina}
                         />
-                        {formErrors.Documento && (
-                          <div className="text-red-400 text-xs mt-1 px-2">
-                            {formErrors.Documento}
-                          </div>
-                        )}
                       </div>
 
                       <div className="flex flex-col md:flex-row justify-between gap-x-4 mb-4">
@@ -399,15 +314,9 @@ const FirmaPedidos = () => {
                             <input
                               className=" border-b border-black text-xs text-center px-2 h-8"
                               type="text"
-                              name="instructor"
-                              value={formData.instructor}
-                              onChange={handleInputChange}
+                              name="servidorAsignado"
+                              value={formData.servidorAsignado}
                             />
-                            {formErrors.instructor && (
-                              <div className="text-red-400 text-xs mt-1 px-2">
-                                {formErrors.instructor}
-                              </div>
-                            )}
                           </div>
                         </div>
 
@@ -418,21 +327,9 @@ const FirmaPedidos = () => {
                           <input
                             className=" border-b border-black text-xs text-center h-8 w-20"
                             type="text"
-                            name="cedInstructor"
-                            value={formData.cedInstructor}
-                            onChange={handleInputChange}
-                            onKeyPress={(e) => {
-                              if (!/[0-9]/.test(e.key)) {
-                                e.preventDefault();
-                              }
-                            }}
-                            maxLength={10}
+                            name="cedulaServidor"
+                            value={formData.cedulaServidor}
                           />
-                          {formErrors.Documento && (
-                            <div className="text-red-400 text-xs mt-1 px-2">
-                              {formErrors.Documento}
-                            </div>
-                          )}
                         </div>
                       </div>
                       <div>
@@ -446,7 +343,6 @@ const FirmaPedidos = () => {
                               type="text"
                               name="correo"
                               value={formData.correo}
-                              onChange={handleInputChange}
                             />
                           </div>
                         </div>

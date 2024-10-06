@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { api } from "../api/token";
 import { useNavigate } from "react-router-dom";
 import { saveAs } from "file-saver";
 import SidebarCoord from "../components/SidebarCoord";
@@ -7,36 +8,94 @@ import MUIDataTable from "mui-datatables";
 import IconButton from "@mui/material/IconButton";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import * as XLSX from "xlsx";
-import { toast } from "react-toastify";
+import clsx from "clsx";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const AutorizarPedidos = () => {
   const [sidebarToggleCoord, setsidebarToggleCoord] = useState(false);
-  const [selectedPedido, setSelectedPedido] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [data, setData] = useState([
     {
-      Código: "",
-      Nombre: "",
-      Fecha_de_Ingreso: "",
-      Marca: "",
-      Condición: "",
-      Descripción: "",
+      createdAt: "",
+      servidorAsignado: "",
+      codigoFicha: "",
+      area: "",
+      EstadoId: "",
     },
   ]);
 
-  const handleViewClick = (rowIndex) => {
-    // const Pedido = data[rowIndex];
-    // setSelectedPedido(Pedido);
-    navigate("/FirmaPedidos");
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        const response = await api.get("/Estado");
+        const filteredEstados = response.data.filter(
+          (estado) => estado.id === 5 || estado.id === 6 || estado.id === 7
+        );
+        setEstados(filteredEstados);
+      } catch (error) {
+        showToastError("Error al cargar los estados");
+      }
+    };
+
+    fetchStates();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get("/pedido");
+      const data = response.data;
+
+      const pedidosFormatted = data.map((pedido) => ({
+        id: pedido.id,
+        createdAt: pedido.createdAt,
+        servidorAsignado: pedido.servidorAsignado,
+        codigoFicha: pedido.codigoFicha,
+        area: pedido.area,
+        estadoName: pedido.Estado?.estadoName || "",
+      }));
+
+      setData(pedidosFormatted);
+    } catch (error) {
+      console.error("Error fetching pedidos data:", error);
+      toast.error("Error al cargar los datos de pedidos", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+    setLoading(false);
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleViewClick = (rowIndex) => {
+    const Pedido = data[rowIndex]; 
+    navigate("/firmaPedidos", { state: { pedidoId: Pedido.id } }); 
+  }; 
+
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); 
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
 
   const columns = [
     {
-      name: "Código",
+      name: "createdAt",
       label: "FECHA",
       options: {
+
         customHeadRender: (columnMeta) => (
           <th
             key={columnMeta.label}
@@ -45,11 +104,15 @@ const AutorizarPedidos = () => {
             {columnMeta.label}
           </th>
         ),
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
+        customBodyRender: (value) => (
+        <div className="text-center"> 
+         {formatDate(value)} 
+         </div>
+        ),
       },
     },
     {
-      name: "Nombre",
+      name: "servidorAsignado",
       label: "NOMBRE SOLICITANTE",
       options: {
         customHeadRender: (columnMeta) => (
@@ -64,7 +127,7 @@ const AutorizarPedidos = () => {
       },
     },
     {
-      name: "Fecha_de_Ingreso",
+      name: "codigoFicha",
       label: "FICHA",
       options: {
         customHeadRender: (columnMeta) => (
@@ -79,7 +142,7 @@ const AutorizarPedidos = () => {
       },
     },
     {
-      name: "Marca",
+      name: "area",
       label: "ÁREA",
       options: {
         customHeadRender: (columnMeta) => (
@@ -94,7 +157,7 @@ const AutorizarPedidos = () => {
       },
     },
     {
-      name: "Marca",
+      name: "estadoName",
       label: "ESTADO",
       options: {
         customHeadRender: (columnMeta) => (
@@ -105,11 +168,22 @@ const AutorizarPedidos = () => {
             {columnMeta.label}
           </th>
         ),
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
+        customBodyRender: (value) => (
+          <div
+            className={clsx("text-center", {
+              "text-green-500": value === "ENTREGADO",
+              "text-orange-500": value === "EN PROCESO",
+              "text-red-500": value === "PENDIENTE",
+            })}
+          >
+            {value}
+          </div>
+        ),
+        setCellHeaderProps: () => ({ style: { textAlign: "center" } }),
       },
     },
     {
-      name: "edit",
+      name: "ver",
       label: "VER DETALLE",
       options: {
         customHeadRender: (columnMeta) => (
@@ -243,6 +317,7 @@ const AutorizarPedidos = () => {
           </p>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

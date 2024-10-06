@@ -1,200 +1,179 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../api/token";
+import { useNavigate } from "react-router-dom";
 import { saveAs } from "file-saver";
-import { toast } from "react-toastify";
-import Sidebar from "../components/Sidebar";
+import SidebarCoord from "../components/SidebarCoord";
 import Home from "../components/Home";
 import MUIDataTable from "mui-datatables";
-import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
-import EditPedidoModal from "../components/EditPedidoModal";
-import clsx from "clsx";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import * as XLSX from "xlsx";
+import clsx from "clsx";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Pedidos = () => {
-  const [sidebarToggle, setSidebarToggle] = useState(false);
-  const [data, setData] = useState([]);
-  const [isOpenEditModal, setIsOpenEditModal] = useState(false);
+  const [sidebarToggleCoord, setsidebarToggleCoord] = useState(false);
   const [selectedPedido, setSelectedPedido] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const fetchData = async () => {
-    // console.time('fetchData');
-    setLoading(true);
-    try {
-      const response = await api.get("/pedido", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      const pedidosConRolesYEstados = response.data.map((pedido) => ({
-        ...pedido,
-        nombreUsuario: pedido.Usuario ? pedido.Usuario.nombre : "Desconocido",
-        nombreinstructor: pedido.Instructores
-          ? pedido.Instructores.nombre
-          : "Desconocido",
-        ficha: pedido.Fichas ? pedido.Fichas.NumeroFicha : "Desconocido",
-        nombreproducto: pedido.Producto
-          ? pedido.Producto.nombre
-          : "Desconocido",
-        unidadNombre: pedido.UnidadMedida
-          ? pedido.UnidadMedida.nombre
-          : "Desconocido",
-        estadoName: pedido.Estado ? pedido.Estado.estadoName : "Desconocido",
-      }));
-
-      pedidosConRolesYEstados.sort((a, b) => a.id - b.id);
-      setData(pedidosConRolesYEstados);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      toast.error("Error al cargar los datos de pedidos", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    }
-    setLoading(false);
-    // console.timeEnd('fetchData');
-  };
+  const [pedidos, setPedidos] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const [data, setData] = useState([
+    {
+      createdAt: "",
+      servidorAsignado: "",
+      codigoFicha: "",
+      area: "",
+      EstadoId: "",
+    },
+  ]);
 
   useEffect(() => {
-    fetchData();
+    const fetchPedidos = async () => {
+      try {
+        const response = await api.get("/pedidos"); 
+        setPedidos(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error al obtener pedidos:", error);
+        toast.error("Error al cargar los pedidos.", { position: "top-right" });
+        setLoading(false);
+      }
+    };
+
+    fetchPedidos();
   }, []);
 
-  const handleEditClick = (rowIndex) => {
-    const pedido = data[rowIndex];
-    setSelectedPedido(pedido);
-    setIsOpenEditModal(true);
-  };
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        const response = await api.get("/Estado");
+        const filteredEstados = response.data.filter(
+          (estado) => estado.id === 5 || estado.id === 6 || estado.id === 7
+        );
+        setEstados(filteredEstados);
+      } catch (error) {
+        showToastError("Error al cargar los estados");
+      }
+    };
 
-  const handleCloseEditModal = (updatedPedido) => {
-    if (updatedPedido) {
-      fetchData();
-    }
+    fetchStates();
+  }, []);
 
-    setSelectedPedido(null);
-  };
-
-  const handleCloseAddModal = (newPedido) => {
-    if (newPedido) {
-      fetchData();
-    }
-    setIsOpenAddModal(false);
+  const handleViewClick = (rowIndex) => {
+    // const Pedido = data[rowIndex];
+    // setSelectedPedido(Pedido);
+    navigate("/gestionarPedidos");
   };
 
   const columns = [
     {
-      name: "id",
-      label: "id",
+      name: "createdAt",
+      label: "FECHA",
       options: {
+        customHeadRender: (columnMeta) => (
+          <th
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
+          </th>
+        ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "nombreproducto",
-      label: "Producto",
+      name: "servidorAsignado",
+      label: "NOMBRE SOLICITANTE",
       options: {
+        customHeadRender: (columnMeta) => (
+          <th
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
+          </th>
+        ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "codigo",
-      label: "codigo",
+      name: "codigoFicha",
+      label: "FICHA",
       options: {
+        customHeadRender: (columnMeta) => (
+          <th
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
+          </th>
+        ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "cantidadSolicitada",
-      label: "Cantidad solicitada",
+      name: "area",
+      label: "ÁREA",
       options: {
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
-      },
-    },
-    {
-      name: "cantidadEntregada",
-      label: "cantidad entregada",
-      options: {
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
-      },
-    },
-
-    {
-      name: "unidadNombre",
-      label: "unidad de medida",
-      options: {
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
-      },
-    },
-    {
-      name: "nombreinstructor",
-      label: "instructor",
-      options: {
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
-      },
-    },
-    {
-      name: "ficha",
-      label: "ficha",
-      options: {
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
-      },
-    },
-    {
-      name: "fechaPedido",
-      label: "fecha",
-      options: {
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
-      },
-    },
-    {
-      name: "nombreUsuario",
-      label: "usuario",
-      options: {
+        customHeadRender: (columnMeta) => (
+          <th
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
+          </th>
+        ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
       name: "estadoName",
-      label: "Estado",
+      label: "ESTADO",
       options: {
+        customHeadRender: (columnMeta) => (
+          <th
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
+          </th>
+        ),
         customBodyRender: (value) => (
           <div
             className={clsx("text-center", {
-              "text-green-500": value === "ACTIVO",
-              "text-red-500": value === "INACTIVO",
-              "text-gray-500": value === "AGOTADO",
-              "text-yellow-500": value === "PENDIENTE",
-              "text-blue-500": value === "EN PROCESO",
-              "text-orange-500": value === "EN USO",
-              "text-green-300": value === "ENTREGADO",
-              "text-purple-500": value === "DEVUELTO",
+              "text-green-500": value === "ENTREGADO",
+              "text-orange-500": value === "EN PROCESO",
+              "text-red-500": value === "PENDIENTE",
             })}
           >
             {value}
           </div>
         ),
+        setCellHeaderProps: () => ({ style: { textAlign: "center" } }),
       },
     },
     {
-      name: "edit",
-      label: "Editar",
+      name: "ver",
+      label: "VER DETALLE",
       options: {
+        customHeadRender: (columnMeta) => (
+          <th
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
+          </th>
+        ),
         filter: false,
         customBodyRender: (value, tableMeta, updateValue) => (
           <div className="flex items-center justify-center">
             <IconButton
-              onClick={() => handleEditClick(tableMeta.rowIndex)}
+              onClick={() => handleViewClick(tableMeta.rowIndex)}
               color="primary"
-              aria-label="edit"
+              aria-label="view"
             >
-              <EditIcon />
+              <VisibilityIcon />
             </IconButton>
           </div>
         ),
@@ -204,16 +183,14 @@ const Pedidos = () => {
 
   const handleCustomExport = (rows) => {
     const exportData = rows.map((row) => ({
-      FechaPedido: row.data[0],
-      CantidadEntregada: row.data[1],
-      IDpedido: row.data[2],
-      IDFicha: row.data[3],
-      Id: row.data[4],
-      CantidadSolicitada: row.data[5],
-      Codigo: row.data[6],
-      IDProducto: row.data[7],
-      IDInstructor: row.data[8],
+      Código: row.data[0],
+      Nombre: row.data[1],
+      "Fecha de Ingreso": row.data[2],
+      Marca: row.data[3],
+      Condición: row.data[4],
+      Descripción: row.data[5],
     }));
+
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Pedidos");
@@ -226,44 +203,39 @@ const Pedidos = () => {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar sidebarToggle={sidebarToggle} />
+    <div className="flex min-h-screen bg-fondo">
+      <SidebarCoord sidebarToggleCoord={sidebarToggleCoord} />
       <div
-        className={`flex flex-col flex-grow p-6 bg-gray-100 ${
-          sidebarToggle ? "ml-64" : ""
+        className={`flex flex-col flex-grow p-4 bg-fondo ${
+          sidebarToggleCoord ? "ml-64" : ""
         } mt-16`}
       >
         <Home
-          sidebarToggle={sidebarToggle}
-          setSidebarToggle={setSidebarToggle}
+          sidebarToggle={sidebarToggleCoord}
+          setSidebarToggle={setsidebarToggleCoord}
         />
-        <div className="flex justify-end mt-2">
-          <button className="btn-primary" onClick={handleOpenAddModal}>
-            Agregar Pedido
-          </button>
-        </div>
         <div className="flex-grow flex items-center justify-center">
-          <div className="max-w-9xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             {loading ? (
-              <div className="text-center">Cargando pedidos...</div>
+              <div className="text-center">Cargando Pedidos...</div>
             ) : (
               <MUIDataTable
-                title={<span className="custom-title">PEDIDOS</span>}
+                title={
+                  <span className="custom-title">
+                    Pedidos de Productos consumibles
+                  </span>
+                }
                 data={data}
                 columns={columns}
                 options={{
                   responsive: "standard",
                   selectableRows: "none",
                   download: true,
-                  print: true,
-                  viewColumns: true,
-                  filter: true,
-                  search: true,
                   rowsPerPage: 5,
                   rowsPerPageOptions: [5, 10, 15],
                   setTableProps: () => {
                     return {
-                      className: "custom-table",
+                      className: "custom-tables",
                     };
                   },
                   onDownload: (buildHead, buildBody, columns, data) => {
@@ -278,29 +250,29 @@ const Pedidos = () => {
                     pagination: {
                       next: "Siguiente",
                       previous: "Anterior",
-                      rowsPerPage: "Filas por página:",
+                      rowsPerPage: "Filas por página",
                       displayRows: "de",
                     },
                     toolbar: {
                       search: "Buscar",
                       downloadCsv: "Descargar CSV",
                       print: "Imprimir",
-                      viewColumns: "Mostrar Columnas",
-                      filterTable: "Filtrar Tabla",
+                      viewColumns: "Mostrar columnas",
+                      filterTable: "Filtrar tabla",
                     },
                     filter: {
-                      all: "Todo",
+                      all: "Todos",
                       title: "FILTROS",
                       reset: "REINICIAR",
                     },
                     viewColumns: {
-                      title: "Mostrar Columnas",
+                      title: "Mostrar columnas",
                       titleAria: "Mostrar/Ocultar Columnas",
                     },
                     selectedRows: {
                       text: "fila(s) seleccionada(s)",
                       delete: "Eliminar",
-                      deleteAria: "Eliminar filas seleccionadas",
+                      deleteAria: "Eliminar fila seleccionada",
                     },
                   },
                 }}
@@ -309,13 +281,7 @@ const Pedidos = () => {
           </div>
         </div>
       </div>
-      {selectedPedido && (
-        <EditPedidoModal
-          isOpen={isOpenEditModal}
-          onClose={handleCloseEditModal}
-          pedido={selectedPedido}
-        />
-      )}
+      <ToastContainer />
     </div>
   );
 };

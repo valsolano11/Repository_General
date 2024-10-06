@@ -1,32 +1,52 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom"; 
 import MUIDataTable from "mui-datatables";
+import { api } from "../api/token";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const TablaPedidosFirma = () => {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState([]);
+  const { id } = useParams();
+  const location = useLocation();
+  const [pedido, setPedido] = useState(null);
+  const { pedidoId } = location.state || {};
+  const [pedidoData, setPedidoData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState([
+    {
+      ProductoId: "",
+      nombre: "",
+      UnidadMedidaId: "",
+      cantidadSolicitar: "",
+      observaciones: "",
+    },
+  ]);
 
-  const fetchData = async () => {
+  const fetchPedido  = async () => {
     setLoading(true);
     try {
-      const response = [
-        {
-          FechaPedido: "",
-          CantidadEntregada: "",
-          IDUsuario: "",
-          IDFicha: "",
-          Id: "",
-          CantidadSolicitada: "",
-          Codigo: "",
-          IDProducto: "",
-          IDInstructor: "",
-        },
-      ];
-
-      setData(response);
+      const response = await api.get(`/pedido/${id}`);
+      setPedido(response.data);
+  
+      const pedidosFormatted = data.map((pedido, index) => ({
+        item: index + 1, 
+        nombre: pedido.nombre,
+        UnidadMedidaId: pedido.UnidadMedidaId,
+        cantidadSolicitar: pedido.cantidadSolicitar,
+        observaciones: pedido.observaciones,
+      }));
+  
+      setData(pedidosFormatted);
+      setData({
+        item: index + 1, 
+        nombre: pedido.nombre,
+        UnidadMedidaId: pedido.UnidadMedidaId,
+        cantidadSolicitar: pedido.cantidadSolicitar,
+        observaciones: pedido.observaciones,
+      })
     } catch (error) {
-      console.error("Error fetching loan data:", error);
+      console.error("Error fetching pedidos data:", error);
       toast.error("Error al cargar los datos de pedidos", {
         position: "top-right",
         autoClose: 2000,
@@ -38,15 +58,15 @@ const TablaPedidosFirma = () => {
       });
     }
     setLoading(false);
-  };
+  };  
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchPedido ();
+  }, [id]);
 
   const columns = [
     {
-      name: "FechaPedido",
+      name: "item",
       label: "ITEM",
       options: {
         customHeadRender: (columnMeta) => (
@@ -61,7 +81,7 @@ const TablaPedidosFirma = () => {
       },
     },
     {
-      name: "CantidadEntregada",
+      name: "nombre",
       label: "NOMBRE PRODUCTO",
       options: {
         customHeadRender: (columnMeta) => (
@@ -76,7 +96,7 @@ const TablaPedidosFirma = () => {
       },
     },
     {
-      name: "IDUsuario",
+      name: "UnidadMedidaId",
       label: "UNIDAD DE MEDIDA",
       options: {
         customHeadRender: (columnMeta) => (
@@ -91,7 +111,7 @@ const TablaPedidosFirma = () => {
       },
     },
     {
-      name: "IDFicha",
+      name: "cantidadSolicitar",
       label: "CANTIDAD A SOLICITAR",
       options: {
         customHeadRender: (columnMeta) => (
@@ -106,7 +126,7 @@ const TablaPedidosFirma = () => {
       },
     },
     {
-      name: "Id",
+      name: "observaciones",
       label: "OBSERVACIONES",
       options: {
         customHeadRender: (columnMeta) => (
