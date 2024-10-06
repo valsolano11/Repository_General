@@ -1,26 +1,39 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import { Op, ValidationError } from "sequelize"; 
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import { Op, ValidationError } from "sequelize";
 import Producto from "../../models/Producto.js";
 import Estado from "../../models/Estado.js";
 import Pedido from "../../models/Pedido.js";
 import PedidoProducto from "../../models/PedidoProducto.js";
-import cronJob from "node-cron"; 
+import cronJob from "node-cron";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export const crearPedido = async (req, res) => {
-  const { codigoFicha, area,correo, jefeOficina, cedulaJefeOficina, servidorAsignado, cedulaServidor, productos } = req.body;
+  const {
+    codigoFicha,
+    area,
+    correo,
+    jefeOficina,
+    cedulaJefeOficina,
+    servidorAsignado,
+    cedulaServidor,
+    productos,
+  } = req.body;
 
   console.log("Datos recibidos para crear el pedido:", req.body);
 
   try {
-    const estadoPendiente = await Estado.findOne({ where: { estadoName: "PENDIENTE" } });
+    const estadoPendiente = await Estado.findOne({
+      where: { estadoName: "PENDIENTE" },
+    });
     if (!estadoPendiente) {
-      return res.status(404).json({ message: "El estado 'PENDIENTE' no existe." });
+      return res
+        .status(404)
+        .json({ message: "El estado 'PENDIENTE' no existe." });
     }
 
     const nuevoPedido = await Pedido.create({
@@ -38,13 +51,17 @@ export const crearPedido = async (req, res) => {
     for (const producto of productos) {
       if (!producto.cantidadSolicitar || producto.cantidadSolicitar <= 0) {
         return res.status(400).json({
-          message: `La cantidad solicitada para el producto con id ${producto.ProductoId} no puede ser nula o cero.`
+          message: `La cantidad solicitada para el producto con id ${producto.ProductoId} no puede ser nula o cero.`,
         });
       }
 
       const productoData = await Producto.findByPk(producto.ProductoId);
       if (!productoData) {
-        return res.status(404).json({ message: `Producto con id ${producto.ProductoId} no encontrado.` });
+        return res
+          .status(404)
+          .json({
+            message: `Producto con id ${producto.ProductoId} no encontrado.`,
+          });
       }
 
       await PedidoProducto.create({
@@ -56,7 +73,7 @@ export const crearPedido = async (req, res) => {
       });
     }
 
-    cronJob.schedule('0 0 * * *', async () => {
+    cronJob.schedule("0 0 * * *", async () => {
       const fechaLimite = new Date();
       fechaLimite.setDate(fechaLimite.getDate() - 3);
 
@@ -69,18 +86,19 @@ export const crearPedido = async (req, res) => {
 
       if (pedidosPendientes.length > 0) {
         await Pedido.destroy({
-          where: { id: { [Op.in]: pedidosPendientes.map(p => p.id) } },
+          where: { id: { [Op.in]: pedidosPendientes.map((p) => p.id) } },
         });
       }
     });
 
-    return res.status(201).json({ message: "Pedido creado con éxito", pedido: nuevoPedido });
-
+    return res
+      .status(201)
+      .json({ message: "Pedido creado con éxito", pedido: nuevoPedido });
   } catch (error) {
     if (error instanceof ValidationError) {
       return res.status(400).json({
         message: "Error de validación",
-        details: error.errors.map(err => err.message)
+        details: error.errors.map((err) => err.message),
       });
     }
     console.error("Error al crear el pedido:", error);
@@ -122,7 +140,11 @@ export const getPedido = async (req, res) => {
         {
           model: Producto,
           through: {
-            attributes: ['cantidadSolicitar', 'cantidadSalida', 'observaciones'],
+            attributes: [
+              "cantidadSolicitar",
+              "cantidadSalida",
+              "observaciones",
+            ],
           },
         },
         { model: Estado },
@@ -130,7 +152,9 @@ export const getPedido = async (req, res) => {
     });
 
     if (!pedido) {
-      return res.status(404).json({ message: `Pedido con id ${id} no encontrado.` });
+      return res
+        .status(404)
+        .json({ message: `Pedido con id ${id} no encontrado.` });
     }
 
     return res.status(200).json(pedido);
@@ -140,38 +164,52 @@ export const getPedido = async (req, res) => {
   }
 };
 
-
 export const actualizarPedido = async (req, res) => {
-
-  const { id } = req.params; 
-  const { filename } = req.file || {}; 
+  const { id } = req.params;
+  const { filename } = req.file || {}; // Manejo seguro de filename
 
   console.log("Datos recibidos para actualizar:", req.body);
+  console.log("Archivo subido:", req.file); // Verificar si el archivo se está recibiendo
 
   try {
     const pedido = await Pedido.findByPk(id);
     if (!pedido) {
-      return res.status(404).json({ message: `Pedido con id ${id} no encontrado.` });
+      return res
+        .status(404)
+        .json({ message: `Pedido con id ${id} no encontrado.` });
     }
 
-    const estadoEnProceso = await Estado.findOne({ where: { estadoName: "EN PROCESO" } });
+    const estadoEnProceso = await Estado.findOne({
+      where: { estadoName: "EN PROCESO" },
+    });
     if (!estadoEnProceso) {
-      return res.status(404).json({ message: "El estado 'EN PROCESO' no existe." });
+      return res
+        .status(404)
+        .json({ message: "El estado 'EN PROCESO' no existe." });
     }
 
-    const firmaPath = path.join(__dirname, '../../uploads', filename); 
-    pedido.firma = firmaPath;
-    pedido.EstadoId = estadoEnProceso.id; 
-    
-    await pedido.save(); 
+    // Si se ha subido un archivo de firma, actualizar la ruta de la firma
+    if (req.file && filename) {
+      const firmaPath = path.join(__dirname, "../../uploads", filename);
+      pedido.firma = firmaPath;
+    } else {
+      console.log("No se ha subido ningún archivo de firma.");
+    }
 
-    return res.status(200).json({ message: "Pedido actualizado con éxito", pedido });
+    // Actualizar el estado a "EN PROCESO"
+    pedido.EstadoId = estadoEnProceso.id;
 
+    // Guardar los cambios
+    await pedido.save();
+
+    return res
+      .status(200)
+      .json({ message: "Pedido actualizado con éxito", pedido });
   } catch (error) {
     if (error instanceof ValidationError) {
       return res.status(400).json({
         message: "Error de validación",
-        details: error.errors.map(err => err.message)
+        details: error.errors.map((err) => err.message),
       });
     }
     console.error("Error al actualizar el pedido:", error);
