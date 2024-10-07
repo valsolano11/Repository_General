@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { api } from "../api/token";
 import { NavLink, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -7,25 +8,25 @@ import siga from "/Siga.png";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { FaGripLinesVertical } from "react-icons/fa6";
 import TablaPedidos from "../components/TablaPedidos";
-import Firmas from "../components/Firmas";
 
 const PedidosIntructores = () => {
-  const [formErrors, setFormErrors] = useState({});
-  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    nombre: "",
-    Documento: "",
-    fecha: "",
-    ficha: "",
+    codigoFicha: "",
     area: "",
-    coordi: "",
-    cedCoordi: "",
-    instructor: "",
-    cedInstructor: "",
+    jefeOficina: "",
+    cedulaJefeOficina: "",
+    servidorAsignado: "",
+    cedulaServidor: "",
     correo: "",
-    item: "",
-    codigoSena: "",
+    productos: [
+      {
+        ProductoId: "",
+        cantidadSolicitar: "",
+        observaciones: "",
+      },
+    ],
   });
+
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -39,7 +40,6 @@ const PedidosIntructores = () => {
   const [accordionStates, setAccordionStates] = useState({
     datos: false,
     productos: false,
-    firmas: false,
   });
 
   const toggleAccordion = (section) => {
@@ -49,12 +49,25 @@ const PedidosIntructores = () => {
     }));
   };
 
+  const [formErrors, setFormErrors] = useState({});
+
+  const showToastError = (message) => {
+    toast.error(message, {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+  };
+
   const validateInput = (name, value) => {
     let errorMessage = "";
-    if (name === "area" || name === "coordi" || name === "instructor") {
-      const nameRegex = /^[A-Za-z\s-_\u00C0-\u017F]+$/;
+    if (["area", "jefeOficina", "servidorAsignado"].includes(name)) {
+      const nameRegex = /^[A-Za-z\s]+$/;
       if (!nameRegex.test(value) || /\d/.test(value)) {
-        errorMessage = "No puede contener caracteres especiales.";
+        errorMessage = "No puede contener números o caracteres especiales.";
       }
     }
     return errorMessage;
@@ -67,87 +80,73 @@ const PedidosIntructores = () => {
       ...prevErrors,
       [name]: errorMessage,
     }));
-
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
 
-  const showToastError = (message) => {
-    toast.error(message, {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+  const handleProductChange = (index, updatedProduct) => {
+    console.log("Producto actualizado en el índice:", index, updatedProduct); 
+    const updatedProducts = [...formData.productos];
+    updatedProducts[index] = updatedProduct;
+    setFormData({ ...formData, productos: updatedProducts });
+    console.log("Productos después de la actualización:", updatedProducts); 
   };
 
-  const handleCreate = (currentSection) => {
-    const {
-      nombre,
-      Documento,
-      ficha,
-      fecha,
-      area,
-      coordi,
-      cedCoordi,
-      instructor,
-      cedInstructor,
-      correo,
-    } = formData;
-    const areaError = validateInput("area", area);
-    const coordiError = validateInput("coordi", coordi);
-    const instructorError = validateInput("instructor", instructor);
+  const handleCreate = async () => {
+    console.log("Estado de formData antes de enviar:", formData);
 
-    if (areaError || coordiError || instructorError) {
-      setFormErrors({
-        area: areaError,
-        coordi: coordiError,
-        instructor: instructorError,
-      });
-      showToastError("Por favor, corrige los errores antes de agregar.");
-      return;
-    }
+    const {
+      codigoFicha,
+      area,
+      jefeOficina,
+      cedulaJefeOficina,
+      servidorAsignado,
+      cedulaServidor,
+      correo,
+      productos,
+    } = formData;
+
+    console.log("Datos a enviar:", formData);
 
     if (
-      !nombre ||
-      !Documento ||
-      !fecha ||
-      !ficha ||
+      !codigoFicha ||
       !area ||
-      !coordi ||
-      !cedCoordi ||
-      !instructor ||
-      !cedInstructor ||
-      !correo
+      !jefeOficina ||
+      !cedulaJefeOficina ||
+      !servidorAsignado ||
+      !cedulaServidor ||
+      !correo ||
+      !productos.some((p) => p.ProductoId && p.cantidadSolicitar)
     ) {
-      showToastError("Todos los campos son obligatorios, incluyendo la fecha.");
+      showToastError("Todos los campos son obligatorios.");
       return;
     }
 
-    // Cerrar el acordeón actual y abrir el siguiente
-    if (currentSection === "datos") {
-      setAccordionStates({
-        datos: false,
-        productos: true,
-        firmas: false,
-      });
-    } else if (currentSection === "productos") {
-      setAccordionStates({
-        datos: false,
-        productos: false,
-        firmas: true,
-      });
-    } else if (currentSection === "firmas") {
-      setAccordionStates({
-        datos: false,
-        productos: false,
-        firmas: false,
-      });
+    try {
+      const response = await api.post(
+        "http://localhost:9100/pedido",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Respuesta del servidor:", response); 
+
+      // Verifica si la respuesta es exitosa
+      if (response.status === 201) {
+        toast.success("Pedido creado con éxito.");
+      } else {
+        const errorData = await response.json();
+        showToastError(errorData.message || "Error al crear el pedido.");
+      }
+    } catch (error) {
+      console.error("Error en la comunicación con el servidor:", error); 
+      showToastError("Error en la comunicación con el servidor.");
     }
   };
 
@@ -252,18 +251,6 @@ const PedidosIntructores = () => {
                           readOnly
                         />
                       </div>
-                      <div className="flex flex-row min-w-[200px] w-full md:w-1/3">
-                        <label className="mb-1 font-bold text-xs mt-2">
-                          Fecha de Solicitud*
-                        </label>
-                        <input
-                          className="bg-grisClaro border-b border-black text-xs px-2 h-8"
-                          type="date"
-                          name="fecha"
-                          value={formData.fecha}
-                          onChange={handleInputChange}
-                        />
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -290,8 +277,8 @@ const PedidosIntructores = () => {
                       <input
                         className=" border-b border-black text-xs text-center h-8 w-20"
                         type="text"
-                        name="ficha"
-                        value={formData.ficha}
+                        name="codigoFicha"
+                        value={formData.codigoFicha}
                         onChange={handleInputChange}
                         onKeyPress={(e) => {
                           if (!/[0-9]/.test(e.key)) {
@@ -336,13 +323,13 @@ const PedidosIntructores = () => {
                         <input
                           className=" border-b border-black text-xs text-center px-2 h-8"
                           type="text"
-                          name="coordi"
-                          value={formData.coordi}
+                          name="jefeOficina"
+                          value={formData.jefeOficina}
                           onChange={handleInputChange}
                         />
-                        {formErrors.coordi && (
+                        {formErrors.jefeOficina && (
                           <div className="text-red-400 text-xs mt-1 px-2">
-                            {formErrors.coordi}
+                            {formErrors.jefeOficina}
                           </div>
                         )}
                       </div>
@@ -354,8 +341,8 @@ const PedidosIntructores = () => {
                     <input
                       className=" border-b border-black text-xs text-center h-8 w-20"
                       type="text"
-                      name="cedCoordi"
-                      value={formData.cedCoordi}
+                      name="cedulaJefeOficina"
+                      value={formData.cedulaJefeOficina}
                       onChange={handleInputChange}
                       onKeyPress={(e) => {
                         if (!/[0-9]/.test(e.key)) {
@@ -364,9 +351,9 @@ const PedidosIntructores = () => {
                       }}
                       maxLength={10}
                     />
-                    {formErrors.Documento && (
+                    {formErrors.cedulaJefeOficina && (
                       <div className="text-red-400 text-xs mt-1 px-2">
-                        {formErrors.Documento}
+                        {formErrors.cedulaJefeOficina}
                       </div>
                     )}
                   </div>
@@ -381,13 +368,13 @@ const PedidosIntructores = () => {
                         <input
                           className=" border-b border-black text-xs text-center px-2 h-8"
                           type="text"
-                          name="instructor"
-                          value={formData.instructor}
+                          name="servidorAsignado"
+                          value={formData.servidorAsignado}
                           onChange={handleInputChange}
                         />
-                        {formErrors.instructor && (
+                        {formErrors.servidorAsignado && (
                           <div className="text-red-400 text-xs mt-1 px-2">
-                            {formErrors.instructor}
+                            {formErrors.instservidorAsignadoructor}
                           </div>
                         )}
                       </div>
@@ -400,8 +387,8 @@ const PedidosIntructores = () => {
                       <input
                         className=" border-b border-black text-xs text-center h-8 w-20"
                         type="text"
-                        name="cedInstructor"
-                        value={formData.cedInstructor}
+                        name="cedulaServidor"
+                        value={formData.cedulaServidor}
                         onChange={handleInputChange}
                         onKeyPress={(e) => {
                           if (!/[0-9]/.test(e.key)) {
@@ -410,9 +397,9 @@ const PedidosIntructores = () => {
                         }}
                         maxLength={10}
                       />
-                      {formErrors.Documento && (
+                      {formErrors.cedulaServidor && (
                         <div className="text-red-400 text-xs mt-1 px-2">
-                          {formErrors.Documento}
+                          {formErrors.cedulaServidor}
                         </div>
                       )}
                     </div>
@@ -462,7 +449,8 @@ const PedidosIntructores = () => {
                   <div className="flex flex-row justify-between w-full mb-4">
                     <TablaPedidos
                       accordionStates={accordionStates}
-                      toggleAccordion={toggleAccordion}
+                      handleProductChange={handleProductChange}
+                      productos={formData.productos}
                     />
                   </div>
                 </div>
@@ -470,7 +458,12 @@ const PedidosIntructores = () => {
             </div>
 
             <div className="flex justify-center items-center w-2/4 mt-10 mx-auto">
-              <button className="btn-black2">Enviar solicitud</button>
+              <button
+                className="btn-black2 mb-4"
+                onClick={() => handleCreate("productos")}
+              >
+                Enviar Solicitud
+              </button>
               <FaGripLinesVertical className="h-24 mx-4" />
               <div onClick={handleClick} style={{ cursor: "pointer" }}>
                 <h6 className="font-semibold">FORMATO DE HERRAMIENTAS</h6>

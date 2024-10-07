@@ -231,7 +231,6 @@ const AutorizarPedidos = () => {
     saveAs(data, "Pedidos.xlsx");
   };
 
-
   return (
     <div className="flex min-h-screen bg-fondo">
       <SidebarCoord sidebarToggleCoord={sidebarToggleCoord} />
