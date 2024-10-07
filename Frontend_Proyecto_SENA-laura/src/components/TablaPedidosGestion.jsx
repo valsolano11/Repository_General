@@ -32,7 +32,6 @@ const TablaPedidosGestion = ({ actualizarCantidadSalida }) => {
       try {
         setLoading(true);
         const response = await api.get(`/pedido/${pedidoId}`);
-
         const productosData = response.data.Productos;
 
         const pedidosFormatted = productosData.map((producto, index) => {
@@ -42,6 +41,7 @@ const TablaPedidosGestion = ({ actualizarCantidadSalida }) => {
           return {
             item: index + 1,
             nombre: producto.nombre,
+            ProductoId: producto.id,
             UnidadMedidaId: unidad ? unidad.nombre : "",
             cantidadSolicitar: producto.PedidoProducto.cantidadSolicitar,
             observaciones: producto.PedidoProducto.observaciones,
@@ -144,14 +144,16 @@ const TablaPedidosGestion = ({ actualizarCantidadSalida }) => {
         ),
         customBodyRender: (value, tableMeta) => {
           const rowIndex = tableMeta.rowIndex; 
+          const productoId = data[rowIndex].ProductoId;
           return (
             <div className="text-center">
               <input
                 type="number"
                 value={value}
-                onChange={(e) =>
-                  handleCantidadSalidaChange(rowIndex, e.target.value)
-                }
+                onChange={(e) => {
+                  const cantidadSalida = parseInt(e.target.value);
+                  actualizarCantidadSalida(rowIndex, productoId, cantidadSalida);
+              }}
                 className="border px-2 py-1 rounded"
               />
             </div>

@@ -151,6 +151,10 @@ const FirmaPedidos = () => {
     }
   };
   
+  const Navigate = () => {
+    navigate("/autPedidos");
+  }
+
   return (
     <div className="flex min-h-screen bg-grisClaro">
       <SidebarCoord sidebarToggleCoord={sidebarToggleCoord} />
@@ -448,8 +452,11 @@ const FirmaPedidos = () => {
                   )}
                 </div>
 
-                {/* Botón Enviar */}
+                {/* Botones */}
                 <div className="flex justify-center items-center w-2/4 mt-10 mx-auto">
+                  <button className="btn-danger2 mx-4" onClick={Navigate}>
+                    Atrás
+                  </button>
                 <button
                   className={`btn-black2 ${!firmaAdjunta ? "opacity-50 cursor-not-allowed" : ""}`}
                   disabled={!firmaAdjunta || loading}
