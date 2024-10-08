@@ -1,9 +1,8 @@
 import { DataTypes } from "sequelize";
 import { conexion } from "../conexion.js";
-import Usuario from "./Usuario.js";
-import Estado from "./Estado.js";
 import Subcategoria from "./Subcategoria.js";
-import UnidadMedida from "./UnidadMedida.js";
+import Estado from "./Estado.js";
+import Usuario from "./Usuario.js";
 
 const Herramienta = conexion.define(
   "Herramienta",
@@ -17,7 +16,6 @@ const Herramienta = conexion.define(
     nombre: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
       validate: {
         notEmpty: {
           msg: "El nombre de la herramienta no puede estar vacío",
@@ -34,32 +32,6 @@ const Herramienta = conexion.define(
         },
       },
     },
-    descripcion: {
-        type: DataTypes.STRING,
-        allowNull: true, // Permite valores null
-    
-    },
-    cantidadEntrada: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        notEmpty: {
-          msg: "La cantidad de entrada de la herramienta no puede estar vacía",
-        },
-      },
-    },
-    cantidadSalida: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    cantidadActual: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    VolumenTotal: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     marca: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -70,17 +42,27 @@ const Herramienta = conexion.define(
       },
     },
     condicion: {
-      type: DataTypes.ENUM("BUENO", "REGULAR", "MALO"),
+      type: DataTypes.ENUM("Bueno", "Regular", "Malo"),
       allowNull: false,
+      defaultValue: "Bueno",
       validate: {
         notEmpty: {
-          msg: "Debe especificar la condición de la herramienta",
+          msg: "La condición de la herramienta no puede estar vacía",
+        },
+        isIn: {
+          args: [["Bueno", "Regular", "Malo"]],
+          msg: "La condición debe ser 'Bueno', 'Regular' o 'Malo'",
         },
       },
     },
     observaciones: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING,
       allowNull: true,
+    },
+    fechaDeIngreso: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   {
@@ -89,9 +71,9 @@ const Herramienta = conexion.define(
   }
 );
 
-Herramienta.belongsTo(Usuario, { foreignKey: "UsuarioId" });
-Herramienta.belongsTo(Estado, { foreignKey: "EstadoId" });
+// Definición de relaciones
 Herramienta.belongsTo(Subcategoria, { foreignKey: "SubcategoriaId" });
-Herramienta.belongsTo(UnidadMedida, { foreignKey: "UnidadMedidaId" });
+Herramienta.belongsTo(Estado, { foreignKey: "EstadoId" });
+Herramienta.belongsTo(Usuario, { foreignKey: "UsuarioId" });
 
-export default Herramienta;
+export default Herramienta

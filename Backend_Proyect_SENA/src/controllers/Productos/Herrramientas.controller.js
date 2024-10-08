@@ -3,224 +3,200 @@ import Herramienta from "../../models/Herramientas.js";
 import Usuario from "../../models/Usuario.js";
 import Subcategoria from "../../models/Subcategoria.js";
 import Estado from "../../models/Estado.js";
-import UnidadDeMedida from "../../models/UnidadMedida.js";
 
-export const crearHerramientas = async (req, res) => {
+export const crearHerramienta = async (req, res) => {
     try {
-        const {
-            nombre,
-            codigo,
-            descripcion,
-            cantidadEntrada,
-            marca,
-            EstadoId,
-            SubcategoriaId,
-            UnidadMedidaId,
-            condicion,
-            observaciones,
-        } = req.body;
+        const { nombre, codigo, marca, condicion, observaciones, UsuarioId, EstadoId, SubcategoriaId } = req.body;
 
-        const UsuarioId = req.usuario.id;
-
-        const consultaCodigo = await Herramienta.findOne({
-            where: { [Op.or]: [{ codigo }] },
-        });
+        const consultaCodigo = await Herramienta.findOne({ where: { codigo } });
         if (consultaCodigo) {
-            return res.status(400).json({ error: "El código de la herramienta ya existe" });
+            return res.status(400).json({ error: 'El código de la herramienta ya existe' });
         }
 
-        // Verificar la existencia de las relaciones
         const consultaUsuario = await Usuario.findByPk(UsuarioId);
         if (!consultaUsuario) {
             return res.status(400).json({ message: "El usuario especificado no existe" });
         }
 
-        const consultaUnidad = await UnidadDeMedida.findByPk(UnidadMedidaId);
-        if (!consultaUnidad) {
-            return res.status(400).json({ message: "La unidad de medida especificada no existe" });
-        }
-
-        const consultaSubcategoria = await Subcategoria.findByPk(SubcategoriaId);
+        const consultaSubcategoria = await Subcategoria.findByPk(SubcategoriaId, {
+            include: [{ model: Estado, as: 'Estado' }]
+        });
         if (!consultaSubcategoria) {
             return res.status(400).json({ message: "La subcategoría especificada no existe" });
         }
 
-        const consultaEstado = await Estado.findByPk(EstadoId);
-        if (!consultaEstado) {
-            return res.status(400).json({ message: "El estado especificado no existe" });
+        if (consultaSubcategoria.Estado.estadoName !== 'ACTIVO') {
+            return res.status(400).json({ error: 'La subcategoría no está en estado ACTIVO' });
         }
 
-        // Inicializar cantidades
-        const cantidadSalida = 0;
-        const cantidadActual = cantidadEntrada;
-        let estadoIdActual;
-
-        // Determinar el estado inicial basado en la cantidad actual
-        if (cantidadActual < 2) {
-            const estadoAgotado = await Estado.findOne({ where: { estadoName: "AGOTADO" } });
-            if (estadoAgotado) {
-                estadoIdActual = estadoAgotado.id;
+        let estadoId = EstadoId;
+        if (condicion === 'Malo') {
+            const estadoInactivo = await Estado.findOne({ where: { estadoName: 'INACTIVO' } });
+            if (!estadoInactivo) {
+                return res.status(500).json({ error: 'Estado INACTIVO no encontrado' });
             }
+            estadoId = estadoInactivo.id;
         } else {
-            const estadoActivo = await Estado.findOne({ where: { estadoName: "ACTIVO" } });
-            if (estadoActivo) {
-                estadoIdActual = estadoActivo.id;
+            const consultaEstado = await Estado.findByPk(EstadoId);
+            if (!consultaEstado) {
+                return res.status(400).json({ message: "El estado especificado no existe" });
             }
         }
 
-        const volumenTotalCalculado = `${cantidadActual} ${consultaUnidad.sigla}`;
-
-        // Crear la herramienta
         const herramienta = await Herramienta.create({
             nombre,
             codigo,
-            descripcion,
-            cantidadEntrada,
-            cantidadSalida,
-            cantidadActual,
             marca,
             condicion,
             observaciones,
-            VolumenTotal: volumenTotalCalculado,
             UsuarioId,
-            UnidadMedidaId,
-            SubcategoriaId,
-            EstadoId: estadoIdActual || EstadoId,
+            EstadoId: estadoId,
+            SubcategoriaId
         });
 
-        res.status(201).json({
-            ...herramienta.toJSON(),
-            unidadDeMedida: consultaUnidad.nombre,
-            cantidadActual,
-        });
+        res.status(201).json(herramienta);
     } catch (error) {
         console.error("Error al crear la herramienta", error);
         res.status(500).json({ message: error.message });
     }
 };
 
-export const getAllHerramientas = async (req, res) => {
+export const getAllHerramienta = async (req, res) =>{
     try {
-        let consultaHerramienta = await Herramienta.findAll({
+        let consultaHerramieta = await Herramienta.findAll({
             attributes: null,
             include: [
-                { model: Usuario, attributes: ["nombre"] },
-                { model: Subcategoria, attributes: ["subcategoriaName"] },
-                { model: Estado, attributes: ["estadoName"] },
-                { model: UnidadDeMedida, attributes: ["nombre"] },
-            ],
+                { model: Usuario, attributes: ['nombre',] },
+                { model: Subcategoria, attributes: ['subcategoriaName'] },
+                { model: Estado, attributes: ['estadoName'] },
+            ]
         });
-        res.status(200).json(consultaHerramienta);
+        res.status(200).json(consultaHerramieta);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
-export const getHerramienta = async (req, res) => {
-    try {
-        let consultaHerramienta = await Herramienta.findByPk(req.params.id);
 
-        if (!consultaHerramienta) {
+export const getHerramienta = async (req, res) =>{
+    try {
+        let consultaHerramieta = await Herramienta.findByPk(req.params.id);
+
+        if(!consultaHerramieta){
+            return res.status(404).json({ message: "Herramienta no encontrada" });
+        }
+        res.status(200).json(consultaHerramieta)
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+
+
+export const obtenerCodigosPorNombre = async (req, res) => {
+    try {
+        const { nombre } = req.query;
+
+        if (!nombre) {
+            return res.status(400).json({ error: 'Se requiere el parámetro "nombre"' });
+        }
+
+        const herramientas = await Herramienta.findAll({
+            where: {
+                nombre: {
+                    [Op.iLike]: `%${nombre}%` 
+                },
+                estado: 'ACTIVO'
+            },
+            attributes: ['codigo']
+        });
+
+        if (herramientas.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron herramientas con ese nombre' });
+        }
+
+        const codigos = herramientas.map(herramienta => herramienta.codigo);
+        const codigosUnicos = [...new Set(codigos)]; 
+
+        res.status(200).json(codigosUnicos);
+    } catch (error) {
+        console.error("Error al obtener códigos de herramientas:", error);
+        res.status(500).json({ error: 'Error al obtener códigos de herramientas' });
+    }
+};
+
+
+
+export const putHerramienta = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nombre, codigo, marca, condicion, observaciones, UsuarioId, EstadoId, SubcategoriaId } = req.body;
+
+        const herramienta = await Herramienta.findByPk(id);
+        if (!herramienta) {
             return res.status(404).json({ message: "Herramienta no encontrada" });
         }
 
-        res.status(200).json(consultaHerramienta);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-export const actualizarHerramienta = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { nombre, descripcion, cantidadEntrada, volumen, marca, UnidadMedidaId, SubcategoriaId, EstadoId, condicion, observaciones } = req.body;
-        const UsuarioId = req.usuario.id;
-
-        const herramienta = await Herramienta.findByPk(id);
-
-        if (!herramienta) {
-            return res.status(404).json({ error: 'Herramienta no encontrada' });
-        }
-
-        if (nombre && nombre !== herramienta.nombre) {
-            const existingHerramientaNombre = await Herramienta.findOne({ where: { nombre } });
-            if (existingHerramientaNombre) {
-                return res.status(400).json({ error: 'El nombre de la herramienta ya existe' });
+        if (codigo) {
+            const consultaCodigo = await Herramienta.findOne({ where: { codigo, id: { [Op.ne]: id } } });
+            if (consultaCodigo) {
+                return res.status(400).json({ error: 'El código de la herramienta ya existe' });
             }
-        }
-
-        if (descripcion && descripcion.trim() === '') {
-            return res.status(400).json({ error: 'La descripción no puede estar vacía' });
         }
 
         if (UsuarioId) {
-            const usuario = await Usuario.findByPk(UsuarioId);
-            if (!usuario) {
-                return res.status(400).json({ error: 'El UsuarioId no existe' });
-            }
-        }
-
-        if (UnidadMedidaId) {
-            const unidadMedida = await UnidadDeMedida.findByPk(UnidadMedidaId);
-            if (!unidadMedida) {
-                return res.status(400).json({ error: 'El UnidadMedidaId no existe' });
+            const consultaUsuario = await Usuario.findByPk(UsuarioId);
+            if (!consultaUsuario) {
+                return res.status(400).json({ message: "El usuario especificado no existe" });
             }
         }
 
         if (SubcategoriaId) {
-            const subcategoria = await Subcategoria.findByPk(SubcategoriaId);
-            if (!subcategoria) {
-                return res.status(400).json({ error: 'El SubcategoriaId no existe' });
+            const consultaSubcategoria = await Subcategoria.findByPk(SubcategoriaId, {
+                include: [{ model: Estado, as: 'Estado' }]
+            });
+            if (!consultaSubcategoria) {
+                return res.status(400).json({ message: "La subcategoría especificada no existe" });
             }
+
+            if (consultaSubcategoria.Estado.estadoName !== 'ACTIVO') {
+                return res.status(400).json({ error: 'La subcategoría no está en estado ACTIVO' });
+            }
+            herramienta.SubcategoriaId = SubcategoriaId;
         }
 
-        if (EstadoId) {
-            const estado = await Estado.findByPk(EstadoId);
-            if (!estado) {
-                return res.status(400).json({ error: 'El EstadoId no existe' });
+        if (condicion === 'Malo') {
+            const estadoInactivo = await Estado.findOne({ where: { estadoName: 'INACTIVO' } });
+            if (!estadoInactivo) {
+                return res.status(500).json({ error: 'Estado INACTIVO no encontrado' });
             }
+            herramienta.EstadoId = estadoInactivo.id;
+        } else if (EstadoId) {
+            const consultaEstado = await Estado.findByPk(EstadoId);
+            if (!consultaEstado) {
+                return res.status(400).json({ message: "El estado especificado no existe" });
+            }
+            herramienta.EstadoId = EstadoId;
         }
 
-        // Actualizar cantidad y estado
-        if (cantidadEntrada !== undefined) {
-            herramienta.cantidadEntrada = cantidadEntrada;
-            herramienta.cantidadSalida = 0;
-            herramienta.cantidadActual = cantidadEntrada;
-
-            let estadoIdActual;
-            if (cantidadEntrada < 2) {
-                const estadoAgotado = await Estado.findOne({ where: { estadoName: "AGOTADO" } });
-                if (estadoAgotado) {
-                    estadoIdActual = estadoAgotado.id;
-                }
-            } else {
-                const estadoActivo = await Estado.findOne({ where: { estadoName: "ACTIVO" } });
-                if (estadoActivo) {
-                    estadoIdActual = estadoActivo.id;
-                }
-            }
-            herramienta.EstadoId = estadoIdActual;
-        }
-
-        herramienta.nombre = nombre !== undefined ? nombre : herramienta.nombre;
-        herramienta.volumen = volumen !== undefined ? volumen : herramienta.volumen;
-        herramienta.descripcion = descripcion !== undefined ? descripcion : herramienta.descripcion;
-        herramienta.marca = marca !== undefined ? marca : herramienta.marca;
-        herramienta.UnidadMedidaId = UnidadMedidaId !== undefined ? UnidadMedidaId : herramienta.UnidadMedidaId;
-        herramienta.SubcategoriaId = SubcategoriaId !== undefined ? SubcategoriaId : herramienta.SubcategoriaId;
-        herramienta.condicion = condicion !== undefined ? condicion : herramienta.condicion;
-        herramienta.observaciones = observaciones !== undefined ? observaciones : herramienta.observaciones;
-        herramienta.UsuarioId = UsuarioId;
+        herramienta.nombre = nombre || herramienta.nombre;
+        herramienta.codigo = codigo || herramienta.codigo;
+        herramienta.marca = marca || herramienta.marca;
+        herramienta.condicion = condicion || herramienta.condicion;
+        herramienta.observaciones = observaciones || herramienta.observaciones;
+        herramienta.UsuarioId = UsuarioId || herramienta.UsuarioId;
 
         await herramienta.save();
 
-        res.json(herramienta);
+        res.status(200).json(herramienta);
     } catch (error) {
         console.error("Error al actualizar la herramienta", error);
-        res.status(500).json({ error: 'Error al actualizar la herramienta' });
+        res.status(500).json({ message: error.message });
     }
 };
 
+// Buscar herramientas por nombre
 export const buscarHerramientas = async (req, res) => {
     try {
         const { query } = req.query;
