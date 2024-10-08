@@ -1,4 +1,3 @@
-
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -17,6 +16,8 @@ import SubcategoriaRouter from "./routes/Subcategoria.routes.js";
 import ProductoRouter from "./routes/Producto.routes.js";
 import UnidadMedidaRouter from "./routes/UnidadMedida.routes.js";
 import Pedido from "./routes/Pedidos.routes.js";
+import PedidoRouter from "./routes/Pedidos.routes.js";
+import HerramientaRouter from "./routes/Herramienta.routes.js";
 
 const app = express();
 
@@ -45,7 +46,9 @@ app.use(
   SubcategoriaRouter,
   ProductoRouter,
   UnidadMedidaRouter,
-  Pedido
+  Pedido,
+  PedidoRouter,
+  HerramientaRouter
 );
 
 export default app;

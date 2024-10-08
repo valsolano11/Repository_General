@@ -3,6 +3,7 @@ import Producto from "../../models/Producto.js";
 import Pedido from "../../models/Pedido.js";
 import PedidoProducto from "../../models/PedidoProducto.js";
 import nodemailer from "nodemailer";
+import Estado from "../../models/Estado.js";
 
 export const actualizarSalidaProducto = async (req, res) => {
   const { id } = req.params; 
@@ -16,8 +17,13 @@ export const actualizarSalidaProducto = async (req, res) => {
     });
 
     if (!pedido) {
-      return res.status(404).json({ message: `Pedido con id ${id} no encontrado.` });
+      return res.status(404).json({ message: `Pedido con id ${id} no encontrado.`});
     }
+    for (const producto of productos) {
+      if (typeof producto.cantidadSalida !== 'number' || isNaN(producto.cantidadSalida) || producto.cantidadSalida < 0) {
+          return res.status(400).json({ message: `La cantidad de salida para el producto ${producto.ProductoId} no es válida.` });
+      }
+  }
 
     for (const producto of productos) {
       const pedidoProducto = await PedidoProducto.findOne({
@@ -92,7 +98,7 @@ const enviarCorreoNotificacion = async (pedido) => {
     from: 'inventariodelmobiliario@gmail.com',
     to: pedido.correo, 
     subject: 'Notificación de salida de productos',
-    text: `El pedido con ID ${pedido.id} ha sido actualizado y está listo para ser recogido.`,
+    text:` El pedido con ID ${pedido.id} ha sido actualizado y está listo para ser recogido.`,
   };
 
   await transporter.sendMail(mailOptions);
