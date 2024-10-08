@@ -70,7 +70,7 @@ const Herramienta = conexion.define(
       },
     },
     condicion: {
-      type: DataTypes.ENUM("Bueno", "Regular", "Malo"),
+      type: DataTypes.ENUM("BUENO", "REGULAR", "MALO"),
       allowNull: false,
       validate: {
         notEmpty: {
