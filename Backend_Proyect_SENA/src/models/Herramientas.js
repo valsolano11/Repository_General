@@ -35,13 +35,9 @@ const Herramienta = conexion.define(
       },
     },
     descripcion: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notEmpty: {
-          msg: "La descripción de la herramienta no puede estar vacía",
-        },
-      },
+        type: DataTypes.STRING,
+        allowNull: true, // Permite valores null
+    
     },
     cantidadEntrada: {
       type: DataTypes.INTEGER,
