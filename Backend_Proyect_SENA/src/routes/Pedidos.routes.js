@@ -6,14 +6,14 @@ import {
   getPedido, 
   getAllPedidos 
 } from '../controllers/Productos/Pedido.controllers.js';
-import { actualizarSalidaProducto } from "../controllers/Coordinación/Salida.controller.js"; 
+import { actualizarSalidaProducto } from '../controllers/Coordinación/Salida.controller.js';
 
-const router = express.Router();
+const PedidoRouter = express.Router();
 
-router.get('/pedido', getAllPedidos);
-router.get('/pedido/:id', getPedido);
-router.post('/pedido', crearPedido);
-router.put('/pedido/:id', upload.single('firma'), actualizarPedido);
-router.put("/pedido/:id/salida", actualizarSalidaProducto);
+PedidoRouter.get('/pedido', getAllPedidos);
+PedidoRouter.get("/pedido/:id", getPedido);
+PedidoRouter.post("/pedido", crearPedido);
+PedidoRouter.put("/pedido/:id", upload.single("firma"), actualizarPedido);
+PedidoRouter.put("/pedido/:id/salida", actualizarSalidaProducto);
 
-export default router;
+export default PedidoRouter;

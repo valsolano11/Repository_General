@@ -233,38 +233,32 @@ export const putProductos = async (req, res) => {
     }
 }
 
-
 // Propiedad de Valentina
 export const BusquedaProductos = async (req, res) => {
-  try {
-    const { query } = req.query; 
+    try {
+        const { query } = req.query; 
 
-    if (!query || query.trim() === "") {
-      return res.status(400).json({ message: "Debe ingresar un término de búsqueda." });
+        if (!query || query.trim() === "") {
+        return res.status(400).json({ message: "Debe ingresar un término de búsqueda." });
+        }
+
+        const productos = await Producto.findAll({
+            where: {
+                nombre: {
+                [Op.like]:` %${query}%`,
+                },
+                EstadoId: 1 
+            },
+            attributes: ["id", "nombre", "marca"],
+        });
+
+        if (productos.length === 0) {
+            return res.status(404).json({ message: "No se encontraron productos." });
+        }
+
+        res.status(200).json(productos);
+    } catch (error) {
+        console.error("Error al obtener sugerencias de productos", error);
+        res.status(500).json({ message: "Error al obtener sugerencias de productos" });
     }
-
-    const productos = await Producto.findAll({
-      where: {
-        nombre: {
-          [Op.like]: `%${query}%`,
-        },
-      },
-      include: [
-        {
-          model: UnidadDeMedida,
-          attributes: ["sigla"], 
-        },
-      ],
-      attributes: ["nombre"], 
-    });
-
-    if (productos.length === 0) {
-      return res.status(404).json({ message: "No se encontraron productos." });
-    }
-
-    res.status(200).json(productos);
-  } catch (error) {
-    console.error("Error al obtener sugerencias de productos", error);
-    res.status(500).json({ message: "Error al obtener sugerencias de productos" });
-  }
 };
