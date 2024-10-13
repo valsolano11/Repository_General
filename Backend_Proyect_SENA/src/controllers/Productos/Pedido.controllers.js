@@ -31,9 +31,7 @@ export const crearPedido = async (req, res) => {
       where: { estadoName: "PENDIENTE" },
     });
     if (!estadoPendiente) {
-      return res
-        .status(404)
-        .json({ message: "El estado 'PENDIENTE' no existe." });
+      return res.status(404).json({ message: "El estado 'PENDIENTE' no existe." });
     }
 
     const nuevoPedido = await Pedido.create({

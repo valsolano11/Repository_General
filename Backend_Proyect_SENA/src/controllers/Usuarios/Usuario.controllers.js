@@ -141,7 +141,6 @@ export const getUsuario = async (req, res) => {
   }
 };
 
-
 export const Putusuario = async (req, res) => {
   try {
     const { permisos } = req.body;
@@ -247,4 +246,3 @@ export const Putusuario = async (req, res) => {
     });
   }
 }
-

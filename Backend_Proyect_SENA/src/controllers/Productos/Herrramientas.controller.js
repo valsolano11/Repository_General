@@ -195,7 +195,7 @@ export const putHerramienta = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
+ 
 // Buscar herramientas por nombre
 export const buscarHerramientas = async (req, res) => {
     try {
