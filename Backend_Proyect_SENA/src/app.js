@@ -18,6 +18,7 @@ import UnidadMedidaRouter from "./routes/UnidadMedida.routes.js";
 import Pedido from "./routes/Pedidos.routes.js";
 import PedidoRouter from "./routes/Pedidos.routes.js";
 import HerramientaRouter from "./routes/Herramienta.routes.js";
+import PrestamoRouter from "./routes/Prestamos.routes.js";
 
 const app = express();
 
@@ -48,7 +49,8 @@ app.use(
   UnidadMedidaRouter,
   Pedido,
   PedidoRouter,
-  HerramientaRouter
+  HerramientaRouter,
+  PrestamoRouter
 );
 
 export default app;
