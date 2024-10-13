@@ -38,12 +38,9 @@ const Productos = () => {
         productoNombre: produc.nombre,
         nombreUser: produc.Usuario ? produc.Usuario.nombre : "Desconocido",
         estadoName: produc.Estado ? produc.Estado.estadoName : "Desconocido",
-        subcategoriaName: produc.Subcategorium
-          ? produc.Subcategorium.subcategoriaName
-          : "Desconocido",
-        unidadNombre: produc.UnidadMedida
-          ? produc.UnidadMedida.sigla
-          : "Desconocido",
+        subcategoriaName: produc.Subcategorium ? produc.Subcategorium.subcategoriaName : "Desconocido",
+        unidadNombre: produc.UnidadDeMedida ? produc.UnidadDeMedida.nombre : "Desconocido",
+
       }));
 
       productoconUnidadSub.sort((a, b) => a.id - b.id);

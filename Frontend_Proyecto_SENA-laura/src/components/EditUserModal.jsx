@@ -19,8 +19,8 @@ const EditUserModal = ({ isOpen, onClose, selectedUser }) => {
     nombre: "",
     Documento: "",
     correo: "",
-    rolId: "",
-    estadoId: "",
+    RolId: "",
+    EstadoId: "",
     DetallePermisos: [],
   });
 
@@ -70,8 +70,8 @@ const EditUserModal = ({ isOpen, onClose, selectedUser }) => {
           nombre: nombre || "",
           Documento: Documento || "",
           correo: correo || "",
-          rolId: RolId || "",
-          estadoId: EstadoId || "",
+          RolId: RolId || "",
+          EstadoId: EstadoId || "",
           DetallePermisos: DetallePermisos || [],
         });
 
@@ -150,10 +150,10 @@ const EditUserModal = ({ isOpen, onClose, selectedUser }) => {
   };
 
   const handleUpdate = async () => {
-    const { nombre, correo, Documento, rolId, estadoId } = formData;
+    const { nombre, correo, Documento, RolId, EstadoId } = formData;
   
     // Validar campos obligatorios
-    if (!nombre || !correo || !Documento || !rolId || !estadoId) {
+    if (!nombre || !correo || !Documento || !RolId || !EstadoId) {
       toast.error("Todos los campos son obligatorios.", { position: "top-right" });
       return;
     }
@@ -174,7 +174,7 @@ const EditUserModal = ({ isOpen, onClose, selectedUser }) => {
   
       // Hacemos la llamada API para actualizar el usuario
       const response = await api.put(
-        `/usuarios/${user.id}`, // Reemplaza user.id con el ID del usuario que estás editando
+        `/usuarios/${selectedUser.id}`, // Reemplaza user.id con el ID del usuario que estás editando
         updatedFormData, 
         {
           headers: {
@@ -301,8 +301,8 @@ const EditUserModal = ({ isOpen, onClose, selectedUser }) => {
                     </label>
                     <select
                       className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                      name="rolId"
-                      value={formData.rolId}
+                      name="RolId"
+                      value={formData.RolId}
                       onChange={handleInputChange}
                     >
                       <option value="">Seleccionar Rol</option>
@@ -320,8 +320,8 @@ const EditUserModal = ({ isOpen, onClose, selectedUser }) => {
                     <label className="mb-1 font-bold text-sm">Estado *</label>
                     <select
                       className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                      name="estadoId"
-                      value={formData.estadoId}
+                      name="EstadoId"
+                      value={formData.EstadoId}
                       onChange={handleInputChange}
                     >
                       <option value="">Seleccionar Estado</option>

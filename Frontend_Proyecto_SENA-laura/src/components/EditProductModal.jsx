@@ -29,8 +29,11 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
   useEffect(() => {
     const fetchEstados = async () => {
       try {
-        const response = await api.get("/Estado/tipo/producto");
-        setEstados(response.data);
+        const response = await api.get("/Estado");
+        const filteredEstados = response.data.filter(
+          (estado) => estado.id === 1 || estado.id === 2 
+        );
+        setEstados(filteredEstados);
       } catch (error) {
         showToastError("Error al cargar los estados");
       }

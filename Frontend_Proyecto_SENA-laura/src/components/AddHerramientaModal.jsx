@@ -5,18 +5,19 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
-  const [categorias, setCategorias] = useState([]);
+  const [subcategorias, setSubcategorias] = useState([]);
   const [estados, setEstados] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    codigo: "",
     nombre: "",
-    fechaIngreso: "",
+    codigo: "",
     marca: "",
-    estadoId: "",
-    categoriaId: "",
-    descripcion: "",
+    condicion: "",
+    observaciones: "",
+    EstadoId: "",
+    SubcategoriaId: "",
   });
 
   useEffect(() => {
@@ -28,56 +29,49 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
   useEffect(() => {
     if (herramienta) {
       setFormData({
-        codigo: herramienta.codigo || "",
         nombre: herramienta.nombre || "",
-        fechaIngreso: herramienta.fechaIngreso || "",
+        codigo: herramienta.codigo || "",
         marca: herramienta.marca || "",
-        estadoId: herramienta.estadoId || "",
-        categoriaId: herramienta.categoriaId || "",
-        descripcion: herramienta.descripcion || "",
+        condicion: herramienta.condicion || "",
+        observaciones: herramienta.observaciones || "",
+        EstadoId: herramienta.EstadoId || "",
+        SubcategoriaId: herramienta.SubcategoriaId || "",
+        UsuarioId: herramienta.UsuarioId || "",
       });
     }
   }, [herramienta]);
 
   useEffect(() => {
-    const fetchCategorias = async () => {
+    const fetchsubcategorias = async () => {
       try {
-        const response = await api.get("/categorias");
-        setCategorias(response.data);
+        const response = await api.get("/subcategoria/estado");
+        setSubcategorias(response.data);
       } catch (error) {
-        showToastError("Error al cargar categorías");
+        showToastError("Error al cargar subcategorías");
       }
     };
 
     const fetchEstados = async () => {
       try {
-        const response = await api.get("/estados");
+        const response = await api.get("/Estado");
         setEstados(response.data);
       } catch (error) {
         showToastError("Error al cargar los estados");
       }
     };
 
-    fetchCategorias();
+    fetchsubcategorias();
     fetchEstados();
   }, []);
 
   const validateInput = (name, value) => {
     let errorMessage = "";
-    if (name === "codigo" && !value) {
-      errorMessage = "El código es obligatorio.";
-    } else if (name === "nombre") {
+    if (name === "nombre") {
       const nameRegex = /^[A-Za-z\s-_\u00C0-\u017F]+$/;
       if (!nameRegex.test(value) || /\d/.test(value)) {
-        errorMessage = "El nombre no puede contener números o caracteres especiales.";
+        errorMessage = "El nombre no puede contener caracteres especiales.";
       }
-    } else if (name === "fechaIngreso") {
-      if (!Date.parse(value)) {
-        errorMessage = "La fecha debe ser válida.";
-      }
-    } else if (name === "marca" && !value) {
-      errorMessage = "La marca es obligatoria.";
-    }
+    } 
     return errorMessage;
   };
 
@@ -88,7 +82,6 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
       ...prevErrors,
       [name]: errorMessage,
     }));
-
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -109,35 +102,38 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
 
   const resetForm = () => {
     setFormData({
-      codigo: "",
       nombre: "",
-      fechaIngreso: "",
+      codigo: "",
       marca: "",
-      estadoId: "",
-      categoriaId: "",
-      descripcion: "",
+      condicion: "",
+      observaciones: "",
+      EstadoId: "",
+      SubcategoriaId: "",
+      UsuarioId: "",
     });
   };
 
   const handleCreate = async () => {
-    const { codigo, nombre, fechaIngreso, marca, estadoId, categoriaId, descripcion } = formData;
+    const {  nombre, codigo, marca, condicion, observaciones,  EstadoId, SubcategoriaId } = formData;
     const codigoError = validateInput("codigo", codigo);
     const nombreError = validateInput("nombre", nombre);
-    const fechaIngresoError = validateInput("fechaIngreso", fechaIngreso);
+    const condicionError = validateInput("fechaDeIngreso", condicion);
+    const observacionesError = validateInput("fechaDeIngreso", observaciones);
     const marcaError = validateInput("marca", marca);
 
-    if (codigoError || nombreError || fechaIngresoError || marcaError) {
+    if (codigoError || nombreError  || condicionError || observacionesError || marcaError) {
       setFormErrors({
         codigo: codigoError,
         nombre: nombreError,
-        fechaIngreso: fechaIngresoError,
+        condicion: condicionError,
+        observaciones: observacionesError,
         marca: marcaError,
       });
       showToastError("Por favor, corrige los errores antes de agregar.");
       return;
     }
 
-    if (!codigo || !nombre || !fechaIngreso || !marca || !estadoId || !categoriaId) {
+    if (!codigo || !nombre || !condicion || !observaciones|| !marca || !EstadoId || !SubcategoriaId ) {
       showToastError("Todos los campos son obligatorios.");
       return;
     }
@@ -148,7 +144,7 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
         /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
         "$1"
       );
-      const response = await api.post("/herramientas", formData, {
+      const response = await api.post("/herramienta", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -200,21 +196,7 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                   Registro Herramienta
                 </h6>
 
-                <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Código *</label>
-                  <input
-                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    type="text"
-                    name="codigo"
-                    value={formData.codigo}
-                    onChange={handleInputChange}
-                  />
-                  {formErrors.codigo && (
-                    <div className="text-red-400 text-sm mt-1 px-2">
-                      {formErrors.codigo}
-                    </div>
-                  )}
-                </div>
+
 
                 <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Nombre *</label>
@@ -238,17 +220,17 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Fecha de Ingreso *</label>
+                  <label className="mb-1 font-bold text-sm">Código *</label>
                   <input
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    type="date"
-                    name="fechaIngreso"
-                    value={formData.fechaIngreso}
+                    type="text"
+                    name="codigo"
+                    value={formData.codigo}
                     onChange={handleInputChange}
                   />
-                  {formErrors.fechaIngreso && (
+                  {formErrors.codigo && (
                     <div className="text-red-400 text-sm mt-1 px-2">
-                      {formErrors.fechaIngreso}
+                      {formErrors.codigo}
                     </div>
                   )}
                 </div>
@@ -269,29 +251,63 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                   )}
                 </div>
 
+
                 <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Categoría *</label>
+                  <label className="mb-1 font-bold text-sm">Condicion *</label>
                   <select
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    name="categoriaId"
-                    value={formData.categoriaId}
+                    name="condicion"
+                    value={formData.condicion}
                     onChange={handleInputChange}
                   >
-                    <option value="">Seleccione una categoría</option>
-                    {categorias.map((categoria) => (
+                    <option value="" >Seleccione una Condicion</option>
+                    <option value="BUENO">BUENO</option>
+                    <option value="REGULAR">REGULAR</option>
+                    <option value="MALO">MALO</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="mb-1 font-bold text-sm">Observaciones *</label>
+                  <input
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
+                    type="text"
+                    name="observaciones"
+                    value={formData.observaciones}
+                    onChange={handleInputChange}
+                  />
+                  {formErrors.observaciones && (
+                    <div className="text-red-400 text-sm mt-1 px-2">
+                      {formErrors.observaciones}
+                    </div>
+                  )}
+                </div>
+
+
+                <div className="flex flex-col">
+                  <label className="mb-1 font-bold text-sm">Subcategoría *</label>
+                  <select
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
+                    name="SubcategoriaId"
+                    value={formData.SubcategoriaId}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Seleccione una Subcategoría</option>
+                    {subcategorias.map((categoria) => (
                       <option key={categoria.id} value={categoria.id}>
-                        {categoria.nombre}
+                        {categoria.subcategoriaName}
                       </option>
                     ))}
                   </select>
                 </div>
 
+
                 <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Estado *</label>
                   <select
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    name="estadoId"
-                    value={formData.estadoId}
+                    name="EstadoId"
+                    value={formData.EstadoId}
                     onChange={handleInputChange}
                   >
                     <option value="">Seleccione un estado</option>
@@ -301,27 +317,17 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                         value={estado.id}
                         style={{
                           color:
-                            estado.nombre === "ACTIVO"
+                            estado.estadoName === "ACTIVO"
                               ? "green"
-                              : estado.nombre === "INACTIVO"
+                              : estado.estadoName === "INACTIVO"
                               ? "red"
                               : "inherit",
                         }}
                       >
-                        {estado.nombre}
+                        {estado.estadoName}
                       </option>
                     ))}
                   </select>
-                </div>
-
-                <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Descripción</label>
-                  <textarea
-                    className="bg-grisClaro text-sm rounded-lg px-2 h-24"
-                    name="descripcion"
-                    value={formData.descripcion}
-                    onChange={handleInputChange}
-                  />
                 </div>
 
                 <div className="sm:w-full md:w-full flex flex-col justify-end">

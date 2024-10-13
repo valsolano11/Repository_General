@@ -78,14 +78,14 @@ const AutorizarPedidos = () => {
   }, []);
 
   const handleViewClick = (rowIndex) => {
-    const Pedido = data[rowIndex]; 
-    navigate("/firmaPedidos", { state: { pedidoId: Pedido.id } }); 
-  }; 
+    const Pedido = data[rowIndex];
+    navigate("/firmaPedidos", { state: { pedidoId: Pedido.id } });
+  };
 
   function formatDate(dateString) {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); 
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${year}/${month}/${day}`;
   }
@@ -95,7 +95,6 @@ const AutorizarPedidos = () => {
       name: "createdAt",
       label: "FECHA",
       options: {
-
         customHeadRender: (columnMeta) => (
           <th
             key={columnMeta.label}
@@ -105,9 +104,9 @@ const AutorizarPedidos = () => {
           </th>
         ),
         customBodyRender: (value) => (
-        <div className="text-center"> 
-         {formatDate(value)} 
-         </div>
+          <div className="text-center">
+            {formatDate(value)}
+          </div>
         ),
       },
     },
@@ -254,7 +253,7 @@ const AutorizarPedidos = () => {
                     Pedidos de Productos consumibles
                   </span>
                 }
-                data={data} 
+                data={data}
                 columns={columns}
                 options={{
                   responsive: "standard",
@@ -309,11 +308,15 @@ const AutorizarPedidos = () => {
             )}
           </div>
         </div>
-        <div className="flex-grow flex items-center justify-center text-red700 mx-20">
+        <div
+          className="flex-grow flex items-center justify-center text-center text-sm text-black 
+             border-black rounded-lg border-2 bg-orange-200 font-bold w-1/2 mx-auto mt-4 mb-4"
+        >
           <p>
             NOTA: Los pedidos que no se firmen, es decir, que permanezcan en
-            estado PENDIENTE. Tienen 3 días desde la fecha de creación para que
-            cambien de estado a EN PROCESO, de lo contrario serán descartados.
+            estado PENDIENTE. Tienen 3 días hábiles desde la fecha de creación
+            para que cambien de estado a EN PROCESO, de lo contrario serán
+            descartados.
           </p>
         </div>
       </div>

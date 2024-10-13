@@ -6,25 +6,27 @@ import fondo from "/logoSena.png";
 import siga from "/Siga.png";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { FaGripLinesVertical } from "react-icons/fa6";
-import Firmas from "../components/Firmas";
 import TablaHerramientas from "../components/TablaHerramientas";
 
 const FormatoHerram = () => {
   const [formErrors, setFormErrors] = useState({});
   const [formData, setFormData] = useState({
-    nombre: "",
-    Documento: "",
-    fecha: "",
-    ficha: "",
+    codigoFicha: "",
     area: "",
-    coordi: "",
-    cedCoordi: "",
-    instructor: "",
-    cedInstructor: "",
+    jefeOficina: "",
+    cedulaJefeOficina: "",
+    servidorAsignado: "",
+    cedulaServidor: "",
     correo: "",
-    item: "",
-    codigoSena: "",
+    herramientas: [
+      {
+        HerramientaId: "",
+        codigo: "",
+        observaciones: "",
+      },
+    ],
   });
+
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -38,7 +40,6 @@ const FormatoHerram = () => {
   const [accordionStates, setAccordionStates] = useState({
     datos: false,
     herramientas: false,
-    firmas: false,
   });
 
   const toggleAccordion = (section) => {
@@ -48,12 +49,23 @@ const FormatoHerram = () => {
     }));
   };
 
+  const showToastError = (message) => {
+    toast.error(message, {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+  };
+
   const validateInput = (name, value) => {
     let errorMessage = "";
-    if (name === "area" || name === "coordi" || name === "instructor") {
-      const nameRegex = /^[A-Za-z\s-_\u00C0-\u017F]+$/;
+    if (["area", "jefeOficina", "servidorAsignado"].includes(name)) {
+      const nameRegex = /^[A-Za-z\s]+$/;
       if (!nameRegex.test(value) || /\d/.test(value)) {
-        errorMessage = "No puede contener caracteres especiales.";
+        errorMessage = "No puede contener números o caracteres especiales.";
       }
     }
     return errorMessage;
@@ -66,88 +78,87 @@ const FormatoHerram = () => {
       ...prevErrors,
       [name]: errorMessage,
     }));
-
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
 
-  const showToastError = (message) => {
-    toast.error(message, {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+  const handleHerramientaChange = (updatedHerramienta) => {
+    console.log("Herramientas recibidos en el padre:", updatedHerramienta); // Verifica que se pasan los productos correctos
+    setFormData({ ...formData, herramientas: updatedHerramienta });
   };
 
-  const handleCreate = (currentSection) => {
+
+
+
+  const handleCreate = async () => {
+    console.log("Estado de formData antes de enviar:", formData);
+  
     const {
-      nombre,
-      Documento,
-      ficha,
-      fecha,
+      codigoFicha,
       area,
-      coordi,
-      cedCoordi,
-      instructor,
-      cedInstructor,
+      jefeOficina,
+      cedulaJefeOficina,
+      servidorAsignado,
+      cedulaServidor,
       correo,
+      herramientas,
     } = formData;
-    const areaError = validateInput("area", area);
-    const coordiError = validateInput("coordi", coordi);
-    const instructorError = validateInput("instructor", instructor);
-
-    if (areaError || coordiError || instructorError) {
-      setFormErrors({
-        area: areaError,
-        coordi: coordiError,
-        instructor: instructorError,
-      });
-      showToastError("Por favor, corrige los errores antes de agregar.");
-      return;
-    }
-
+  
+    console.log("Datos a enviar:", formData);
+  
     if (
-      !nombre ||
-      !Documento ||
-      !fecha ||
-      !ficha ||
+      !codigoFicha ||
       !area ||
-      !coordi ||
-      !cedCoordi ||
-      !instructor ||
-      !cedInstructor ||
-      !correo
+      !jefeOficina ||
+      !cedulaJefeOficina ||
+      !servidorAsignado ||
+      !cedulaServidor ||
+      !correo ||
+      !herramientas.some((p) => p.HerramientaId && p.codigo)
     ) {
-      showToastError("Todos los campos son obligatorios, incluyendo la fecha.");
+      showToastError("Todos los campos son obligatorios.");
       return;
     }
-
-    if (currentSection === "datos") {
-      setAccordionStates({
-        datos: false,
-        herramientas: true,
-        firmas: false,
+  
+    try {
+      const response = await api.post("http://localhost:9100/pedido", formData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-    } else if (currentSection === "herramientas") {
-      setAccordionStates({
-        datos: false,
-        herramientas: false,
-        firmas: true,
-      });
-    } else if (currentSection === "firmas") {
-      setAccordionStates({
-        datos: false,
-        herramientas: false,
-        firmas: false,
-      });
+    
+      console.log("Respuesta del servidor:", response);
+    
+      if (response.status === 201) {
+        toast.success("Prestamo creado con éxito.");
+        setFormData({
+          codigoFicha: '',
+          area: '',
+          jefeOficina: '',
+          cedulaJefeOficina: '',
+          servidorAsignado: '',
+          cedulaServidor: '',
+          correo: '',
+          herramientas: [
+            {
+              ProductoId: "",
+              codigo: "",
+              observaciones: "",
+            }
+          ], 
+        });
+      } else {
+        const errorData = await response.json();
+        showToastError(errorData.message || "Error al crear el pedido.");
+      }
+    } catch (error) {
+      console.error("Error en la comunicación con el servidor:", error);
+      showToastError("Error en la comunicación con el servidor.");
     }
   };
+  
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-grisClaro">
@@ -248,18 +259,6 @@ const FormatoHerram = () => {
                           name="name"
                           value="Centro Tecnólogico del Mobiliario"
                           readOnly
-                        />
-                      </div>
-                      <div className="flex flex-row min-w-[200px] w-full md:w-1/3">
-                        <label className="mb-1 font-bold text-xs mt-2">
-                          Fecha de Solicitud*
-                        </label>
-                        <input
-                          className="bg-grisClaro border-b border-black text-xs px-2 h-8"
-                          type="date"
-                          name="fecha"
-                          value={formData.fecha}
-                          onChange={handleInputChange}
                         />
                       </div>
                     </div>
@@ -433,14 +432,6 @@ const FormatoHerram = () => {
                     </div>
                   </div>
 
-                  <div className="flex justify-end mt-2">
-                    <button
-                      className="btn-black2 mb-4"
-                      onClick={() => handleCreate("datos")}
-                    >
-                      Guardar y continuar
-                    </button>
-                  </div>
                 </div>
               )}
             </div>
@@ -459,8 +450,9 @@ const FormatoHerram = () => {
                 <div className="flex flex-col rounded-lg w-full">
                   <div className="flex flex-row justify-between w-full mb-4">
                     <TablaHerramientas
-                      accordionStates={accordionStates}
-                      toggleAccordion={toggleAccordion}
+                        accordionStates={accordionStates}
+                        handleHerramientaChange={handleHerramientaChange}
+                        herramientas={formData.herramientas}
                     />
                   </div>
                 </div>

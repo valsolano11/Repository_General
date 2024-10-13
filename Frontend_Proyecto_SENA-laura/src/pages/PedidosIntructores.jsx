@@ -10,6 +10,7 @@ import { FaGripLinesVertical } from "react-icons/fa6";
 import TablaPedidos from "../components/TablaPedidos";
 
 const PedidosIntructores = () => {
+  const [formErrors, setFormErrors] = useState({});
   const [formData, setFormData] = useState({
     codigoFicha: "",
     area: "",
@@ -49,7 +50,7 @@ const PedidosIntructores = () => {
     }));
   };
 
-  const [formErrors, setFormErrors] = useState({});
+
 
   const showToastError = (message) => {
     toast.error(message, {
@@ -86,17 +87,17 @@ const PedidosIntructores = () => {
     }));
   };
 
-  const handleProductChange = (index, updatedProduct) => {
-    console.log("Producto actualizado en el índice:", index, updatedProduct); 
-    const updatedProducts = [...formData.productos];
-    updatedProducts[index] = updatedProduct;
+  const handleProductChange = (updatedProducts) => {
+    console.log("Productos recibidos en el padre:", updatedProducts); // Verifica que se pasan los productos correctos
     setFormData({ ...formData, productos: updatedProducts });
-    console.log("Productos después de la actualización:", updatedProducts); 
   };
+
+
+
 
   const handleCreate = async () => {
     console.log("Estado de formData antes de enviar:", formData);
-
+  
     const {
       codigoFicha,
       area,
@@ -107,9 +108,9 @@ const PedidosIntructores = () => {
       correo,
       productos,
     } = formData;
-
+  
     console.log("Datos a enviar:", formData);
-
+  
     if (
       !codigoFicha ||
       !area ||
@@ -123,32 +124,48 @@ const PedidosIntructores = () => {
       showToastError("Todos los campos son obligatorios.");
       return;
     }
-
+  
     try {
-      const response = await api.post(
-        "http://localhost:9100/pedido",
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      console.log("Respuesta del servidor:", response); 
-
-      // Verifica si la respuesta es exitosa
+      const response = await api.post("http://localhost:9100/pedido", formData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      console.log("Respuesta del servidor:", response);
+  
       if (response.status === 201) {
         toast.success("Pedido creado con éxito.");
+        
+        // Restablecer el estado del formulario para limpiar los campos
+        setFormData({
+          codigoFicha: '',
+          area: '',
+          jefeOficina: '',
+          cedulaJefeOficina: '',
+          servidorAsignado: '',
+          cedulaServidor: '',
+          correo: '',
+          productos: [
+            {
+              ProductoId: "",
+              cantidadSolicitar: "",
+              observaciones: "",
+            }
+          ],
+        });
       } else {
         const errorData = await response.json();
         showToastError(errorData.message || "Error al crear el pedido.");
       }
     } catch (error) {
-      console.error("Error en la comunicación con el servidor:", error); 
+      console.error("Error en la comunicación con el servidor:", error);
       showToastError("Error en la comunicación con el servidor.");
     }
   };
+  
+  
+
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-grisClaro">
@@ -251,6 +268,7 @@ const PedidosIntructores = () => {
                           readOnly
                         />
                       </div>
+
                     </div>
                   </div>
                 </div>
@@ -423,47 +441,38 @@ const PedidosIntructores = () => {
                   </div>
 
                   <div className="flex justify-end mt-2">
-                    <button
-                      className="btn-black2 mb-4"
-                      onClick={() => handleCreate("datos")}
-                    >
-                      Guardar y continuar
-                    </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* PRODUCTOS */}
-            <div className="flex flex-col rounded-lg w-full bg-white px-8 mx-auto border-2 border-black mb-4">
-              <button
-                onClick={() => toggleAccordion("productos")}
-                className="font-bold text-lg py-2 flex justify-between items-center w-full"
-              >
-                <span>Productos</span>
-                <ExpandMoreIcon className="mr-2" />
-              </button>
+                      {/* PRODUCTOS */}
+                      <div className="flex flex-col rounded-lg w-full bg-white px-8 mx-auto border-2 border-black mb-4">
+                          <button
+                            onClick={() => toggleAccordion("productos")}
+                            className="font-bold text-lg py-2 flex justify-between items-center w-full"
+                          >
+                            <span>Productos</span>
+                            <ExpandMoreIcon className="mr-2" />
+                          </button>
 
-              {accordionStates.productos && (
-                <div className="flex flex-col rounded-lg w-full">
-                  <div className="flex flex-row justify-between w-full mb-4">
-                    <TablaPedidos
-                      accordionStates={accordionStates}
-                      handleProductChange={handleProductChange}
-                      productos={formData.productos}
-                    />
-                  </div>
-                </div>
-              )}
+                          {accordionStates.productos && (
+                            <div className="flex flex-col rounded-lg w-full">
+                              <div className="flex flex-row justify-between w-full mb-4">
+                              <TablaPedidos
+                                accordionStates={accordionStates}
+                                handleProductChange={handleProductChange}
+                                productos={formData.productos}  // Pasa los productos actuales
+                              />
+                              </div>
+                            </div>
+                          )}
             </div>
 
             <div className="flex justify-center items-center w-2/4 mt-10 mx-auto">
-              <button
-                className="btn-black2 mb-4"
-                onClick={() => handleCreate("productos")}
-              >
-                Enviar Solicitud
-              </button>
+            <button className="btn-black2 mb-4" onClick={() => handleCreate("productos")}>
+              Enviar Solicitud
+            </button>
               <FaGripLinesVertical className="h-24 mx-4" />
               <div onClick={handleClick} style={{ cursor: "pointer" }}>
                 <h6 className="font-semibold">FORMATO DE HERRAMIENTAS</h6>

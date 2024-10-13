@@ -27,9 +27,10 @@ const FirmasDos = ({ accordionStates, onFirmaChange }) => {
           const data = response.data;
 
           if (data.firma) {
-            setFirmaExistente(data.firma); 
-            onFirmaChange(false, null); 
-          }
+            const firmaUrl = `http://localhost:9100${data.firma}`;  
+            setFirmaExistente(firmaUrl);
+            onFirmaChange(false, null);
+          }          
         } catch (error) {
           console.error("Error fetching pedido data:", error);
         }
