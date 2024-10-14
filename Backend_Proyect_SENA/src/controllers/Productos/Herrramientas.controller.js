@@ -91,9 +91,6 @@ export const getHerramienta = async (req, res) =>{
     }
 };
 
-
-
-
 export const obtenerCodigosPorNombre = async (req, res) => {
     try {
         const { nombre } = req.query;
@@ -120,12 +117,11 @@ export const obtenerCodigosPorNombre = async (req, res) => {
         const codigosUnicos = [...new Set(codigos)]; 
 
         res.status(200).json(codigosUnicos);
-    } catch (error) {
+    } catch (error) { 
         console.error("Error al obtener códigos de herramientas:", error);
         res.status(500).json({ error: 'Error al obtener códigos de herramientas' });
     }
 };
-
 
 
 export const putHerramienta = async (req, res) => {
