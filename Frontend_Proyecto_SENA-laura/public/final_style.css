@@ -692,11 +692,6 @@ td{
   margin-right: 0.5rem;
 }
 
-.mx-20{
-  margin-left: 5rem;
-  margin-right: 5rem;
-}
-
 .mx-4{
   margin-left: 1rem;
   margin-right: 1rem;
@@ -1635,11 +1630,6 @@ td{
   color: rgb(220 38 38 / var(--tw-text-opacity));
 }
 
-.text-red700{
-  --tw-text-opacity: 1;
-  color: rgb(178 34 34 / var(--tw-text-opacity));
-}
-
 .text-sena{
   --tw-text-opacity: 1;
   color: rgb(1 175 8 / var(--tw-text-opacity));
@@ -1734,6 +1724,10 @@ td{
 
 .duration-300{
   transition-duration: 300ms;
+}
+
+.ease-in-out{
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Estilos personalizados */
