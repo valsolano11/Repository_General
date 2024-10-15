@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { api } from "../api/token";
 
 const FirmasDos = ({ accordionStates, onFirmaChange }) => {
@@ -8,6 +9,8 @@ const FirmasDos = ({ accordionStates, onFirmaChange }) => {
   const location = useLocation();
   const { pedidoId } = location.state || {};
   const [loading, setLoading] = useState(false);
+
+  const { user } = useAuth();
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -27,9 +30,10 @@ const FirmasDos = ({ accordionStates, onFirmaChange }) => {
           const data = response.data;
 
           if (data.firma) {
-            setFirmaExistente(data.firma); 
-            onFirmaChange(false, null); 
-          }
+            const firmaUrl = `http://localhost:9100${data.firma}`;  
+            setFirmaExistente(firmaUrl);
+            onFirmaChange(false, null);
+          }          
         } catch (error) {
           console.error("Error fetching pedido data:", error);
         }
@@ -39,6 +43,8 @@ const FirmasDos = ({ accordionStates, onFirmaChange }) => {
 
     fetchData();
   }, [pedidoId, onFirmaChange]);
+
+  const canUpload = user?.Rol?.RolId === 3 || user?.Rol?.rolName === "COORDINADOR";
 
   return (
     <div>
@@ -59,13 +65,17 @@ const FirmasDos = ({ accordionStates, onFirmaChange }) => {
                   className="h-24 w-auto border border-black rounded"
                 />
               </div>
-            ) : (
+            ) : null}
+
+            {canUpload ? ( 
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
                 className="font-inter text-xs ml-2 mb-4"
               />
+            ) : (
+              <p className="text-xs text-gray-500 mt-2">No tienes permiso para subir una firma.</p>
             )}
 
             {firmaImagen && (

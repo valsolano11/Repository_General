@@ -46,6 +46,7 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
       });
     }
   }, [product]);
+
   useEffect(() => {
     const fetchsubcategorias = async () => {
       try {
@@ -58,8 +59,11 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
 
     const fetchEstados = async () => {
       try {
-        const response = await api.get("/Estado/tipo/producto");
-        setEstados(response.data);
+        const response = await api.get("/Estado");
+        const filteredEstados = response.data.filter(
+          (estado) => estado.id === 1 || estado.id === 2 
+        );
+        setEstados(filteredEstados);
       } catch (error) {
         showToastError("Error al cargar los estados");
       }
@@ -78,7 +82,6 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
     fetchEstados();
     fetchUnidad();
   }, []);
-
 
   const validateInput = (name, value) => {
     let errorMessage = "";
@@ -109,7 +112,6 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
       [name]: processedValue,
     }));
   };
-
 
   const showToastError = (message) => {
     toast.error(message, {
@@ -181,7 +183,9 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
           progress: undefined,
         });
         resetForm();
-        setTimeout(() => {}, 2000);
+        setTimeout(() => {
+          onClose(response.data);
+        }, 2000);
       } else {
         showToastError(
           "Ocurrió un error!, por favor intenta con un documento o correo diferente."

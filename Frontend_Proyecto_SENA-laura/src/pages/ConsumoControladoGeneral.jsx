@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
+import { api } from "../api/token";
 import { saveAs } from "file-saver";
 import { toast } from "react-toastify";
-import { api } from "../api/token";
 import { useAuth } from "../context/AuthContext";
+import Sidebar from "../components/Sidebar";
+import Home from "../components/Home";
 import MUIDataTable from "mui-datatables";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
-import clsx from "clsx";
-import * as XLSX from "xlsx";
-import Sidebar from "../components/Sidebar";
-import Home from "../components/Home";
 import EditProductModal from "../components/EditProductModal";
 import AddProductModal from "../components/AddProductModal";
+import clsx from "clsx";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import "react-toastify/dist/ReactToastify.css";
 
 const ConsumoControladoGeneral = () => {

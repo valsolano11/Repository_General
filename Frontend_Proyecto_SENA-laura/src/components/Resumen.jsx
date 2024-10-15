@@ -1,27 +1,76 @@
-import React from "react";
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { Box, Button, CardHeader, IconButton, Typography } from "@mui/material";
+import { api } from "../api/token";
+import { Box, Button, CardHeader, Typography } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
-import ForestIcon from "@mui/icons-material/Forest";
+//import ForestIcon from "@mui/icons-material/Forest";
+import PushPinIcon from '@mui/icons-material/PushPin';
 import FormatColorFillIcon from "@mui/icons-material/FormatColorFill";
 import HardwareIcon from "@mui/icons-material/Hardware";
 import DoorFrontIcon from "@mui/icons-material/DoorFront";
 import LineChart from "../components/LineChart";
 import ProgressCircle from "./../components/ProgressCircle";
 import { green, grey } from "@mui/material/colors";
-import StatBox from "./../components/StatBox";
+import StatBox1 from "./../components/StatBox1";
 import { mockTransactions } from "../data/mockData";
 import BarChart from "../components/BarChart";
 import PieChart from "../components/PieChart";
 import Reportes from "../pages/Reportes";
+import StatBox2 from "./StatBox2";
+import StatBox3 from "./StatBox3";
 
 const Resumen = () => {
+  const [loading, setLoading] = useState(false);
+  const [totalPedidos2024, setTotalPedidos2024] = useState(0);
+  const [cantidadHerramientas, setCantidadHerramientas] = useState(0);
+
+  const fetchPedidos = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get("/pedido", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const pedidos2024 = response.data.filter((pedido) => {
+        const fechaPedido = new Date(pedido.createdAt); 
+        return fechaPedido.getFullYear() === 2024;
+      });
+
+      setTotalPedidos2024(pedidos2024.length);
+    } catch (error) {
+      console.error("Error al cargar pedidos:", error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchPedidos();
+  }, []);
+
+  useEffect(() => {
+    const fetchHerramientas = async () => {
+      try {
+        const response = await api.get("/herramienta");
+        
+        const herramientasBuenas = response.data.filter(
+          (herramienta) => herramienta.condicion === "Bueno"
+        );
+        setCantidadHerramientas(herramientasBuenas.length);
+      } catch (error) {
+        console.error("Error al obtener las herramientas", error);
+      }
+    };
+
+    fetchHerramientas();
+  }, []);
 
   const navigate = useNavigate();
 
   const handleRedirect = () => {
-    navigate('/reportes');
+    navigate("/reportes");
   };
 
   return (
@@ -67,7 +116,6 @@ const Resumen = () => {
             >
               <DownloadIcon sx={{ mr: "10px" }} />
               Descargar Reportes
-              
             </Button>
           </Box>
         </Box>
@@ -81,70 +129,53 @@ const Resumen = () => {
         >
           {/* FILA 1 */}
           <Box
-            gridColumn="span 3"
+            gridColumn="span 4"
             backgroundColor="grisClaro.main"
             display="flex"
             alignItems="center"
             justifyContent="center"
           >
-            <StatBox
+            <StatBox1
               cantidad="190"
               producto="Madera"
               progress="0.75"
               disponible="Disp: 75%"
-              icon={<ForestIcon sx={{ color: green[600], fontSize: "26px" }} />}
+              icon={<PushPinIcon sx={{ color: green[600], fontSize: "26px" }} />}
             />
           </Box>
           <Box
-            gridColumn="span 3"
+            gridColumn="span 4"
             backgroundColor="grisClaro.main"
             display="flex"
             alignItems="center"
             justifyContent="center"
           >
-            <StatBox
+            <StatBox2
               cantidad="1,225"
               producto="Pintura"
               progress="0.50"
               disponible="Disp: 50%"
               icon={
-                <FormatColorFillIcon
+                <PushPinIcon
                   sx={{ color: green[600], fontSize: "26px" }}
                 />
               }
             />
           </Box>
           <Box
-            gridColumn="span 3"
+            gridColumn="span 4"
             backgroundColor="grisClaro.main"
             display="flex"
             alignItems="center"
             justifyContent="center"
           >
-            <StatBox
+            <StatBox3
               cantidad="12,441"
               producto="Puntillas"
               progress="0.30"
               disponible="Disp: 30%"
               icon={
                 <HardwareIcon sx={{ color: green[600], fontSize: "26px" }} />
-              }
-            />
-          </Box>
-          <Box
-            gridColumn="span 3"
-            backgroundColor="grisClaro.main"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <StatBox
-              cantidad="134"
-              producto="Bisagras"
-              progress="0.80"
-              disponible="Disp: 80%"
-              icon={
-                <DoorFrontIcon sx={{ color: green[600], fontSize: "26px" }} />
               }
             />
           </Box>
@@ -163,17 +194,12 @@ const Resumen = () => {
               alignItems="center"
             >
               <Box>
-                <Typography variant="h" fontWeight="600" color={grey[900]}>
+                <Typography variant="h6" fontWeight="600" color={grey[900]}>
                   Pedidos realizados por instructores en el 2024
                 </Typography>
                 <Typography variant="h5" fontWeight="bold" color={green[500]}>
-                  480
+                  {loading ? "Cargando..." : totalPedidos2024}
                 </Typography>
-              </Box>
-              <Box>
-                <IconButton>
-                  <DownloadIcon sx={{ fontSize: "26px", color: green[500] }} />
-                </IconButton>
               </Box>
             </Box>
             <Box height="250px" m="-20px 0 0 0">
@@ -243,7 +269,7 @@ const Resumen = () => {
             p="30px"
           >
             <Typography variant="h" fontWeight="600">
-              Herramientas en buen estado
+              Estado de las Herramientas 
             </Typography>
             <Box
               display="flex"
@@ -253,7 +279,7 @@ const Resumen = () => {
             >
               <ProgressCircle size="125" />
               <Typography variant="h" color={green[500]} sx={{ mt: "15px" }}>
-                256 Herramientas en buen estado
+                {cantidadHerramientas} Herramientas en buen estado
               </Typography>
               <Typography variant="h">
                 Con gestión constante para el incremento{" "}

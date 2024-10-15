@@ -1,8 +1,60 @@
+import React, { useEffect, useState } from "react";
+import { api } from "../api/token";
 import { grey } from "@mui/material/colors";
-import { mockPieData as data } from "../data/mockData";
 import { ResponsivePie } from '@nivo/pie';
 
 const PieChart = () => {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const fetchPedidosAndProductos = async () => {
+      try {
+        const pedidosResponse = await api.get("/pedido");
+        const pedidos = pedidosResponse.data;
+
+        const productosPromises = pedidos.map(async (pedido) => {
+          const productosResponse = await api.get(`/pedido/${pedido.id}`);
+          return { codigoFicha: pedido.codigoFicha, productos: productosResponse.data.Productos };
+        });
+
+        const pedidosConProductos = await Promise.all(productosPromises);
+
+        const groupedData = pedidosConProductos.reduce((acc, pedido) => {
+          const existingFicha = acc.find(item => item.codigoFicha === pedido.codigoFicha);
+
+          if (existingFicha) {
+            existingFicha.totalProductos += pedido.productos.reduce(
+              (total, producto) => total + producto.PedidoProducto.cantidadSalida,
+              0
+            );
+          } else {
+            acc.push({
+              codigoFicha: pedido.codigoFicha,
+              totalProductos: pedido.productos.reduce(
+                (total, producto) => total + producto.PedidoProducto.cantidadSalida,
+                0
+              ),
+            });
+          }
+
+          return acc;
+        }, []);
+
+        const chartData = groupedData.map(item => ({
+          id: item.codigoFicha,
+          label: item.codigoFicha,
+          value: item.totalProductos,
+        }));
+
+        setData(chartData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchPedidosAndProductos();
+  }, []);
+
   return (
     <ResponsivePie
       data={data}
@@ -44,33 +96,13 @@ const PieChart = () => {
         modifiers: [["darker", 0.2]],
       }}
       arcLinkLabelsSkipAngle={10}
-      arcLinkLabelsTextColor={ grey[900]}
+      arcLinkLabelsTextColor={grey[900]}
       arcLinkLabelsThickness={2}
       arcLinkLabelsColor={{ from: "color" }}
       enableArcLabels={false}
       arcLabelsRadiusOffset={0.4}
       arcLabelsSkipAngle={7}
       arcLabelsTextColor={grey[900]}
-      defs={[
-        {
-          id: "dots",
-          type: "patternDots",
-          background: "inherit",
-          color: "rgba(255, 255, 255, 0.3)",
-          size: 4,
-          padding: 1,
-          stagger: true,
-        },
-        {
-          id: "lines",
-          type: "patternLines",
-          background: "inherit",
-          color: "rgba(255, 255, 255, 0.3)",
-          rotation: -45,
-          lineWidth: 6,
-          spacing: 10,
-        },
-      ]}
       legends={[
         {
           anchor: "bottom",
@@ -81,7 +113,7 @@ const PieChart = () => {
           itemsSpacing: 0,
           itemWidth: 40,
           itemHeight: 18,
-          itemTextColor: grey[900], 
+          itemTextColor: grey[900],
           itemDirection: "left-to-right",
           itemOpacity: 1,
           symbolSize: 12,
@@ -90,7 +122,7 @@ const PieChart = () => {
             {
               on: "hover",
               style: {
-                itemTextColor: grey[700], 
+                itemTextColor: grey[700],
               },
             },
           ],

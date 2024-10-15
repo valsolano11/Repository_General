@@ -221,11 +221,15 @@ const AutorizarPrestamos = () => {
             )}
           </div>
         </div>
-        <div className="flex-grow flex items-center justify-center text-red700 mx-20">
+        <div
+          className="flex-grow flex items-center justify-center text-center text-sm text-black 
+             border-black rounded-lg border-2 bg-orange-200 font-bold w-1/2 mx-auto mt-4 mb-4"
+        >
           <p>
-            NOTA: Los préstamos que no se firmen, es decir, que permanezcan en
-            estado PENDIENTE. Tienen 3 días desde la fecha de creación para que
-            cambien de estado a EN PROCESO, de lo contrario serán descartados.
+            NOTA: Los pedidos que no se firmen, es decir, que permanezcan en
+            estado PENDIENTE. Tienen 3 días hábiles desde la fecha de creación
+            para que cambien de estado a EN PROCESO, de lo contrario serán
+            descartados.
           </p>
         </div>
       </div>

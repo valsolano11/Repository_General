@@ -26,21 +26,26 @@ const Pedidos = () => {
     },
   ]);
 
-  useEffect(() => {
-    const fetchStates = async () => {
-      try {
-        const response = await api.get("/Estado");
-        const filteredEstados = response.data.filter(
-          (estado) => estado.id === 5 || estado.id === 6 || estado.id === 7
-        );
-        setEstados(filteredEstados);
-      } catch (error) {
-        showToastError("Error al cargar los estados");
-      }
-    };
-
-    fetchStates();
-  }, []);
+  const fetchStates = async () => {
+    try {
+      const response = await api.get("/Estado");
+      const filteredEstados = response.data.filter(
+        (estado) => estado.id === 5 || estado.id === 6 || estado.id === 7
+      );
+      setEstados(filteredEstados);
+    } catch (error) {
+      console.error("Error fetching states:", error);
+      toast.error("Error al cargar los estados", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  }; 
 
   const fetchData = async () => {
     setLoading(true);

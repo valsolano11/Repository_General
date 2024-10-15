@@ -34,7 +34,6 @@ const GestionarPedidos = () => {
     codigoSena: "",
   });
 
-  // Función que será llamada desde el componente hijo
   const actualizarCantidadSalida = (cantidad) => {
     setNuevaCantidadSalida(cantidad);
   };
@@ -109,20 +108,16 @@ const GestionarPedidos = () => {
       "0"
     )}-${String(date.getDate()).padStart(2, "0")}`;
   };
-  // Función para manejar el cambio en la cantidad de salida
   const handleCantidadSalidaChange = (index, productoId, cantidadSalida) => {
     const updatedProductos = [...productosSalida];
 
-    // Busca si ya existe el ProductoId en el array
     const productoIndex = updatedProductos.findIndex(
       (producto) => producto.ProductoId === productoId
     );
 
     if (productoIndex >= 0) {
-      // Si ya existe, actualiza la cantidad de salida
       updatedProductos[productoIndex].cantidadSalida = cantidadSalida;
     } else {
-      // Si no existe, añade el nuevo producto con su cantidad de salida
       updatedProductos.push({ ProductoId: productoId, cantidadSalida });
     }
 
@@ -272,7 +267,7 @@ const GestionarPedidos = () => {
                               className="border-b border-black text-xs px-2 h-8"
                               type="date"
                               name="fecha"
-                              value={formData.fecha}
+                              value={formData.fecha || ""}
                               readOnly
                             />
                           </div>

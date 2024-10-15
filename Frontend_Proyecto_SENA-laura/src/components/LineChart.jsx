@@ -1,13 +1,67 @@
-
 import { blue, grey } from "@mui/material/colors";
-import { mockLineData as data } from "../data/mockData";
 import { ResponsiveLine } from '@nivo/line';
+import { useState, useEffect } from "react";
+import { api } from "../api/token";
 
-const LineChart = ({ isCustomLineColors  = false, isDashboard = false }) => {
+const LineChart = ({ isCustomLineColors = false, isDashboard = false }) => {
+  const [chartData, setChartData] = useState([]);
+
+  const transformData = (pedidos) => {
+    const groupedByServidor = pedidos.reduce((acc, pedido) => {
+      const servidor = pedido.servidorAsignado;
+      const fechaPedido = new Date(pedido.createdAt);
+      const mes = fechaPedido.toLocaleString('default', { month: 'short' }).toLowerCase();
+  
+      if (!acc[servidor]) {
+        acc[servidor] = {};
+      }
+  
+      acc[servidor][mes] = (acc[servidor][mes] || 0) + 1;
+      return acc;
+    }, {});
+  
+    const formattedData = Object.keys(groupedByServidor).map((servidor) => ({
+      id: servidor,
+      data: [
+        { x: "ene", y: groupedByServidor[servidor]["ene"] || 0 }, 
+        { x: "feb", y: groupedByServidor[servidor]["feb"] || 0 }, 
+        { x: "mar", y: groupedByServidor[servidor]["mar"] || 0 }, 
+        { x: "abr", y: groupedByServidor[servidor]["abr"] || 0 }, 
+        { x: "may", y: groupedByServidor[servidor]["may"] || 0 }, 
+        { x: "jun", y: groupedByServidor[servidor]["jun"] || 0 }, 
+        { x: "jul", y: groupedByServidor[servidor]["jul"] || 0 }, 
+        { x: "ago", y: groupedByServidor[servidor]["ago"] || 0 }, 
+        { x: "sep", y: groupedByServidor[servidor]["sep"] || 0 }, 
+        { x: "oct", y: groupedByServidor[servidor]["oct"] || 0 }, 
+        { x: "nov", y: groupedByServidor[servidor]["nov"] || 0 },
+        { x: "dic", y: groupedByServidor[servidor]["dic"] || 0 },
+      ],
+    }));
+  
+    return formattedData;
+  };
+
+  const fetchPedidos = async () => {
+    try {
+      const response = await api.get("/pedido", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const transformedData = transformData(response.data);
+      setChartData(transformedData);
+    } catch (error) {
+      console.error("Error al cargar pedidos:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPedidos();
+  }, []);
 
   return (
     <ResponsiveLine
-      data={data}
+      data={chartData}
       theme={{
         axis: {
           domain: {
@@ -41,18 +95,21 @@ const LineChart = ({ isCustomLineColors  = false, isDashboard = false }) => {
           },
         },
       }}
-      colors ={isDashboard ? { datum: "color" } : { scheme: "nivo" }} // added
+      colors={["#00C49F", "#FFBB28", "#FF8042", "#0088FE"]} 
       margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
-      xScale={{ type: "point" }}
+      xScale={{
+        type: "band", 
+        domain: ["ene", "feb", "mar","abr","may","jun","jul","ago","sep","oct", "nov", "dic"],
+      }}
       yScale={{
         type: "linear",
-        min: "auto",
+        min: 0, 
         max: "auto",
-        stacked: true,
+        stacked: false,
         reverse: false,
       }}
       yFormat=" >-.2f"
-      curve="catmullRom"
+      curve="monotoneX"
       axisTop={null}
       axisRight={null}
       axisBottom={{
@@ -60,23 +117,23 @@ const LineChart = ({ isCustomLineColors  = false, isDashboard = false }) => {
         tickSize: 0,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "transportation", // added
+        legend: isDashboard ? undefined : "Mes",
         legendOffset: 36,
         legendPosition: "middle",
       }}
       axisLeft={{
         orient: "left",
-        tickValues: 5, // added
+        tickValues: 5,
         tickSize: 3,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "count", // added
+        legend: isDashboard ? undefined : "Número de Pedidos",
         legendOffset: -40,
         legendPosition: "middle",
       }}
       enableGridX={false}
       enableGridY={false}
-      pointSize={8}
+      pointSize={10}
       pointColor={{ theme: "background" }}
       pointBorderWidth={2}
       pointBorderColor={{ from: "serieColor" }}

@@ -1,12 +1,70 @@
-import React from "react";
-import { ResponsiveBar } from "@nivo/bar";
-import { mockBarData as data } from "../data/mockData";
+import React, { useEffect, useState } from "react";
+import { api } from "../api/token";
 import { grey } from "@mui/material/colors";
+import { ResponsiveBar } from "@nivo/bar";
 
 const BarChart = () => {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const fetchPedidosAndProductos = async () => {
+      try {
+        const pedidosResponse = await api.get("/pedido");
+        const pedidos = pedidosResponse.data;
+        const groupedData = {};
+        for (const pedido of pedidos) {
+          const productosResponse = await api.get(`/pedido/${pedido.id}`);
+          const productos = productosResponse.data.Productos;
+          for (const producto of productos) {
+            const cantidadSalida = producto.PedidoProducto.cantidadSalida;
+            if (!groupedData[pedido.servidorAsignado]) {
+              groupedData[pedido.servidorAsignado] = {
+                servidorAsignado: pedido.servidorAsignado,
+                totalProductos: 0,
+              };
+            }
+            groupedData[pedido.servidorAsignado].totalProductos +=
+              cantidadSalida;
+          }
+        }
+        const finalData = Object.values(groupedData).map((item) => ({
+          servidorAsignado: item.servidorAsignado,
+          totalProductos: item.totalProductos,
+        }));
+        setData(finalData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchPedidosAndProductos();
+  }, []);
+
+  const colorMap = {};
+  
+  const coloresDisponibles = [
+    "#FF6347",
+    "#4682B4",
+    "#32CD32",
+    "#FFD700",
+    "#FF4500",
+    "#6A5ACD",
+  ];
+
+  const getColor = (bar) => {
+    if (!colorMap[bar.indexValue]) {
+      colorMap[bar.indexValue] =
+        coloresDisponibles[
+          Object.keys(colorMap).length % coloresDisponibles.length
+        ];
+    }
+    return colorMap[bar.indexValue];
+  };
+
   return (
     <ResponsiveBar
       data={data}
+      keys={["totalProductos"]}
+      indexBy="servidorAsignado"
       theme={{
         axis: {
           domain: {
@@ -31,8 +89,8 @@ const BarChart = () => {
         },
         grid: {
           line: {
-            stroke: grey[400], 
-            strokeWidth: 1, 
+            stroke: grey[400],
+            strokeWidth: 1,
           },
         },
         legends: {
@@ -41,59 +99,28 @@ const BarChart = () => {
           },
         },
       }}
-      keys={["2568405", "2568506", "2568607", "2569617", "2567618"]}
-      indexBy="country"
-      margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
+      margin={{ top: 50, right: 130, bottom: 60, left: 60 }}
       padding={0.3}
       valueScale={{ type: "linear" }}
       indexScale={{ type: "band", round: true }}
-      colors={{ scheme: "nivo" }}
-      defs={[
-        {
-          id: "dots",
-          type: "patternDots",
-          background: "inherit",
-          color: "#38bcb2",
-          size: 4,
-          padding: 1,
-          stagger: true,
-        },
-        {
-          id: "lines",
-          type: "patternLines",
-          background: "inherit",
-          color: "#eed312",
-          rotation: -45,
-          lineWidth: 6,
-          spacing: 10,
-        },
-      ]}
-      borderColor={{
-        from: "color",
-        modifiers: [["darker", 1.6]],
-      }}
+      colors={getColor}
       axisTop={null}
       axisRight={null}
       axisBottom={{
         tickSize: 5,
         tickPadding: 5,
-        tickRotation: 0,
-        // legend: "country",
-        legendPosition: "middle",
-        legendOffset: 32,
-        truncateTickAt: 0,
+        tickRotation: -35,
       }}
       axisLeft={{
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        // legend: "food",
+        legend: "Cantidad de Productos",
         legendPosition: "middle",
         legendOffset: -40,
-        truncateTickAt: 0,
       }}
-      enableGridX={false} 
-      enableGridY={true}  
+      enableGridX={false}
+      enableGridY={true}
       labelSkipWidth={12}
       labelSkipHeight={12}
       labelTextColor="transparent"
@@ -124,7 +151,7 @@ const BarChart = () => {
       role="application"
       ariaLabel="Nivo bar chart demo"
       barAriaLabel={(e) =>
-        e.id + ": " + e.formattedValue + " in country: " + e.indexValue
+        e.id + ": " + e.formattedValue + " en servidor: " + e.indexValue
       }
     />
   );

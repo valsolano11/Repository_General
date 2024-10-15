@@ -26,21 +26,26 @@ const AutorizarPedidos = () => {
     },
   ]);
 
-  useEffect(() => {
-    const fetchStates = async () => {
-      try {
-        const response = await api.get("/Estado");
-        const filteredEstados = response.data.filter(
-          (estado) => estado.id === 5 || estado.id === 6 || estado.id === 7
-        );
-        setEstados(filteredEstados);
-      } catch (error) {
-        showToastError("Error al cargar los estados");
-      }
-    };
-
-    fetchStates();
-  }, []);
+  const fetchStates = async () => {
+    try {
+      const response = await api.get("/Estado");
+      const filteredEstados = response.data.filter(
+        (estado) => estado.id === 5 || estado.id === 6 || estado.id === 7
+      );
+      setEstados(filteredEstados);
+    } catch (error) {
+      console.error("Error fetching states:", error);
+      toast.error("Error al cargar los estados", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  };  
 
   const fetchData = async () => {
     setLoading(true);
@@ -78,14 +83,14 @@ const AutorizarPedidos = () => {
   }, []);
 
   const handleViewClick = (rowIndex) => {
-    const Pedido = data[rowIndex]; 
-    navigate("/firmaPedidos", { state: { pedidoId: Pedido.id } }); 
-  }; 
+    const Pedido = data[rowIndex];
+    navigate("/firmaPedidos", { state: { pedidoId: Pedido.id } });
+  };
 
   function formatDate(dateString) {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); 
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${year}/${month}/${day}`;
   }
@@ -95,7 +100,6 @@ const AutorizarPedidos = () => {
       name: "createdAt",
       label: "FECHA",
       options: {
-
         customHeadRender: (columnMeta) => (
           <th
             key={columnMeta.label}
@@ -105,9 +109,7 @@ const AutorizarPedidos = () => {
           </th>
         ),
         customBodyRender: (value) => (
-        <div className="text-center"> 
-         {formatDate(value)} 
-         </div>
+          <div className="text-center">{formatDate(value)}</div>
         ),
       },
     },
@@ -231,7 +233,6 @@ const AutorizarPedidos = () => {
     saveAs(data, "Pedidos.xlsx");
   };
 
-
   return (
     <div className="flex min-h-screen bg-fondo">
       <SidebarCoord sidebarToggleCoord={sidebarToggleCoord} />
@@ -255,7 +256,7 @@ const AutorizarPedidos = () => {
                     Pedidos de Productos consumibles
                   </span>
                 }
-                data={data} 
+                data={data}
                 columns={columns}
                 options={{
                   responsive: "standard",
@@ -310,11 +311,15 @@ const AutorizarPedidos = () => {
             )}
           </div>
         </div>
-        <div className="flex-grow flex items-center justify-center text-red700 mx-20">
+        <div
+          className="flex-grow flex items-center justify-center text-center text-sm text-black 
+             border-black rounded-lg border-2 bg-orange-200 font-bold w-1/2 mx-auto mt-4 mb-4"
+        >
           <p>
             NOTA: Los pedidos que no se firmen, es decir, que permanezcan en
-            estado PENDIENTE. Tienen 3 días desde la fecha de creación para que
-            cambien de estado a EN PROCESO, de lo contrario serán descartados.
+            estado PENDIENTE. Tienen 3 días hábiles desde la fecha de creación
+            para que cambien de estado a EN PROCESO, de lo contrario serán
+            descartados.
           </p>
         </div>
       </div>
