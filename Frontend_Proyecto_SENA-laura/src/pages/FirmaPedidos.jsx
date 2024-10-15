@@ -53,18 +53,6 @@ const FirmaPedidos = () => {
     }));
   };
 
-  const showToastError = (message) => {
-    toast.error(message, {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       if (pedidoId) {
@@ -113,10 +101,18 @@ const FirmaPedidos = () => {
 
   const handleSubmit = async () => {
     if (!firmaAdjunta) {
-      showToastError("Debe adjuntar una firma antes de enviar el pedido.");
-      return;
+      toast.error("Debe adjuntar una firma antes de enviar el pedido.", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      return; 
     }
-  
+    
     try {
       const formData = new FormData();
       formData.append('firma', firmaImagen); 
@@ -141,11 +137,27 @@ const FirmaPedidos = () => {
         });
         navigate('/autPedidos'); 
       } else {
-        showToastError("Error al enviar el pedido.");
+        toast.error("Error al enviar el pedido.", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });    
       }
     } catch (error) {
       console.error("Error al enviar el pedido:", error);
-      showToastError("Error al enviar el pedido.");
+      toast.error("Error al enviar el pedido.", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });  
     } finally {
       setLoading(false);
     }
@@ -276,7 +288,7 @@ const FirmaPedidos = () => {
                               className="bg-grisClaro border-b border-black text-xs px-2 h-8"
                               type="date"
                               name="fecha"
-                              value={formData.fecha}
+                              value={formData.fecha || ""}
                               readOnly
                             />
                           </div>

@@ -123,7 +123,7 @@ const FormatoHerram = () => {
     }
   
     try {
-      const response = await api.post("http://localhost:9100/pedido", formData, {
+      const response = await api.post("/pedido", formData, {
         headers: {
           "Content-Type": "application/json",
         },

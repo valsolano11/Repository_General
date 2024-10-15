@@ -12,6 +12,8 @@ import EditProductModal from "../components/EditProductModal";
 import AddProductModal from "../components/AddProductModal";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import "react-toastify/dist/ReactToastify.css";
 
 const Productos = () => {
@@ -110,7 +112,9 @@ const Productos = () => {
       label: "Nombre del Producto",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),
@@ -358,6 +362,58 @@ const Productos = () => {
     );
   };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF('landscape'); 
+    const tableColumn = [
+      "ID", 
+      "Nombre del Producto", 
+      "Codigo", 
+      "Descripcion", 
+      "Cantidad Entrada", 
+      "Cantidad Salida", 
+      "Cantidad Actual", 
+      "Volumen Total", 
+      "Marca", 
+      "Unidad de Medida", 
+      "Subcategoria", 
+      "Usuario", 
+      "ESTADO"
+    ];
+    const tableRows = [];
+  
+    data.forEach((producto) => {
+      const productoData = [
+        producto.id || "",
+        producto.productoNombre || "",
+        producto.codigo || "",
+        producto.descripcion || "",
+        producto.cantidadEntrada || "",
+        producto.cantidadSalida || "",
+        producto.cantidadActual || "",
+        producto.VolumenTotal || "",
+        producto.marca || "",
+        producto.unidadNombre || "",
+        producto.subcategoriaName || "",
+        producto.nombreUser || "",
+        producto.estadoName || ""
+      ];
+      tableRows.push(productoData);
+    });
+  
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      theme: 'striped',
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [0, 57, 107] },
+      margin: { top: 10 }
+    });
+  
+    doc.text("Listado de Productos", 14, 15);
+    doc.save("Productos.pdf");
+  };
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -371,6 +427,9 @@ const Productos = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
+          <button className="btn-black mr-2" onClick={handleExportPDF}>
+            Exportar PDF
+          </button>
           {hasPermission("Crear Producto") && (
             <button className="btn-primary" onClick={handleOpenAddModal}>
               Agregar Producto

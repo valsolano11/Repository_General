@@ -46,6 +46,7 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
       });
     }
   }, [product]);
+
   useEffect(() => {
     const fetchsubcategorias = async () => {
       try {
@@ -82,7 +83,6 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
     fetchUnidad();
   }, []);
 
-
   const validateInput = (name, value) => {
     let errorMessage = "";
     if (name === "nombre") {
@@ -112,7 +112,6 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
       [name]: processedValue,
     }));
   };
-
 
   const showToastError = (message) => {
     toast.error(message, {
@@ -184,7 +183,9 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
           progress: undefined,
         });
         resetForm();
-        setTimeout(() => {}, 2000);
+        setTimeout(() => {
+          onClose(response.data);
+        }, 2000);
       } else {
         showToastError(
           "Ocurrió un error!, por favor intenta con un documento o correo diferente."
