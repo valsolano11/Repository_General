@@ -34,10 +34,6 @@ const GestionarPedidos = () => {
     codigoSena: "",
   });
 
-  const actualizarCantidadSalida = (cantidad) => {
-    setNuevaCantidadSalida(cantidad);
-  };
-
   const [accordionStates, setAccordionStates] = useState({
     datos: false,
     productos: false,
@@ -79,6 +75,7 @@ const GestionarPedidos = () => {
             servidorAsignado: data.servidorAsignado,
             cedulaServidor: data.cedulaServidor,
             correo: data.correo,
+            EstadoId: data.EstadoId, 
           };
           setPedidoData(pedidoFormatted);
           setFormData({
@@ -108,21 +105,33 @@ const GestionarPedidos = () => {
       "0"
     )}-${String(date.getDate()).padStart(2, "0")}`;
   };
-  const handleCantidadSalidaChange = (index, productoId, cantidadSalida) => {
-    const updatedProductos = [...productosSalida];
 
+  const handleCantidadSalidaChange = (index, productoId, cantidadSalida) => {
+    console.log("Producto ID:", productoId);
+    console.log("Cantidad Salida:", cantidadSalida);
+  
+    const updatedProductos = [...productosSalida];
+  
     const productoIndex = updatedProductos.findIndex(
       (producto) => producto.ProductoId === productoId
     );
-
+  
     if (productoIndex >= 0) {
-      updatedProductos[productoIndex].cantidadSalida = cantidadSalida;
+      if (cantidadSalida > 0) {
+        updatedProductos[productoIndex].cantidadSalida = cantidadSalida;
+      } else {
+        updatedProductos.splice(productoIndex, 1);
+      }
     } else {
-      updatedProductos.push({ ProductoId: productoId, cantidadSalida });
+      if (cantidadSalida > 0) {
+        updatedProductos.push({ ProductoId: productoId, cantidadSalida });
+      }
     }
-
+  
     setProductosSalida(updatedProductos);
+    console.log("Productos salida actualizados:", updatedProductos);
   };
+  
 
   const handleGestionarPedido = async () => {
     try {
@@ -452,6 +461,7 @@ const GestionarPedidos = () => {
                   <button
                     className="btn-black2"
                     onClick={handleGestionarPedido}
+                    disabled={pedidoData && pedidoData.EstadoId === 7}                   
                   >
                     Gestionar Pedido
                   </button>
