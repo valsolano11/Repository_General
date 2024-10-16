@@ -7,14 +7,10 @@ import MUIDataTable from "mui-datatables";
 import clsx from "clsx";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
-import * as XLSX from "xlsx";
 import "react-toastify/dist/ReactToastify.css";
 
 const FichasCoordi = () => {
   const [sidebarToggleCoord, setsidebarToggleCoord] = useState(false);
-  const [isOpenEditModal, setIsOpenEditModal] = useState(false);
-  const [selectedFicha, setSelectedFicha] = useState(null);
-  const [isOpenAddModal, setIsOpenAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
@@ -60,9 +56,11 @@ const FichasCoordi = () => {
       label: "ID",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -73,9 +71,11 @@ const FichasCoordi = () => {
       label: "FICHA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -86,9 +86,11 @@ const FichasCoordi = () => {
       label: "PROGRAMA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -99,9 +101,11 @@ const FichasCoordi = () => {
       label: "JORNADA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -112,9 +116,11 @@ const FichasCoordi = () => {
       label: "USUARIO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -125,9 +131,11 @@ const FichasCoordi = () => {
       label: "ESTADO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => (
@@ -148,9 +156,11 @@ const FichasCoordi = () => {
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value, tableMeta, updateValue) => (
@@ -180,13 +190,13 @@ const FichasCoordi = () => {
           sidebarToggle={sidebarToggleCoord}
           setSidebarToggle={setsidebarToggleCoord}
         />
-                <div className="flex-grow flex items-center justify-center">
+        <div className="flex-grow flex items-center justify-center">
           <div className="max-w-7xl overflow-auto">
             {loading ? (
               <div className="text-center">Cargando Fichas...</div>
             ) : (
               <MUIDataTable
-                title={<span className="custom-title">FICHAS</span>} 
+                title={<span className="custom-title">FICHAS</span>}
                 data={data}
                 columns={columns}
                 options={{

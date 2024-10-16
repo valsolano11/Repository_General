@@ -1,45 +1,81 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 import { api } from "../api/token";
 import MUIDataTable from "mui-datatables";
+import "react-toastify/dist/ReactToastify.css";
 
-const TablaPrestamosFirma = () => {
+const TablaPrestamosGestion = ({ actualizarFechaEntrega }) => {
+  const [herramientas, setHerramientas] = useState([]);
   const location = useLocation();
-  const { herramientaId } = location.state || {};
-  const [loading, setLoading] = useState(false);
+  const { prestamoId } = location.state || {};
+  const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    const fetchHerramintas = async () => {
+    const fetchherramientas = async () => {
+      try {
+        const response = await api.get(`/herramienta`);
+        setHerramientas(response.data);
+      } catch (err) {
+        console.error("Error fetching herramientas:", err);
+        toast.error("Error al cargar herramientas.");
+      }
+    };
+
+    fetchherramientas();
+  }, []);
+
+  useEffect(() => {
+    const fetchherramientasDelPedido = async () => {
+      if (!prestamoId) return;
+
       try {
         setLoading(true);
-        const response = await api.get(`/prestamos/${herramientaId}`);
+        const response = await api.get(`/prestamos/${prestamoId}`);
+        const herramientasData = response.data.Herramienta || [];
 
-        const herraminetasData = response.data.Herramienta;
+        const formatDate = (dateString) => {
+          const date = new Date(dateString);
+          const formattedDate = isNaN(date.getTime())
+            ? "Sin fecha"
+            : date.toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              });
+          return formattedDate;
+        };
 
-        const prestamosFormatted = herraminetasData.map(
+        const herramientasFormatted = herramientasData.map(
           (herramienta, index) => {
+            const fechaEntrega = herramienta.fechaEntrega
+              ? formatDate(herramienta.fechaEntrega)
+              : "Sin fecha";
+
             return {
               item: index + 1,
               nombre: herramienta.nombre,
               codigo: herramienta.codigo,
-              observaciones: herramienta.PrestamoHerramienta.observaciones,
+              HerramientumId: herramienta.id,
+              observaciones:
+                herramienta.PrestamoHerramienta?.observaciones ||
+                "Sin observaciones",
+              fechaEntrega,
             };
           }
         );
-
-        setData(prestamosFormatted);
+        setData(herramientasFormatted);
       } catch (err) {
         console.error("Error fetching herramientas:", err);
+        toast.error("Error al cargar herramientas.");
       } finally {
         setLoading(false);
       }
     };
 
-    if (herramientaId > 0) {
-      fetchHerramintas();
-    }
-  }, [herramientaId]);
+    fetchherramientasDelPedido();
+  }, [prestamoId]);
 
   const columns = [
     {
@@ -59,7 +95,7 @@ const TablaPrestamosFirma = () => {
     },
     {
       name: "nombre",
-      label: "NOMBRE HERRAMIENTAS",
+      label: "NOMBRE herramienta",
       options: {
         customHeadRender: (columnMeta) => (
           <th
@@ -74,7 +110,7 @@ const TablaPrestamosFirma = () => {
     },
     {
       name: "codigo",
-      label: "CODIGO",
+      label: "CÓDIGO herramienta",
       options: {
         customHeadRender: (columnMeta) => (
           <th
@@ -100,6 +136,24 @@ const TablaPrestamosFirma = () => {
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
+      },
+    },
+    {
+      name: "fechaEntrega",
+      label: "FECHA ENTREGA",
+      options: {
+        customHeadRender: (columnMeta) => (
+          <th
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
+          </th>
+        ),
+        customBodyRender: (value) => {
+          const displayValue = value || "Fecha pendiente";
+          return <div className="text-center">{displayValue}</div>;
+        },
       },
     },
   ];
@@ -128,10 +182,6 @@ const TablaPrestamosFirma = () => {
                   return {
                     className: "custom-table",
                   };
-                },
-                onDownload: (buildHead, buildBody, columns, data) => {
-                  handleCustomExport(data);
-                  return false;
                 },
                 textLabels: {
                   body: {
@@ -175,4 +225,4 @@ const TablaPrestamosFirma = () => {
   );
 };
 
-export default TablaPrestamosFirma;
+export default TablaPrestamosGestion;

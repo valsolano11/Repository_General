@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { api } from "../api/token";
 import { saveAs } from "file-saver";
 import { toast } from "react-toastify";
-import { useAuth } from "../context/AuthContext"; 
+import { useAuth } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
 import Home from "../components/Home";
 import MUIDataTable from "mui-datatables";
@@ -92,9 +92,11 @@ const Subcategorias = () => {
       label: "ID",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -105,9 +107,11 @@ const Subcategorias = () => {
       label: "SUBCATEGORIA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -118,9 +122,11 @@ const Subcategorias = () => {
       label: "CATEGORIA",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -131,9 +137,11 @@ const Subcategorias = () => {
       label: "ESTADO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => (
@@ -154,9 +162,11 @@ const Subcategorias = () => {
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value, tableMeta, updateValue) => (
@@ -196,19 +206,19 @@ const Subcategorias = () => {
     return user.DetallePermisos.some(
       (permiso) => permiso.Permiso.nombrePermiso === permissionName
     );
-  };  
+  };
 
   const handleExportPDF = () => {
     const doc = new jsPDF();
     const tableColumn = ["Subcategoria", "Categoria"];
     const tableRows = [];
-  
+
     data.forEach((subcategoria) => {
       const subcategoriaData = [
         subcategoria.subcategoriaName || "",
         subcategoria.categoriaName || "",
       ];
-      tableRows.push(subcategoriaData); 
+      tableRows.push(subcategoriaData);
     });
 
     doc.autoTable({
@@ -217,14 +227,14 @@ const Subcategorias = () => {
       startY: 20,
       theme: "striped",
       styles: { fontSize: 10 },
-      headStyles: { fillColor: [0, 57, 107] }, 
+      headStyles: { fillColor: [0, 57, 107] },
       margin: { top: 10 },
     });
 
     doc.text("Subcategorias", 14, 15);
     doc.save("Subcategorias.pdf");
   };
-  
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -256,7 +266,7 @@ const Subcategorias = () => {
               <div className="text-center">Cargando Subcategoria...</div>
             ) : (
               <MUIDataTable
-                title={<span className="custom-title">SUBCATEGORIAS</span>} 
+                title={<span className="custom-title">SUBCATEGORIAS</span>}
                 data={data}
                 columns={columns}
                 options={{

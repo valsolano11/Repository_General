@@ -54,7 +54,10 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
     const fetchEstados = async () => {
       try {
         const response = await api.get("/Estado");
-        setEstados(response.data);
+        const filteredEstados = response.data.filter(
+          (estado) => estado.id === 1 || estado.id === 2
+        );
+        setEstados(filteredEstados);
       } catch (error) {
         showToastError("Error al cargar los estados");
       }
@@ -71,7 +74,7 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
       if (!nameRegex.test(value) || /\d/.test(value)) {
         errorMessage = "El nombre no puede contener caracteres especiales.";
       }
-    } 
+    }
     return errorMessage;
   };
 
@@ -114,14 +117,29 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
   };
 
   const handleCreate = async () => {
-    const {  nombre, codigo, marca, condicion, observaciones,  EstadoId, SubcategoriaId } = formData;
+    const {
+      nombre,
+      codigo,
+      marca,
+      condicion,
+      observaciones,
+      EstadoId,
+      SubcategoriaId,
+    } = formData;
+
     const codigoError = validateInput("codigo", codigo);
     const nombreError = validateInput("nombre", nombre);
-    const condicionError = validateInput("fechaDeIngreso", condicion);
-    const observacionesError = validateInput("fechaDeIngreso", observaciones);
+    const condicionError = validateInput("condicion", condicion);
+    const observacionesError = validateInput("observaciones", observaciones);
     const marcaError = validateInput("marca", marca);
 
-    if (codigoError || nombreError  || condicionError || observacionesError || marcaError) {
+    if (
+      codigoError ||
+      nombreError ||
+      condicionError ||
+      observacionesError ||
+      marcaError
+    ) {
       setFormErrors({
         codigo: codigoError,
         nombre: nombreError,
@@ -129,12 +147,55 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
         observaciones: observacionesError,
         marca: marcaError,
       });
-      showToastError("Por favor, corrige los errores antes de agregar.");
+
+      if (codigoError) {
+        showToastError("El código es inválido o está vacío.");
+      }
+      if (nombreError) {
+        showToastError("El nombre es obligatorio y debe ser válido.");
+      }
+      if (condicionError) {
+        showToastError("La condición es obligatoria.");
+      }
+      if (observacionesError) {
+        showToastError("El campo de observaciones es obligatorio.");
+      }
+      if (marcaError) {
+        showToastError("La marca es obligatoria.");
+      }
       return;
     }
 
-    if (!codigo || !nombre || !condicion || !observaciones|| !marca || !EstadoId || !SubcategoriaId ) {
-      showToastError("Todos los campos son obligatorios.");
+    if (
+      !codigo ||
+      !nombre ||
+      !condicion ||
+      !observaciones ||
+      !marca ||
+      !EstadoId ||
+      !SubcategoriaId
+    ) {
+      if (!codigo) {
+        showToastError("El campo 'Código' es obligatorio.");
+      }
+      if (!nombre) {
+        showToastError("El campo 'Nombre' es obligatorio.");
+      }
+      if (!condicion) {
+        showToastError("El campo 'Condición' es obligatorio.");
+      }
+      if (!observaciones) {
+        showToastError("El campo 'Observaciones' es obligatorio.");
+      }
+      if (!marca) {
+        showToastError("El campo 'Marca' es obligatorio.");
+      }
+      if (!EstadoId) {
+        showToastError("El campo 'Estado' es obligatorio.");
+      }
+      if (!SubcategoriaId) {
+        showToastError("El campo 'Subcategoría' es obligatorio.");
+      }
       return;
     }
 
@@ -161,15 +222,17 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
           progress: undefined,
         });
         resetForm();
-        setTimeout(() => {}, 2000);
+        setTimeout(() => {
+          onClose(response.data);
+        }, 2000);
       } else {
         showToastError(
-          "Ocurrió un error!, por favor intenta con un código o nombre diferente."
+          "Error al agregar la herramienta. Intenta con un código o nombre diferente."
         );
       }
     } catch (error) {
       showToastError(
-        "Ocurrió un error!, por favor intenta con un código o nombre diferente."
+        "Ocurrió un error al agregar la herramienta. Verifica los datos e intenta nuevamente."
       );
     } finally {
       setLoading(false);
@@ -195,8 +258,6 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                 <h6 className="font-bold text-center text-2xl mb-2">
                   Registro Herramienta
                 </h6>
-
-
 
                 <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Nombre *</label>
@@ -251,7 +312,6 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                   )}
                 </div>
 
-
                 <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Condicion *</label>
                   <select
@@ -260,7 +320,7 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                     value={formData.condicion}
                     onChange={handleInputChange}
                   >
-                    <option value="" >Seleccione una Condicion</option>
+                    <option value="">Seleccione una Condicion</option>
                     <option value="BUENO">BUENO</option>
                     <option value="REGULAR">REGULAR</option>
                     <option value="MALO">MALO</option>
@@ -268,7 +328,9 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Observaciones *</label>
+                  <label className="mb-1 font-bold text-sm">
+                    Observaciones *
+                  </label>
                   <input
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
                     type="text"
@@ -283,9 +345,10 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                   )}
                 </div>
 
-
                 <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Subcategoría *</label>
+                  <label className="mb-1 font-bold text-sm">
+                    Subcategoría *
+                  </label>
                   <select
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
                     name="SubcategoriaId"
@@ -300,7 +363,6 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                     ))}
                   </select>
                 </div>
-
 
                 <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Estado *</label>

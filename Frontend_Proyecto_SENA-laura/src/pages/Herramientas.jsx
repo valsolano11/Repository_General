@@ -13,7 +13,6 @@ import clsx from "clsx";
 import * as XLSX from "xlsx";
 import "react-toastify/dist/ReactToastify.css";
 
-
 const Herramientas = () => {
   const [sidebarToggle, setSidebarToggle] = useState(false);
   const [data, setData] = useState([]);
@@ -22,9 +21,7 @@ const Herramientas = () => {
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
-
   const fetchData = async () => {
-    // console.time('fetchData');
     setLoading(true);
     try {
       const response = await api.get("/herramienta", {
@@ -37,7 +34,9 @@ const Herramientas = () => {
         ...herrami,
         nombreuser: herrami.Usuario ? herrami.Usuario.nombre : "Desconocido",
         estadoName: herrami.Estado ? herrami.Estado.estadoName : "Desconocido",
-        subcategoriaName: herrami.Subcategorium ? herrami.Subcategorium.subcategoriaName : "Desconocido",
+        subcategoriaName: herrami.Subcategorium
+          ? herrami.Subcategorium.subcategoriaName
+          : "Desconocido",
       }));
 
       herramientaConEstadoUsuarioSub.sort((a, b) => a.id - b.id);
@@ -56,7 +55,6 @@ const Herramientas = () => {
     }
     setLoading(false);
   };
-
 
   useEffect(() => {
     fetchData();
@@ -87,14 +85,15 @@ const Herramientas = () => {
     setIsOpenAddModal(false);
   };
 
-
   const columns = [
     {
       name: "id",
       label: "ID",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+            {columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -104,7 +103,9 @@ const Herramientas = () => {
       label: "Nombre",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+            {columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -114,7 +115,9 @@ const Herramientas = () => {
       label: "Codigo",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+            {columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -124,7 +127,9 @@ const Herramientas = () => {
       label: "Marca",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+            {columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -134,7 +139,9 @@ const Herramientas = () => {
       label: "Condicion",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+            {columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -144,7 +151,9 @@ const Herramientas = () => {
       label: "Observacion",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+            {columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -154,7 +163,9 @@ const Herramientas = () => {
       label: "Fecha de Ingreso",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+            {columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -164,7 +175,9 @@ const Herramientas = () => {
       label: "Subcategoria",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+            {columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -174,7 +187,9 @@ const Herramientas = () => {
       label: "Usuario",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+            {columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
@@ -184,7 +199,9 @@ const Herramientas = () => {
       label: "ESTADO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+            {columnMeta.label}
+          </th>
         ),
         customBodyRender: (value) => (
           <div
@@ -210,7 +227,9 @@ const Herramientas = () => {
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">{columnMeta.label}</th>
+          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+            {columnMeta.label}
+          </th>
         ),
         customBodyRender: (value, tableMeta, updateValue) => (
           <div className="flex items-center justify-center">
@@ -334,7 +353,10 @@ const Herramientas = () => {
           herramienta={selectedHerramienta}
         />
       )}
-      <AddHerramientaModal isOpen={isOpenAddModal} onClose={handleCloseAddModal} />
+      <AddHerramientaModal
+        isOpen={isOpenAddModal}
+        onClose={handleCloseAddModal}
+      />
     </div>
   );
 };

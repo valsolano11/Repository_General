@@ -39,7 +39,6 @@ const ConsumoDevolutivoGeneral = () => {
 
   const handleCloseEditModal = (updatedHerramienta) => {
     if (updatedHerramienta) {
-      // Update data logic here
     }
     setIsOpenEditModal(false);
     setSelectedHerramienta(null);
@@ -226,7 +225,11 @@ const ConsumoDevolutivoGeneral = () => {
               <div className="text-center">Cargando herramientas...</div>
             ) : (
               <MUIDataTable
-                title={<span className="custom-title">Herramientas de consumo devolutivo - General</span>}
+                title={
+                  <span className="custom-title">
+                    Herramientas de consumo devolutivo - General
+                  </span>
+                }
                 data={data}
                 columns={columns}
                 options={{

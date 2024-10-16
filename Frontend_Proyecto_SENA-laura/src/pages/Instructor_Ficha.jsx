@@ -254,7 +254,7 @@ const Intructor_Ficha = () => {
       "nombreUsuario",
     ];
     const tableRows = [];
-  
+
     data.forEach((rowData) => {
       const row = [
         rowData.NumeroFicha || "",
@@ -265,7 +265,7 @@ const Intructor_Ficha = () => {
       ];
       tableRows.push(row);
     });
-  
+
     doc.autoTable({
       head: [tableColumn],
       body: tableRows,
@@ -275,11 +275,10 @@ const Intructor_Ficha = () => {
       headStyles: { fillColor: [0, 57, 107] },
       margin: { top: 10 },
     });
-  
+
     doc.text("Ficha_Instructor", 14, 15);
     doc.save("Ficha_Instructor.pdf");
   };
-  
 
   return (
     <div className="flex min-h-screen">
@@ -294,9 +293,9 @@ const Intructor_Ficha = () => {
           setSidebarToggle={setSidebarToggle}
         />
         <div className="flex justify-end mt-2">
-            <button className="btn-black mr-2" onClick={handleExportPDF}>
+          <button className="btn-black mr-2" onClick={handleExportPDF}>
             Exportar PDF
-            </button>
+          </button>
         </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="max-w-7xl overflow-auto">

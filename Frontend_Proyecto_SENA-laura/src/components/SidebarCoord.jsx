@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaHome, FaUsers } from "react-icons/fa";
+import { FaHome } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { FaFileSignature } from "react-icons/fa";
 import { SiGoogleclassroom } from "react-icons/si";
@@ -9,22 +9,22 @@ import { LiaDropbox } from "react-icons/lia";
 import { FiTool } from "react-icons/fi";
 
 const SidebarCoord = ({ sidebarToggleCoord }) => {
-    const navigate = useNavigate();
-    const [expanded, setExpanded] = useState({
-      autorizar: false,
-    });  
+  const navigate = useNavigate();
+  const [expanded, setExpanded] = useState({
+    autorizar: false,
+  });
 
-    const handleClick = () => {
-        navigate("/homecoord");
-      };
+  const handleClick = () => {
+    navigate("/homecoord");
+  };
 
-    const handleToggle = (panel) => {
-      setExpanded((prevExpanded) => ({
-        ...prevExpanded,
-        [panel]: !prevExpanded[panel],
-      }));
-    };  
-    
+  const handleToggle = (panel) => {
+    setExpanded((prevExpanded) => ({
+      ...prevExpanded,
+      [panel]: !prevExpanded[panel],
+    }));
+  };
+
   return (
     <motion.div
       initial={{ x: "-100%" }}
@@ -53,13 +53,13 @@ const SidebarCoord = ({ sidebarToggleCoord }) => {
         </li>
 
         <li className="mb-2">
-          <div 
+          <div
             className="flex items-center justify-between px-3 py-2 rounded hover:shadow hover:bg-gray-700 cursor-pointer"
             onClick={() => handleToggle("autorizar")}
           >
             <div className="flex items-center">
               <FaFileSignature className="inline-block w-6 h-6 mr-2 -mt-2"></FaFileSignature>
-              Autorizar Pedidos 
+              Autorizar Pedidos
             </div>
             <span>{expanded.autorizar ? "-" : "+"}</span>
           </div>
@@ -67,19 +67,19 @@ const SidebarCoord = ({ sidebarToggleCoord }) => {
             <ul className="bg-black text-center text-white text-sm">
               <li className="py-1 hover:bg-gray-700 rounded mx-4">
                 <a href="/autPedidos" className="px-3 flex items-center">
-                <LiaDropbox className="inline-block w-4 h-4 mr-2 -mt-1"></LiaDropbox>
-                Productos
+                  <LiaDropbox className="inline-block w-4 h-4 mr-2 -mt-1"></LiaDropbox>
+                  Productos
                 </a>
               </li>
               <li className="py-1 hover:bg-gray-700 rounded mx-4">
                 <a href="/autPrestamos" className="px-3 flex items-center">
-                <FiTool className="inline-block w-4 h-4 mr-2 -mt-1"></FiTool>
-                Herramientas
+                  <FiTool className="inline-block w-4 h-4 mr-2 -mt-1"></FiTool>
+                  Herramientas
                 </a>
               </li>
             </ul>
           )}
-          </li>
+        </li>
 
         <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
           <a href="/fichasCoordi" className="px-3">
@@ -92,4 +92,4 @@ const SidebarCoord = ({ sidebarToggleCoord }) => {
   );
 };
 
-export default SidebarCoord
+export default SidebarCoord;

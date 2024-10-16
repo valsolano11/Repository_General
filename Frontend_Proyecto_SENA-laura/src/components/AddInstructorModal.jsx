@@ -38,14 +38,14 @@ const AddInstructorModal = ({ isOpen, onClose, instructor }) => {
       try {
         const response = await api.get("/Estado");
         const filteredEstados = response.data.filter(
-          estado => estado.id === 1 || estado.id === 2
+          (estado) => estado.id === 1 || estado.id === 2
         );
         setEstados(filteredEstados);
       } catch (error) {
         showToastError("Error al cargar los estados");
       }
     };
-  
+
     fetchStates();
   }, []);
 
@@ -68,9 +68,7 @@ const AddInstructorModal = ({ isOpen, onClose, instructor }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const processedValue =
-      name === "EstadoId" || name === "celular"
-        ? Number(value)
-        : value;
+      name === "EstadoId" || name === "celular" ? Number(value) : value;
 
     const errorMessage = validateInput(name, processedValue);
     setFormErrors((prevErrors) => ({
@@ -119,7 +117,7 @@ const AddInstructorModal = ({ isOpen, onClose, instructor }) => {
       return;
     }
 
-    if (!nombre || !correo || !celular ||  !EstadoId) {
+    if (!nombre || !correo || !celular || !EstadoId) {
       showToastError("Todos los campos son obligatorios.");
       return;
     }
@@ -239,7 +237,6 @@ const AddInstructorModal = ({ isOpen, onClose, instructor }) => {
                     maxLength={10}
                   />
                 </div>
-
 
                 <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Estado *</label>
