@@ -16,6 +16,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
   const [isModalPerfilOpen, setIsModalPerfilOpen] = useState(false);
   const [showConfirmLogout, setShowConfirmLogout] = useState(false);
   const [isNotificacionesOpen, setIsNotificacionesOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   const notifications = ["Notificación 1", "Notificación 2", "Notificación 3"];
 
@@ -48,6 +49,9 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
     setShowConfirmLogout(false);
     setIsNotificacionesOpen(false);
   };
+  const handleNewNotifications = (nuevas) => {
+    setUnreadNotifications(nuevas);
+  };
 
   return (
     <nav
@@ -71,23 +75,16 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
       </div>
       <div className="flex justify-end w-full max-w-full">
         <div className="flex items-center gap-x-5">
-          {/* <div className="relative items-center md:w-65">
-            <span className="relative md:absolute inside-y-0 left-0 flex items-center pl-40">
-              <button className="p-2 focus:outline-none text-white md:text-black">
-                <FaSearch />
-              </button>
-            </span>
-            <input
-              type="text"
-              placeholder="Buscar aquí"
-              className="w-full px-4 py-1 pl-22 rounded-lg shadow outline-none hidden md:block bg-gray-100"
-            />
-          </div> */}
-          <div className="text-white">
+          <div className="relative text-white">
             <FaBell
               className="w-6 h-6 text-black cursor-pointer"
               onClick={() => setIsNotificacionesOpen(true)}
             />
+            {unreadNotifications > 0 && (
+              <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                {unreadNotifications}
+              </span>
+            )}
           </div>
           <div>
             <button
@@ -111,16 +108,6 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
               </span>
             </div>
           </li>
-          {/* <li>
-            <div className="bg-gray-100 text-center rounded-lg my-4">
-              <a href="">Ayuda</a>
-            </div>
-          </li>
-          <li>
-            <div className="bg-gray-100 text-center rounded-lg my-4">
-              <a href="">Configuración</a>
-            </div>
-          </li> */}
           <li>
             <div className="bg-gray-100 text-center rounded-lg my-4">
               <span
@@ -143,6 +130,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
         isOpen={isNotificacionesOpen}
         onClose={handleCloseModals}
         notifications={notifications}
+        onNewNotifications={handleNewNotifications}
       />
     </nav>
   );

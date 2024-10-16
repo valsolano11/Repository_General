@@ -306,4 +306,5 @@ const TablaPedidosGestion = ({ actualizarCantidadSalida }) => {
     </div>
   );
 };
+
 export default TablaPedidosGestion;

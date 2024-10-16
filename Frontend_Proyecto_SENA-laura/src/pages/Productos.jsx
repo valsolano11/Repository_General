@@ -40,9 +40,12 @@ const Productos = () => {
         productoNombre: produc.nombre,
         nombreUser: produc.Usuario ? produc.Usuario.nombre : "Desconocido",
         estadoName: produc.Estado ? produc.Estado.estadoName : "Desconocido",
-        subcategoriaName: produc.Subcategorium ? produc.Subcategorium.subcategoriaName : "Desconocido",
-        unidadNombre: produc.UnidadDeMedida ? produc.UnidadDeMedida.nombre : "Desconocido",
-
+        subcategoriaName: produc.Subcategorium
+          ? produc.Subcategorium.subcategoriaName
+          : "Desconocido",
+        unidadNombre: produc.UnidadDeMedida
+          ? produc.UnidadDeMedida.nombre
+          : "Desconocido",
       }));
 
       productoconUnidadSub.sort((a, b) => a.id - b.id);
@@ -112,9 +115,10 @@ const Productos = () => {
       label: "Nombre del Producto",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
             {columnMeta.label}
           </th>
         ),
@@ -363,24 +367,24 @@ const Productos = () => {
   };
 
   const handleExportPDF = () => {
-    const doc = new jsPDF('landscape'); 
+    const doc = new jsPDF("landscape");
     const tableColumn = [
-      "ID", 
-      "Nombre del Producto", 
-      "Codigo", 
-      "Descripcion", 
-      "Cantidad Entrada", 
-      "Cantidad Salida", 
-      "Cantidad Actual", 
-      "Volumen Total", 
-      "Marca", 
-      "Unidad de Medida", 
-      "Subcategoria", 
-      "Usuario", 
-      "ESTADO"
+      "ID",
+      "Nombre del Producto",
+      "Codigo",
+      "Descripcion",
+      "Cantidad Entrada",
+      "Cantidad Salida",
+      "Cantidad Actual",
+      "Volumen Total",
+      "Marca",
+      "Unidad de Medida",
+      "Subcategoria",
+      "Usuario",
+      "ESTADO",
     ];
     const tableRows = [];
-  
+
     data.forEach((producto) => {
       const productoData = [
         producto.id || "",
@@ -395,21 +399,21 @@ const Productos = () => {
         producto.unidadNombre || "",
         producto.subcategoriaName || "",
         producto.nombreUser || "",
-        producto.estadoName || ""
+        producto.estadoName || "",
       ];
       tableRows.push(productoData);
     });
-  
+
     doc.autoTable({
       head: [tableColumn],
       body: tableRows,
       startY: 20,
-      theme: 'striped',
+      theme: "striped",
       styles: { fontSize: 10 },
       headStyles: { fillColor: [0, 57, 107] },
-      margin: { top: 10 }
+      margin: { top: 10 },
     });
-  
+
     doc.text("Listado de Productos", 14, 15);
     doc.save("Productos.pdf");
   };

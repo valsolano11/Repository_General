@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import fondo from "/logoSena.png";
@@ -7,6 +7,7 @@ import siga from "/Siga.png";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { FaGripLinesVertical } from "react-icons/fa6";
 import TablaHerramientas from "../components/TablaHerramientas";
+import { api } from "../api/token";
 
 const FormatoHerram = () => {
   const [formErrors, setFormErrors] = useState({});
@@ -20,7 +21,7 @@ const FormatoHerram = () => {
     correo: "",
     herramientas: [
       {
-        HerramientaId: "",
+        HerramientumId: "",
         codigo: "",
         observaciones: "",
       },
@@ -85,16 +86,10 @@ const FormatoHerram = () => {
   };
 
   const handleHerramientaChange = (updatedHerramienta) => {
-    console.log("Herramientas recibidos en el padre:", updatedHerramienta); // Verifica que se pasan los productos correctos
     setFormData({ ...formData, herramientas: updatedHerramienta });
   };
 
-
-
-
   const handleCreate = async () => {
-    console.log("Estado de formData antes de enviar:", formData);
-  
     const {
       codigoFicha,
       area,
@@ -105,9 +100,7 @@ const FormatoHerram = () => {
       correo,
       herramientas,
     } = formData;
-  
-    console.log("Datos a enviar:", formData);
-  
+
     if (
       !codigoFicha ||
       !area ||
@@ -116,38 +109,36 @@ const FormatoHerram = () => {
       !servidorAsignado ||
       !cedulaServidor ||
       !correo ||
-      !herramientas.some((p) => p.HerramientaId && p.codigo)
+      !herramientas.some((p) => p.HerramientumId && p.codigo)
     ) {
       showToastError("Todos los campos son obligatorios.");
       return;
     }
-  
+
     try {
-      const response = await api.post("/pedido", formData, {
+      const response = await api.post("/prestamos", formData, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-    
-      console.log("Respuesta del servidor:", response);
-    
+
       if (response.status === 201) {
         toast.success("Prestamo creado con éxito.");
         setFormData({
-          codigoFicha: '',
-          area: '',
-          jefeOficina: '',
-          cedulaJefeOficina: '',
-          servidorAsignado: '',
-          cedulaServidor: '',
-          correo: '',
+          codigoFicha: "",
+          area: "",
+          jefeOficina: "",
+          cedulaJefeOficina: "",
+          servidorAsignado: "",
+          cedulaServidor: "",
+          correo: "",
           herramientas: [
             {
-              ProductoId: "",
+              HerramientumId: "",
               codigo: "",
               observaciones: "",
-            }
-          ], 
+            },
+          ],
         });
       } else {
         const errorData = await response.json();
@@ -158,7 +149,6 @@ const FormatoHerram = () => {
       showToastError("Error en la comunicación con el servidor.");
     }
   };
-  
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-grisClaro">
@@ -287,8 +277,8 @@ const FormatoHerram = () => {
                       <input
                         className=" border-b border-black text-xs text-center h-8 w-20"
                         type="text"
-                        name="ficha"
-                        value={formData.ficha}
+                        name="codigoFicha"
+                        value={formData.codigoFicha}
                         onChange={handleInputChange}
                         onKeyPress={(e) => {
                           if (!/[0-9]/.test(e.key)) {
@@ -333,13 +323,13 @@ const FormatoHerram = () => {
                         <input
                           className=" border-b border-black text-xs text-center px-2 h-8"
                           type="text"
-                          name="coordi"
-                          value={formData.coordi}
+                          name="jefeOficina"
+                          value={formData.jefeOficina}
                           onChange={handleInputChange}
                         />
-                        {formErrors.coordi && (
+                        {formErrors.jefeOficina && (
                           <div className="text-red-400 text-xs mt-1 px-2">
-                            {formErrors.coordi}
+                            {formErrors.jefeOficina}
                           </div>
                         )}
                       </div>
@@ -351,8 +341,8 @@ const FormatoHerram = () => {
                     <input
                       className=" border-b border-black text-xs text-center h-8 w-20"
                       type="text"
-                      name="cedCoordi"
-                      value={formData.cedCoordi}
+                      name="cedulaJefeOficina"
+                      value={formData.cedulaJefeOficina}
                       onChange={handleInputChange}
                       onKeyPress={(e) => {
                         if (!/[0-9]/.test(e.key)) {
@@ -361,9 +351,9 @@ const FormatoHerram = () => {
                       }}
                       maxLength={10}
                     />
-                    {formErrors.Documento && (
+                    {formErrors.cedulaJefeOficina && (
                       <div className="text-red-400 text-xs mt-1 px-2">
-                        {formErrors.Documento}
+                        {formErrors.cedulaJefeOficina}
                       </div>
                     )}
                   </div>
@@ -378,13 +368,13 @@ const FormatoHerram = () => {
                         <input
                           className=" border-b border-black text-xs text-center px-2 h-8"
                           type="text"
-                          name="instructor"
-                          value={formData.instructor}
+                          name="servidorAsignado"
+                          value={formData.servidorAsignado}
                           onChange={handleInputChange}
                         />
-                        {formErrors.instructor && (
+                        {formErrors.servidorAsignado && (
                           <div className="text-red-400 text-xs mt-1 px-2">
-                            {formErrors.instructor}
+                            {formErrors.servidorAsignado}
                           </div>
                         )}
                       </div>
@@ -397,8 +387,8 @@ const FormatoHerram = () => {
                       <input
                         className=" border-b border-black text-xs text-center h-8 w-20"
                         type="text"
-                        name="cedInstructor"
-                        value={formData.cedInstructor}
+                        name="cedulaServidor"
+                        value={formData.cedulaServidor}
                         onChange={handleInputChange}
                         onKeyPress={(e) => {
                           if (!/[0-9]/.test(e.key)) {
@@ -407,9 +397,9 @@ const FormatoHerram = () => {
                         }}
                         maxLength={10}
                       />
-                      {formErrors.Documento && (
+                      {formErrors.cedulaServidor && (
                         <div className="text-red-400 text-xs mt-1 px-2">
-                          {formErrors.Documento}
+                          {formErrors.cedulaServidor}
                         </div>
                       )}
                     </div>
@@ -431,7 +421,6 @@ const FormatoHerram = () => {
                       </div>
                     </div>
                   </div>
-
                 </div>
               )}
             </div>
@@ -450,9 +439,9 @@ const FormatoHerram = () => {
                 <div className="flex flex-col rounded-lg w-full">
                   <div className="flex flex-row justify-between w-full mb-4">
                     <TablaHerramientas
-                        accordionStates={accordionStates}
-                        handleHerramientaChange={handleHerramientaChange}
-                        herramientas={formData.herramientas}
+                      accordionStates={accordionStates}
+                      handleHerramientaChange={handleHerramientaChange}
+                      herramientas={formData.herramientas}
                     />
                   </div>
                 </div>
@@ -460,7 +449,12 @@ const FormatoHerram = () => {
             </div>
 
             <div className="flex justify-center items-center w-2/4 mt-10 mx-auto">
-              <button className="btn-black2">Enviar solicitud</button>
+              <button
+                className="btn-black2 mb-4"
+                onClick={() => handleCreate("herramientas")}
+              >
+                Enviar Solicitud
+              </button>
               <FaGripLinesVertical className="h-24 mx-4" />
               <div onClick={handleClick} style={{ cursor: "pointer" }}>
                 <h6 className="font-semibold">FORMATO DE PRODUCTOS</h6>

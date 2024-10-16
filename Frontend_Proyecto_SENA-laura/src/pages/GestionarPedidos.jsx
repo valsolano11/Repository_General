@@ -107,8 +107,6 @@ const GestionarPedidos = () => {
   };
 
   const handleCantidadSalidaChange = (index, productoId, cantidadSalida) => {
-    console.log("Producto ID:", productoId);
-    console.log("Cantidad Salida:", cantidadSalida);
   
     const updatedProductos = [...productosSalida];
   
@@ -129,10 +127,8 @@ const GestionarPedidos = () => {
     }
   
     setProductosSalida(updatedProductos);
-    console.log("Productos salida actualizados:", updatedProductos);
   };
   
-
   const handleGestionarPedido = async () => {
     try {
       const response = await api.put(`/pedido/${pedidoId}/salida`, {

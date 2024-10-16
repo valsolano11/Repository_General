@@ -5,7 +5,7 @@ import { api } from "../api/token";
 
 const FirmasDos = ({ accordionStates, onFirmaChange }) => {
   const [firmaImagen, setFirmaImagen] = useState(null);
-  const [firmaExistente, setFirmaExistente] = useState(null); 
+  const [firmaExistente, setFirmaExistente] = useState(null);
   const location = useLocation();
   const { pedidoId } = location.state || {};
   const [loading, setLoading] = useState(false);
@@ -15,10 +15,10 @@ const FirmasDos = ({ accordionStates, onFirmaChange }) => {
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setFirmaImagen(URL.createObjectURL(file)); 
-      onFirmaChange(true, file); 
+      setFirmaImagen(URL.createObjectURL(file));
+      onFirmaChange(true, file);
     } else {
-      onFirmaChange(false, null); 
+      onFirmaChange(false, null);
     }
   };
 
@@ -30,10 +30,10 @@ const FirmasDos = ({ accordionStates, onFirmaChange }) => {
           const data = response.data;
 
           if (data.firma) {
-            const firmaUrl = `http://localhost:9100${data.firma}`;  
+            const firmaUrl = `http://localhost:9100${data.firma}`;
             setFirmaExistente(firmaUrl);
             onFirmaChange(false, null);
-          }          
+          }
         } catch (error) {
           console.error("Error fetching pedido data:", error);
         }
@@ -44,7 +44,8 @@ const FirmasDos = ({ accordionStates, onFirmaChange }) => {
     fetchData();
   }, [pedidoId, onFirmaChange]);
 
-  const canUpload = user?.Rol?.RolId === 3 || user?.Rol?.rolName === "COORDINADOR";
+  const canUpload =
+    user?.Rol?.RolId === 3 || user?.Rol?.rolName === "COORDINADOR";
 
   return (
     <div>
@@ -60,14 +61,14 @@ const FirmasDos = ({ accordionStates, onFirmaChange }) => {
               <div className="mt-2">
                 <p className="font-bold text-xs mb-2">Firma existente:</p>
                 <img
-                  src={firmaExistente} 
+                  src={firmaExistente}
                   alt="Firma existente"
                   className="h-24 w-auto border border-black rounded"
                 />
               </div>
             ) : null}
 
-            {canUpload ? ( 
+            {canUpload ? (
               <input
                 type="file"
                 accept="image/*"
@@ -75,7 +76,9 @@ const FirmasDos = ({ accordionStates, onFirmaChange }) => {
                 className="font-inter text-xs ml-2 mb-4"
               />
             ) : (
-              <p className="text-xs text-gray-500 mt-2">No tienes permiso para subir una firma.</p>
+              <p className="text-xs text-gray-500 mt-2">
+                No tienes permiso para subir una firma.
+              </p>
             )}
 
             {firmaImagen && (

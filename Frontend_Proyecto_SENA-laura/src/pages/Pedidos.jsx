@@ -45,7 +45,7 @@ const Pedidos = () => {
         progress: undefined,
       });
     }
-  }; 
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -83,14 +83,14 @@ const Pedidos = () => {
   }, []);
 
   const handleViewClick = (rowIndex) => {
-    const Pedido = data[rowIndex]; 
-    navigate("/gestionarPedidos", { state: { pedidoId: Pedido.id } }); 
-  }; 
+    const Pedido = data[rowIndex];
+    navigate("/gestionarPedidos", { state: { pedidoId: Pedido.id } });
+  };
 
   function formatDate(dateString) {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); 
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   }
@@ -109,10 +109,8 @@ const Pedidos = () => {
           </th>
         ),
         customBodyRender: (value) => (
-          <div className="text-center"> 
-           {formatDate(value)} 
-           </div>
-          ),
+          <div className="text-center">{formatDate(value)}</div>
+        ),
       },
     },
     {

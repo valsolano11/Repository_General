@@ -37,18 +37,17 @@ const AddFichasModal = ({ isOpen, onClose, ficha }) => {
       try {
         const response = await api.get("/Estado");
         const filteredEstados = response.data.filter(
-          estado => estado.id === 1 || estado.id === 2
+          (estado) => estado.id === 1 || estado.id === 2
         );
         setEstados(filteredEstados);
       } catch (error) {
         showToastError("Error al cargar los estados");
       }
     };
-  
+
     fetchStates();
   }, []);
-  
-  
+
   const showToastError = (message) => {
     toast.error(message, {
       position: "top-right",
@@ -112,6 +111,7 @@ const AddFichasModal = ({ isOpen, onClose, ficha }) => {
 
   const handleCreate = async () => {
     const { NumeroFicha, Jornada, Programa, EstadoId } = formData;
+
     const NumeroFichaError = validateInput("NumeroFicha", NumeroFicha);
     const JornadaError = validateInput("Jornada", Jornada);
     const ProgramaError = validateInput("Programa", Programa);
@@ -122,12 +122,35 @@ const AddFichasModal = ({ isOpen, onClose, ficha }) => {
         Jornada: JornadaError,
         Programa: ProgramaError,
       });
-      showToastError("Por favor, corrige los errores antes de agregar.");
+
+      if (NumeroFichaError) {
+        showToastError("El número de ficha es inválido o está vacío.");
+      }
+      if (JornadaError) {
+        showToastError("Por favor, selecciona una jornada válida.");
+      }
+      if (ProgramaError) {
+        showToastError(
+          "El campo de programa es obligatorio y debe ser válido."
+        );
+      }
+
       return;
     }
 
     if (!NumeroFicha || !Programa || !Jornada || !EstadoId) {
-      showToastError("Todos los campos son obligatorios.");
+      if (!NumeroFicha) {
+        showToastError("El campo 'Número de Ficha' es obligatorio.");
+      }
+      if (!Programa) {
+        showToastError("El campo 'Programa' es obligatorio.");
+      }
+      if (!Jornada) {
+        showToastError("El campo 'Jornada' es obligatorio.");
+      }
+      if (!EstadoId) {
+        showToastError("El campo 'Estado' es obligatorio.");
+      }
       return;
     }
 
@@ -137,6 +160,7 @@ const AddFichasModal = ({ isOpen, onClose, ficha }) => {
         /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
         "$1"
       );
+
       const response = await api.post("/Fichas", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -159,12 +183,12 @@ const AddFichasModal = ({ isOpen, onClose, ficha }) => {
         }, 2000);
       } else {
         showToastError(
-          "Ocurrió un error!, por favor intenta con un Programa o Jornada diferente."
+          "Error al agregar la ficha. Verifica los datos e intenta nuevamente."
         );
       }
     } catch (error) {
       showToastError(
-        "Ocurrió un error!, por favor intenta con un Programa o Jornada diferente."
+        "Ocurrió un error inesperado. Intenta con un Programa o Jornada diferente."
       );
     } finally {
       setLoading(false);

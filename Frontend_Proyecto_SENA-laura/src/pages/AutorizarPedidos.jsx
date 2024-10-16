@@ -45,7 +45,7 @@ const AutorizarPedidos = () => {
         progress: undefined,
       });
     }
-  };  
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -253,7 +253,7 @@ const AutorizarPedidos = () => {
               <MUIDataTable
                 title={
                   <span className="custom-title">
-                    Pedidos de Productos consumibles
+                    Pedidos de Productos
                   </span>
                 }
                 data={data}

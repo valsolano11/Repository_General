@@ -63,12 +63,21 @@ const PedidosIntructores = () => {
 
   const validateInput = (name, value) => {
     let errorMessage = "";
+
     if (["area", "jefeOficina", "servidorAsignado"].includes(name)) {
-      const nameRegex = /^[A-Za-z\s]+$/;
-      if (!nameRegex.test(value) || /\d/.test(value)) {
+      const nameRegex = /^[A-Za-z\s]+$/; 
+      if (!nameRegex.test(value)) {
         errorMessage = "No puede contener números o caracteres especiales.";
       }
     }
+
+    if (name === "correo") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+      if (!emailRegex.test(value)) {
+        errorMessage = "Por favor, ingresa un correo electrónico válido.";
+      }
+    }
+
     return errorMessage;
   };
 
@@ -90,7 +99,6 @@ const PedidosIntructores = () => {
   };
 
   const handleCreate = async () => {
-
     const {
       codigoFicha,
       area,
@@ -122,7 +130,7 @@ const PedidosIntructores = () => {
           "Content-Type": "application/json",
         },
       });
-      
+
       if (response.status === 201) {
         toast.success("Pedido creado con éxito.");
 

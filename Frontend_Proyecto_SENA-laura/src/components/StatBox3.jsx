@@ -70,4 +70,4 @@ const StatBox3 = ({ icon }) => {
   );
 };
 
-export default StatBox3
+export default StatBox3;
