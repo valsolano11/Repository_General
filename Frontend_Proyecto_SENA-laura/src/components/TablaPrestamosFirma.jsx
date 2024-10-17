@@ -10,14 +10,14 @@ const TablaPrestamosFirma = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    const fetchHerramintas = async () => {
+    const fetchHerramientas = async () => {
       try {
         setLoading(true);
         const response = await api.get(`/prestamos/${herramientaId}`);
 
-        const herraminetasData = response.data.Herramienta;
+        const herramientasData = response.data.Herramienta;
 
-        const prestamosFormatted = herraminetasData.map(
+        const prestamosFormatted = herramientasData.map(
           (herramienta, index) => {
             return {
               item: index + 1,
@@ -37,7 +37,7 @@ const TablaPrestamosFirma = () => {
     };
 
     if (herramientaId > 0) {
-      fetchHerramintas();
+      fetchHerramientas();
     }
   }, [herramientaId]);
 

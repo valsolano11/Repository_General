@@ -5,34 +5,18 @@ import { api } from "../api/token";
 import MUIDataTable from "mui-datatables";
 import "react-toastify/dist/ReactToastify.css";
 
-const TablaPrestamosGestion = ({ actualizarFechaEntrega }) => {
-  const [herramientas, setHerramientas] = useState([]);
+const TablaPrestamosGestion = () => {
   const location = useLocation();
-  const { prestamoId } = location.state || {};
+  const { herramientaId } = location.state || {};
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    const fetchherramientas = async () => {
-      try {
-        const response = await api.get(`/herramienta`);
-        setHerramientas(response.data);
-      } catch (err) {
-        console.error("Error fetching herramientas:", err);
-        toast.error("Error al cargar herramientas.");
-      }
-    };
-
-    fetchherramientas();
-  }, []);
-
-  useEffect(() => {
-    const fetchherramientasDelPedido = async () => {
-      if (!prestamoId) return;
-
+    const fetchHerramientasDelPedido = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/prestamos/${prestamoId}`);
+        const response = await api.get(`/prestamos/${herramientaId}`);
+        
         const herramientasData = response.data.Herramienta || [];
 
         const formatDate = (dateString) => {
@@ -74,8 +58,8 @@ const TablaPrestamosGestion = ({ actualizarFechaEntrega }) => {
       }
     };
 
-    fetchherramientasDelPedido();
-  }, [prestamoId]);
+    fetchHerramientasDelPedido();
+  }, [herramientaId]);
 
   const columns = [
     {

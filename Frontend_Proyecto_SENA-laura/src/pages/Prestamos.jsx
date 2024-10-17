@@ -10,6 +10,8 @@ import SidebarCoord from "../components/SidebarCoord";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
 import Home from "../components/Home";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import "react-toastify/dist/ReactToastify.css";
 
 const Prestamos = () => {
@@ -18,7 +20,7 @@ const Prestamos = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([
     {
-      fechaPrestamos: "",
+      createdAt: "",
       servidorAsignado: "",
       codigoFicha: "",
       area: "",
@@ -26,25 +28,46 @@ const Prestamos = () => {
     },
   ]);
 
+  const fetchStates = async () => {
+    try {
+      const response = await api.get("/Estado");
+      const filteredEstados = response.data.filter(
+        (estado) => estado.id === 5 || estado.id === 6 || estado.id === 7
+      );
+      setEstados(filteredEstados);
+    } catch (error) {
+      console.error("Error fetching states:", error);
+      toast.error("Error al cargar los estados", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
       const response = await api.get("/prestamos");
       const data = response.data;
 
-      const PrestamoFormatted = data.map((pedido) => ({
-        id: pedido.id,
-        fechaPrestamos: pedido.fechaPrestamos,
-        servidorAsignado: pedido.servidorAsignado,
-        codigoFicha: pedido.codigoFicha,
-        area: pedido.area,
-        estadoName: pedido.Estado?.estadoName || "",
+      const PrestamoFormatted = data.map((prestamo) => ({
+        id: prestamo.id,
+        createdAt: prestamo.createdAt,
+        servidorAsignado: prestamo.servidorAsignado,
+        codigoFicha: prestamo.codigoFicha,
+        area: prestamo.area,
+        estadoName: prestamo.Estado?.estadoName || "",
       }));
 
       setData(PrestamoFormatted);
     } catch (error) {
-      console.error("Error fetching Prestamo data:", error);
-      toast.error("Error al cargar los datos de Prestamo", {
+      console.error("Error fetching préstamo data:", error);
+      toast.error("Error al cargar los datos de préstamo", {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -62,8 +85,8 @@ const Prestamos = () => {
   }, []);
 
   const handleViewClick = (rowIndex) => {
-    const Pedido = data[rowIndex];
-    navigate("/gestionarPrestamos", { state: { prestamoId: Pedido.id } });
+    const Herramienta = data[rowIndex];
+    navigate("/gestionarPrestamos", { state: { herramientaId: Herramienta.id } });
   };
 
   function formatDate(dateString) {
@@ -76,7 +99,7 @@ const Prestamos = () => {
 
   const columns = [
     {
-      name: "fechaPrestamos",
+      name: "createdAt",
       label: "FECHA",
       options: {
         customHeadRender: (columnMeta) => (
@@ -153,7 +176,7 @@ const Prestamos = () => {
           <div
             className={clsx("text-center", {
               "text-green-500": value === "ENTREGADO",
-              "text-orange-500": value === "EN PROCESO",
+              "text-yellow-500": value === "EN PROCESO",
               "text-red-500": value === "PENDIENTE",
             })}
           >
@@ -212,6 +235,42 @@ const Prestamos = () => {
     saveAs(data, "Prestamos.xlsx");
   };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const tableColumn = [
+      "Fecha",
+      "Nombre Solicitante",
+      "Ficha",
+      "Area",
+      "Estado"
+    ];
+    const tableRows = [];
+
+    data.forEach((prestamo) => {
+      const prestamoData = [
+        prestamo.createdAt || "",
+        prestamo.servidorAsignado || "",
+        prestamo.codigoFicha || "",
+        prestamo.area || "",
+        prestamo.estadoName || "",
+      ];
+      tableRows.push(prestamoData);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      theme: "striped",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [0, 57, 107] },
+      margin: { top: 10 },
+    });
+
+    doc.text("Listado de Préstamos de Herramientas", 14, 15);
+    doc.save("Prestamos.pdf");
+  };
+
   return (
     <div className="flex min-h-screen bg-fondo">
       <SidebarCoord sidebarToggleCoord={sidebarToggleCoord} />
@@ -224,7 +283,18 @@ const Prestamos = () => {
           sidebarToggle={sidebarToggleCoord}
           setSidebarToggle={setsidebarToggleCoord}
         />
-        <div className="flex-grow flex items-center justify-center">
+
+        {/* Contenedor para los botones */}
+        <div className="flex justify-end mt-6 fixed top-16 right-6 z-10">
+          <button className="btn-black mr-2" onClick={handleExportPDF}>
+            Exportar PDF
+          </button>
+        </div>
+
+        {/* Contenedor de la tabla */}
+        <div className="flex-grow flex items-center justify-center mt-16">
+          {" "}
+          {/* Añadir mt-16 para espacio */}
           <div className="max-w-6xl mx-auto">
             {loading ? (
               <div className="text-center">Cargando Prestamo...</div>

@@ -1,107 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import { useLocation } from "react-router-dom";
-// import { useAuth } from "../context/AuthContext";
-// import { api } from "../api/token";
-
-// const FirmaPrestamosEntrega = ({ accordionStates, onFirmaChange }) => {
-//   const [firmaImagen, setFirmaImagen] = useState(null);
-//   const [firmaExistente, setFirmaExistente] = useState(null);
-//   const location = useLocation();
-//   const { herramientaId } = location.state || {};
-//   const [loading, setLoading] = useState(false);
-
-//   const { user } = useAuth();
-
-//   const handleImageChange = (event) => {
-//     const file = event.target.files[0];
-//     if (file) {
-//       setFirmaImagen(URL.createObjectURL(file));
-//       onFirmaChange(true, file);
-//     } else {
-//       onFirmaChange(false, null);
-//     }
-//   };
-
-//   const handleFirmaChange = (isUploading, file) => {
-//   };
-  
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       if (herramientaId) {
-//         try {
-//           const response = await api.get(`/prestamos/${herramientaId}`);
-//           const data = response.data;
-
-//           if (data.firma) {
-//             const firmaUrl = `http://localhost:9100${data.firma}`;
-//             setFirmaExistente(firmaUrl);
-//             onFirmaChange(false, null);
-//           }
-//         } catch (error) {
-//           console.error("Error fetching Prestamo data:", error);
-//         }
-//       }
-//       setLoading(false);
-//     };
-
-//     fetchData();
-//   }, [herramientaId, onFirmaChange]);
-
-//   const canUpload =
-//     user?.Rol?.RolId === 3 || user?.Rol?.rolName === "COORDINADOR";
-
-//   return (
-//     <div>
-//       {accordionStates.firmas && (
-//         <div className="flex flex-col rounded-lg w-full">
-//           <div className="flex flex-col">
-//             <div>
-//               <label className="mb-2 font-bold text-xs">
-//                 Firma de quien aprueba el pedido:*
-//               </label>
-//             </div>
-//             {firmaExistente ? (
-//               <div className="mt-2">
-//                 <p className="font-bold text-xs mb-2">Firma existente:</p>
-//                 <img
-//                   src={firmaExistente}
-//                   alt="Firma existente"
-//                   className="h-24 w-auto border border-black rounded"
-//                 />
-//               </div>
-//             ) : null}
-
-//             {canUpload ? (
-//               <input
-//                 type="file"
-//                 accept="image/*"
-//                 onChange={handleImageChange}
-//                 className="font-inter text-xs ml-2 mb-4"
-//               />
-//             ) : (
-//               <p className="text-xs text-gray-500 mt-2">
-//                 No tienes permiso para subir una firma.
-//               </p>
-//             )}
-
-//             {firmaImagen && (
-//               <div className="mt-2">
-//                 <p className="font-bold text-xs mb-2">Vista previa:</p>
-//                 <img
-//                   src={firmaImagen}
-//                   alt="Firma"
-//                   className="h-24 w-auto border border-black rounded"
-//                 />
-//               </div>
-//             )}
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default FirmaPrestamosEntrega;
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -111,7 +7,7 @@ const FirmaPrestamoEntrega = ({ accordionStates, onFirmaChange }) => {
   const [firmaImagen, setFirmaImagen] = useState(null);
   const [firmaExistente, setFirmaExistente] = useState(null);
   const location = useLocation();
-  const { pedidoId } = location.state || {};
+  const { herramientaId } = location.state || {};
   const [loading, setLoading] = useState(false);
 
   const { user } = useAuth();
@@ -128,9 +24,9 @@ const FirmaPrestamoEntrega = ({ accordionStates, onFirmaChange }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (pedidoId) {
+      if (herramientaId) {
         try {
-          const response = await api.get(`/pedido/${pedidoId}`);
+          const response = await api.get(`/prestamos/${herramientaId}`);
           const data = response.data;
 
           if (data.firma) {
@@ -139,14 +35,14 @@ const FirmaPrestamoEntrega = ({ accordionStates, onFirmaChange }) => {
             onFirmaChange(false, null);
           }
         } catch (error) {
-          console.error("Error fetching pedido data:", error);
+          console.error("Error fetching prestamo data:", error);
         }
       }
       setLoading(false);
     };
 
     fetchData();
-  }, [pedidoId, onFirmaChange]);
+  }, [herramientaId, onFirmaChange]);
 
   const canUpload =
     user?.Rol?.RolId === 3 || user?.Rol?.rolName === "COORDINADOR";
@@ -158,7 +54,7 @@ const FirmaPrestamoEntrega = ({ accordionStates, onFirmaChange }) => {
           <div className="flex flex-col">
             <div>
               <label className="mb-2 font-bold text-xs">
-                Firma de quien aprueba el pedido:*
+                Firma de quien aprueba el préstamo:*
               </label>
             </div>
             {firmaExistente ? (

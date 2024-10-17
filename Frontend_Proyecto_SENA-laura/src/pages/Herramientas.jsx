@@ -11,6 +11,8 @@ import AddHerramientaModal from "../components/AddHerramientaModal";
 import EditHerramientaModal from "../components/EditHerramientaModal";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import "react-toastify/dist/ReactToastify.css";
 
 const Herramientas = () => {
@@ -266,6 +268,53 @@ const Herramientas = () => {
     saveAs(data, "Herramientas.xlsx");
   };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF("landscape");
+    const tableColumn = [
+      "ID",
+      "Nombre",
+      "Codigo",
+      "Marca",
+      "Condición",
+      "Observación",
+      "Fecha de Ingreso",
+      "Subcategoria",
+      "Usuario",
+      "Estado",
+    ];
+    const tableRows = [];
+
+    data.forEach((herramienta) => {
+      const herramientaData = [
+        herramienta.id || "",
+        herramienta.nombre || "",
+        herramienta.codigo || "",
+        herramienta.marca || "",
+        herramienta.condicion || "",
+        herramienta.observaciones || "",
+        herramienta.fechaDeIngreso || "",
+        herramienta.subcategoriaName || "",
+        herramienta.nombreuser || "",
+        herramienta.estadoName || "",
+      ];
+      tableRows.push(herramientaData);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      theme: "striped",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [0, 57, 107] },
+      margin: { top: 10 },
+    });
+
+    doc.text("Listado de Herramientas", 14, 15);
+    doc.save("Herramientas.pdf");
+  };
+
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -278,18 +327,27 @@ const Herramientas = () => {
           sidebarToggle={sidebarToggle}
           setSidebarToggle={setSidebarToggle}
         />
-        <div className="flex justify-end mt-2">
+
+        {/* Contenedor para los botones */}
+        <div className="flex justify-end mt-6 fixed top-16 right-6 z-10">
+          <button className="btn-black mr-2" onClick={handleExportPDF}>
+            Exportar PDF
+          </button>
           <button className="btn-primary" onClick={handleOpenAddModal}>
             Agregar Herramienta
           </button>
         </div>
-        <div className="flex-grow flex items-center justify-center">
+
+        {/* Contenedor de la tabla */}
+        <div className="flex-grow flex items-center justify-center mt-16">
+          {" "}
+          {/* Añadir mt-16 para espacio */}
           <div className="max-w-6xl mx-auto">
             {loading ? (
               <div className="text-center">Cargando herramientas...</div>
             ) : (
               <MUIDataTable
-                title={<span className="custom-title">HERRAMIENTAS</span>}
+                title={<span className="custom-title">Herramientas consumo devolutivo - Subdirección</span>}
                 data={data}
                 columns={columns}
                 options={{

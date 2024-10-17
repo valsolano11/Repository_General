@@ -378,14 +378,20 @@ const ConsumoControladoGeneral = () => {
           sidebarToggle={sidebarToggle}
           setSidebarToggle={setSidebarToggle}
         />
-        <div className="flex justify-end mt-2">
+
+        {/* Contenedor para los botones */}
+        <div className="flex justify-end mt-6 fixed top-16 right-6 z-10">
           {hasPermission("Crear Producto") && (
             <button className="btn-primary" onClick={handleOpenAddModal}>
               Agregar Producto
             </button>
           )}
         </div>
-        <div className="flex-grow flex items-center justify-center">
+        
+        {/* Contenedor de la tabla */}
+        <div className="flex-grow flex items-center justify-center mt-16">
+          {" "}
+          {/* Añadir mt-16 para espacio */}
           <div className="w-full max-w-9xl mx-auto">
             {loading ? (
               <div className="text-center">Cargando productos...</div>
