@@ -32,9 +32,11 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
     const fetchsubcategorias = async () => {
       try {
         const response = await api.get("/subcategoria/estado");
-        setSubcategorias(response.data);
+        const filteredSubcategorias = response.data.filter(
+          (Categoria) => Categoria.CategoriaId === 2 || Categoria.CategoriaId === 3
+        );
+        setSubcategorias(filteredSubcategorias);
       } catch (error) {
-        showToastError("Error al cargar subcategorías");
       }
     };
 

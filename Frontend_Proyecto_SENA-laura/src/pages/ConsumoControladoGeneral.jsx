@@ -29,13 +29,23 @@ const ConsumoControladoGeneral = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/productos/categoria/:2", {
+      const subcategoriaResponse = await api.get("/subcategoria", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-
-      const productoconUnidadSub = response.data.map((produc) => ({
+      const subcategoriasCategoria4 = subcategoriaResponse.data
+        .filter((subcategoria) => subcategoria.CategoriaId === 4)
+        .map((subcategoria) => subcategoria.id);
+      const productoResponse = await api.get("/producto", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const productosFiltrados = productoResponse.data.filter(
+        (producto) => subcategoriasCategoria4.includes(producto.SubcategoriaId)
+      );
+      const productoconUnidadSub = productosFiltrados.map((produc) => ({
         ...produc,
         productoNombre: produc.nombre,
         nombreUser: produc.Usuario ? produc.Usuario.nombre : "Desconocido",
@@ -43,16 +53,16 @@ const ConsumoControladoGeneral = () => {
         subcategoriaName: produc.Subcategorium
           ? produc.Subcategorium.subcategoriaName
           : "Desconocido",
-        unidadNombre: produc.UnidadMedida
-          ? produc.UnidadMedida.sigla
+        unidadNombre: produc.UnidadDeMedida
+          ? produc.UnidadDeMedida.nombre
           : "Desconocido",
       }));
-
       productoconUnidadSub.sort((a, b) => a.id - b.id);
       setData(productoconUnidadSub);
+  
     } catch (error) {
-      console.error("Error fetching subcategoria data:", error);
-      toast.error("Error al cargar los datos de la  subcategoria", {
+      console.error("Error fetching data:", error);
+      toast.error("Error al cargar los datos", {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -202,7 +212,7 @@ const ConsumoControladoGeneral = () => {
       },
     },
     {
-      name: "volumenTotal",
+      name: "VolumenTotal",
       label: "volumen Total",
       options: {
         customHeadRender: (columnMeta) => (
@@ -366,6 +376,58 @@ const ConsumoControladoGeneral = () => {
     );
   };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF("landscape");
+    const tableColumn = [
+      "ID",
+      "Nombre del Producto",
+      "Codigo",
+      "Descripcion",
+      "Cantidad Entrada",
+      "Cantidad Salida",
+      "Cantidad Actual",
+      "Volumen Total",
+      "Marca",
+      "Unidad de Medida",
+      "Subcategoria",
+      "Usuario",
+      "ESTADO",
+    ];
+    const tableRows = [];
+
+    data.forEach((producto) => {
+      const productoData = [
+        producto.id || "",
+        producto.productoNombre || "",
+        producto.codigo || "",
+        producto.descripcion || "",
+        producto.cantidadEntrada || "",
+        producto.cantidadSalida || "",
+        producto.cantidadActual || "",
+        producto.VolumenTotal || "",
+        producto.marca || "",
+        producto.unidadNombre || "",
+        producto.subcategoriaName || "",
+        producto.nombreUser || "",
+        producto.estadoName || "",
+      ];
+      tableRows.push(productoData);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      theme: "striped",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [0, 57, 107] },
+      margin: { top: 10 },
+    });
+
+    doc.text("Listado de Productos", 14, 15);
+    doc.save("Productos.pdf");
+  };
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -381,13 +443,16 @@ const ConsumoControladoGeneral = () => {
 
         {/* Contenedor para los botones */}
         <div className="flex justify-end mt-6 fixed top-16 right-6 z-10">
+          <button className="btn-black mr-2" onClick={handleExportPDF}>
+            Exportar PDF
+          </button>
           {hasPermission("Crear Producto") && (
             <button className="btn-primary" onClick={handleOpenAddModal}>
               Agregar Producto
             </button>
           )}
         </div>
-        
+
         {/* Contenedor de la tabla */}
         <div className="flex-grow flex items-center justify-center mt-16">
           {" "}
@@ -473,4 +538,5 @@ const ConsumoControladoGeneral = () => {
     </div>
   );
 };
+
 export default ConsumoControladoGeneral;

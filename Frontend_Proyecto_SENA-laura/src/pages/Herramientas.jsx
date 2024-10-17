@@ -26,26 +26,41 @@ const Herramientas = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/herramienta", {
+      const subcategoriaResponse = await api.get("/subcategoria", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      const subcategoriasCategoria2 = subcategoriaResponse.data
+        .filter((subcategoria) => subcategoria.CategoriaId === 2)
+        .map((subcategoria) => subcategoria.id);
+      const herramientaResponse = await api.get("/herramienta", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
+      const herramientaFiltrados = herramientaResponse.data.filter(
+        (herramienta) => subcategoriasCategoria2.includes(herramienta.SubcategoriaId)
+      );
 
-      const herramientaConEstadoUsuarioSub = response.data.map((herrami) => ({
-        ...herrami,
-        nombreuser: herrami.Usuario ? herrami.Usuario.nombre : "Desconocido",
-        estadoName: herrami.Estado ? herrami.Estado.estadoName : "Desconocido",
-        subcategoriaName: herrami.Subcategorium
-          ? herrami.Subcategorium.subcategoriaName
+      const herramientaconUnidadSub = herramientaFiltrados.map((herram) => ({
+        ...herram,
+        herramientaNombre: herram.nombre,
+        nombreUser: herram.Usuario ? herram.Usuario.nombre : "Desconocido",
+        estadoName: herram.Estado ? herram.Estado.estadoName : "Desconocido",
+        subcategoriaName: herram.Subcategorium
+          ? herram.Subcategorium.subcategoriaName
+          : "Desconocido",
+        unidadNombre: herram.UnidadDeMedida
+          ? herram.UnidadDeMedida.nombre
           : "Desconocido",
       }));
 
-      herramientaConEstadoUsuarioSub.sort((a, b) => a.id - b.id);
-      setData(herramientaConEstadoUsuarioSub);
+      herramientaconUnidadSub.sort((a, b) => a.id - b.id);
+      setData(herramientaconUnidadSub);
     } catch (error) {
-      console.error("Error fetching herramientas data:", error);
-      toast.error("Error al cargar los datos de las herramientas", {
+      console.error("Error fetching data:", error);
+      toast.error("Error al cargar los datos", {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -57,7 +72,7 @@ const Herramientas = () => {
     }
     setLoading(false);
   };
-
+  
   useEffect(() => {
     fetchData();
   }, []);
@@ -93,7 +108,9 @@ const Herramientas = () => {
       label: "ID",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),
@@ -105,7 +122,9 @@ const Herramientas = () => {
       label: "Nombre",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),
@@ -117,7 +136,9 @@ const Herramientas = () => {
       label: "Codigo",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),
@@ -129,7 +150,9 @@ const Herramientas = () => {
       label: "Marca",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),
@@ -141,7 +164,9 @@ const Herramientas = () => {
       label: "Condicion",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),
@@ -153,7 +178,9 @@ const Herramientas = () => {
       label: "Observacion",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),
@@ -165,7 +192,9 @@ const Herramientas = () => {
       label: "Fecha de Ingreso",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),
@@ -177,7 +206,9 @@ const Herramientas = () => {
       label: "Subcategoria",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),
@@ -185,11 +216,13 @@ const Herramientas = () => {
       },
     },
     {
-      name: "nombreuser",
+      name: "nombreUser",
       label: "Usuario",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),
@@ -201,7 +234,9 @@ const Herramientas = () => {
       label: "ESTADO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th 
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),
@@ -229,7 +264,9 @@ const Herramientas = () => {
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th         
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold">
             {columnMeta.label}
           </th>
         ),

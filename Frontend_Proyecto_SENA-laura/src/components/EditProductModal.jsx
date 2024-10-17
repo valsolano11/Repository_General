@@ -54,11 +54,11 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
     const fetchSubcategoria = async () => {
       try {
         const response = await api.get("/subcategoria/estado");
-        sesubcategoria(response.data);
+        const filteredSubcategorias = response.data.filter(
+          (Categoria) => Categoria.CategoriaId === 1 || Categoria.CategoriaId === 4
+        );
+        sesubcategoria(filteredSubcategorias);
       } catch (error) {
-        toast.error("Error al cargar las subcategorias", {
-          position: "top-right",
-        });
       }
     };
 

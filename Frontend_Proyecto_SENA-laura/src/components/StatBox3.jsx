@@ -1,41 +1,63 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
-import { red, grey, green } from "@mui/material/colors";
+import { grey, green } from "@mui/material/colors";
 import { api } from "../api/token";
 import NewProgressCircle3 from "./NewProgressCircle3";
 
 const StatBox3 = ({ icon }) => {
-  const [productoMasAgotado, setProductoMasAgotado] = useState(null);
-  const [porcentajeDisponible, setPorcentajeDisponible] = useState(0);
+  const [herramientaMasUsada, setHerramientaMasUsada] = useState(null);
+  const [usoHerramienta, setUsoHerramienta] = useState(0);
+  const [totalPrestamos, setTotalPrestamos] = useState(0);
+  const [condicion, setCondicion] = useState("");
 
   useEffect(() => {
-    const fetchProductos = async () => {
+    const fetchPrestamos = async () => {
       try {
-        const response = await api.get("/producto");
-        const productos = response.data;
+        const response = await api.get("/prestamos");
+        const prestamos = response.data;
 
-        const productoConMenorDisponibilidad = productos.reduce((a, b) => {
-          const porcentajeA = (a.cantidadActual / a.cantidadEntrada) * 100;
-          const porcentajeB = (b.cantidadActual / b.cantidadEntrada) * 100;
-          return porcentajeA < porcentajeB ? a : b;
+        setTotalPrestamos(prestamos.length);
+
+        const herramientasContador = {};
+
+        prestamos.forEach((prestamo) => {
+          prestamo.Herramienta.forEach((herramienta) => {
+            const nombreHerramienta = herramienta.nombre;
+            if (!herramientasContador[nombreHerramienta]) {
+              herramientasContador[nombreHerramienta] = 0;
+            }
+            herramientasContador[nombreHerramienta]++;
+          });
         });
 
-        const porcentaje =
-          (productoConMenorDisponibilidad.cantidadActual /
-            productoConMenorDisponibilidad.cantidadEntrada) *
-          100;
+        const herramientaMasUsada = Object.keys(herramientasContador).reduce(
+          (a, b) => (herramientasContador[a] > herramientasContador[b] ? a : b)
+        );
 
-        setProductoMasAgotado(productoConMenorDisponibilidad);
-        setPorcentajeDisponible(porcentaje);
+        const usoHerramienta = herramientasContador[herramientaMasUsada];
+
+        const responseHerramienta = await api.get("/herramienta");
+        const herramientas = responseHerramienta.data;
+
+        const herramientaDetalles = herramientas.find(
+          (herramienta) => herramienta.nombre === herramientaMasUsada
+        );
+
+        setHerramientaMasUsada(herramientaMasUsada);
+        setUsoHerramienta(usoHerramienta);
+
+        setCondicion(
+          herramientaDetalles?.condicion?.toUpperCase() || "DESCONOCIDA"
+        );
       } catch (error) {
-        console.error("Error al obtener los productos", error);
+        console.error("Error al obtener los préstamos", error);
       }
     };
 
-    fetchProductos();
+    fetchPrestamos();
   }, []);
 
-  if (!productoMasAgotado) {
+  if (!herramientaMasUsada) {
     return <Typography>Cargando...</Typography>;
   }
 
@@ -48,22 +70,21 @@ const StatBox3 = ({ icon }) => {
         <Box>
           {icon}
           <Typography variant="h6" fontWeight="bold" sx={{ color: grey[900] }}>
-            {productoMasAgotado.cantidadActual} /{" "}
-            {productoMasAgotado.cantidadEntrada}
+            {usoHerramienta} veces usada
           </Typography>
         </Box>
 
         <Box pr="20px">
-          <NewProgressCircle3 progress={porcentajeDisponible} />
+          <NewProgressCircle3 progress={100} condicion={condicion} />
         </Box>
       </Box>
 
       <Box display="flex" justifyContent="space-between" mt="2px">
-        <Typography variant="h" sx={{ color: red[500] }}>
-          {productoMasAgotado.nombre}
-        </Typography>
         <Typography variant="h" sx={{ color: green[500] }}>
-          {porcentajeDisponible.toFixed(0)}% disponible
+          {herramientaMasUsada}
+        </Typography>
+        <Typography variant="h" sx={{ color: grey[900] }}>
+          Condición: {condicion}
         </Typography>
       </Box>
     </Box>

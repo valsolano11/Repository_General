@@ -132,10 +132,6 @@ const Resumen = () => {
             justifyContent="center"
           >
             <StatBox1
-              cantidad="190"
-              producto="Madera"
-              progress="0.75"
-              disponible="Disp: 75%"
               icon={<PushPinIcon sx={{ color: green[600], fontSize: "26px" }} />}
             />
           </Box>
@@ -147,10 +143,6 @@ const Resumen = () => {
             justifyContent="center"
           >
             <StatBox2
-              cantidad="1,225"
-              producto="Pintura"
-              progress="0.50"
-              disponible="Disp: 50%"
               icon={
                 <PushPinIcon
                   sx={{ color: green[600], fontSize: "26px" }}
@@ -166,10 +158,6 @@ const Resumen = () => {
             justifyContent="center"
           >
             <StatBox3
-              cantidad="12,441"
-              producto="Puntillas"
-              progress="0.30"
-              disponible="Disp: 30%"
               icon={
                 <HardwareIcon sx={{ color: green[600], fontSize: "26px" }} />
               }
@@ -221,6 +209,7 @@ const Resumen = () => {
                 Historial de Transacciones
               </Typography>
             </Box>
+            
             {mockTransactions.map((transaction, i) => (
               <Box
                 key={`${transaction.accion}-${i}`}
@@ -255,6 +244,7 @@ const Resumen = () => {
                 </Link>
               </Box>
             ))}
+            
           </Box>
 
           {/* FILA 3 */}

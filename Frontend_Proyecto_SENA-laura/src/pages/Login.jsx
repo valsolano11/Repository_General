@@ -127,7 +127,7 @@ const Login = () => {
           }, 2000);
         }
       } catch (error) {
-        // Verificar si es un error específico del estado o los permisos
+
         const errorMessage =
           error.response?.data?.message || "Error al iniciar sesión";
 

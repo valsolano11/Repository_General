@@ -45,9 +45,11 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
     const fetchsubcategorias = async () => {
       try {
         const response = await api.get("/subcategoria/estado");
-        setSubcategorias(response.data);
+        const filteredSubcategorias = response.data.filter(
+          (Categoria) => Categoria.CategoriaId === 2 || Categoria.CategoriaId === 3
+        );
+        setSubcategorias(filteredSubcategorias);
       } catch (error) {
-        showToastError("Error al cargar subcategorías");
       }
     };
 
@@ -266,7 +268,10 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                     type="text"
                     name="nombre"
                     value={formData.nombre}
-                    onChange={handleInputChange}
+                    onChange={(e) => {
+                      const valorEnMayusculas = e.target.value.toUpperCase();
+                      handleInputChange({ target: { name: "nombre", value: valorEnMayusculas } });
+                    }}
                     onKeyPress={(e) => {
                       if (/\d/.test(e.key)) {
                         e.preventDefault();
