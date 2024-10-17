@@ -5,6 +5,7 @@ import {
   FaRegFileExcel,
   FaUnity,
   FaClipboardList,
+  FaFileSignature,
 } from "react-icons/fa";
 import { FaUserLarge } from "react-icons/fa6";
 import { PiChalkboardTeacher } from "react-icons/pi";
@@ -25,6 +26,7 @@ import fondo from "/logoSena.png";
 const Sidebar = ({ sidebarToggle }) => {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState({
+    autorizar: false,
     usuarios: false,
     formacion: false,
     fichas: false,
@@ -78,6 +80,39 @@ const Sidebar = ({ sidebarToggle }) => {
             Dashboard
           </a>
         </li>
+        
+          {/* Autorizar */}
+          {(hasPermission("Autorizar pedidos") ||
+          hasPermission("Autorizar prestamos")) && (
+          <li className="mb-2">
+          <div
+            className="flex items-center justify-between px-3 py-2 rounded hover:shadow hover:bg-gray-700 cursor-pointer"
+            onClick={() => handleToggle("autorizar")}
+          >
+            <div className="flex items-center">
+              <FaFileSignature className="inline-block w-6 h-6 mr-2 -mt-2"></FaFileSignature>
+              Autorizar Pedidos
+            </div>
+            <span>{expanded.autorizar ? "-" : "+"}</span>
+          </div>
+          {expanded.autorizar && (
+            <ul className="bg-black text-center text-white text-sm">
+              <li className="py-1 hover:bg-gray-700 rounded mx-4">
+                <a href="/autPedidos" className="px-3 flex items-center">
+                  <LiaDropbox className="inline-block w-4 h-4 mr-2 -mt-1"></LiaDropbox>
+                  Productos
+                </a>
+              </li>
+              <li className="py-1 hover:bg-gray-700 rounded mx-4">
+                <a href="/autPrestamos" className="px-3 flex items-center">
+                  <FiTool className="inline-block w-4 h-4 mr-2 -mt-1"></FiTool>
+                  Herramientas
+                </a>
+              </li>
+            </ul>
+          )}
+        </li>
+        )}
 
         {/* Usuarios */}
         <li className="mb-2">

@@ -29,13 +29,23 @@ const Productos = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/producto", {
+      const subcategoriaResponse = await api.get("/subcategoria", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-
-      const productoconUnidadSub = response.data.map((produc) => ({
+      const subcategoriasCategoria1 = subcategoriaResponse.data
+        .filter((subcategoria) => subcategoria.CategoriaId === 1)
+        .map((subcategoria) => subcategoria.id);
+      const productoResponse = await api.get("/producto", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const productosFiltrados = productoResponse.data.filter(
+        (producto) => subcategoriasCategoria1.includes(producto.SubcategoriaId)
+      );
+      const productoconUnidadSub = productosFiltrados.map((produc) => ({
         ...produc,
         productoNombre: produc.nombre,
         nombreUser: produc.Usuario ? produc.Usuario.nombre : "Desconocido",
@@ -47,12 +57,11 @@ const Productos = () => {
           ? produc.UnidadDeMedida.nombre
           : "Desconocido",
       }));
-
       productoconUnidadSub.sort((a, b) => a.id - b.id);
       setData(productoconUnidadSub);
     } catch (error) {
-      console.error("Error fetching subcategoria data:", error);
-      toast.error("Error al cargar los datos de la  subcategoria", {
+      console.error("Error fetching data:", error);
+      toast.error("Error al cargar los datos", {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -64,7 +73,7 @@ const Productos = () => {
     }
     setLoading(false);
   };
-
+  
   useEffect(() => {
     fetchData();
   }, []);

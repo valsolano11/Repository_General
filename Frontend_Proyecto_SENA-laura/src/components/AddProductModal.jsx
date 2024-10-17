@@ -7,11 +7,9 @@ import "react-toastify/dist/ReactToastify.css";
 const AddProductModal = ({ isOpen, onClose, product }) => {
   const [subcategorias, setSubcategorias] = useState([]);
   const [estados, setEstados] = useState([]);
-  const [usuarios, setUsuarios] = useState([]);
   const [unidades, setUnidad] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     nombre: "",
     codigo: "",
@@ -48,9 +46,11 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
     const fetchsubcategorias = async () => {
       try {
         const response = await api.get("/subcategoria/estado");
-        setSubcategorias(response.data);
+        const filteredSubcategorias = response.data.filter(
+          (Categoria) => Categoria.CategoriaId === 1 || Categoria.CategoriaId === 4
+        );
+        setSubcategorias(filteredSubcategorias);
       } catch (error) {
-        showToastError("Error al cargar subcategorías");
       }
     };
 
@@ -248,7 +248,10 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
                     type="text"
                     name="nombre"
                     value={formData.nombre}
-                    onChange={handleInputChange}
+                    onChange={(e) => {
+                      const valorEnMayusculas = e.target.value.toUpperCase();
+                      handleInputChange({ target: { name: "nombre", value: valorEnMayusculas } });
+                    }}
                     onKeyPress={(e) => {
                       if (/\d/.test(e.key)) {
                         e.preventDefault();
