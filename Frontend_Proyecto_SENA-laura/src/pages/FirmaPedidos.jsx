@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { api } from "../api/token";
+import * as XLSX from "xlsx";
 import "react-toastify/dist/ReactToastify.css";
 import fondo from "/logoSena.png";
 import siga from "/Siga.png";
@@ -10,6 +11,8 @@ import FirmasDos from "./../components/FirmasDos";
 import TablaPedidosFirma from "../components/TablaPedidosFirma";
 import SidebarCoord from "../components/SidebarCoord";
 import Home from "../components/Home";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const FirmaPedidos = () => {
   const [sidebarToggleCoord, setsidebarToggleCoord] = useState(false);
@@ -19,6 +22,7 @@ const FirmaPedidos = () => {
   const [pedidoData, setPedidoData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [firmaImagen, setFirmaImagen] = useState(null);
+  const [dummyState, setDummyState] = useState(false);
   const [formData, setFormData] = useState({
     createdAt: "",
     servidorAsignado: "",
@@ -69,6 +73,9 @@ const FirmaPedidos = () => {
             servidorAsignado: data.servidorAsignado,
             cedulaServidor: data.cedulaServidor,
             correo: data.correo,
+            EstadoId: data.EstadoId,
+            Estado: data.Estado,
+            Productos: data.Productos,
           };
           setPedidoData(pedidoFormatted);
           setFormData({
@@ -90,6 +97,12 @@ const FirmaPedidos = () => {
 
     fetchData();
   }, [pedidoId]);
+
+  useEffect(() => {
+    if (pedidoData) {
+      setDummyState((prev) => !prev);
+    }
+  }, [pedidoData]);
 
   const formatDateForInput = (dateString) => {
     const date = new Date(dateString);
@@ -165,6 +178,142 @@ const FirmaPedidos = () => {
 
   const Navigate = () => {
     navigate("/autPedidos");
+  };
+
+  const handleExportPDF = (pedidoData) => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(16);
+    doc.text("Detalle del Pedido", 14, 20);
+
+    doc.setFontSize(12);
+    doc.text(`Código de Ficha: ${pedidoData.codigoFicha}`, 14, 30);
+    doc.text(`Jefe de Oficina: ${pedidoData.jefeOficina}`, 14, 40);
+    doc.text(`Cédula del Jefe: ${pedidoData.cedulaJefeOficina}`, 14, 50);
+    doc.text(`Servidor Asignado: ${pedidoData.servidorAsignado}`, 14, 60);
+    doc.text(`Cédula del Servidor: ${pedidoData.cedulaServidor}`, 14, 70);
+    doc.text(`Correo: ${pedidoData.correo}`, 14, 80);
+    doc.text(`Estado: ${pedidoData.Estado.estadoName}`, 14, 90);
+    doc.text(
+      `Fecha de creación: ${new Date(
+        pedidoData.createdAt
+      ).toLocaleDateString()}`,
+      14,
+      100
+    );
+
+    if (pedidoData.Productos && pedidoData.Productos.length > 0) {
+      const productos = pedidoData.Productos.map((producto) => [
+        producto.nombre,
+        producto.codigo,
+        producto.descripcion,
+        producto.marca,
+        producto.cantidadEntrada,
+        producto.PedidoProducto.cantidadSolicitar,
+        producto.PedidoProducto.cantidadSalida,
+        producto.cantidadActual,
+        producto.VolumenTotal,
+      ]);
+
+      doc.autoTable({
+        head: [
+          [
+            "Producto",
+            "Código",
+            "Descripción",
+            "Marca",
+            "Cantidad Entrada",
+            "Cantidad Solicitada",
+            "Cantidad Salida",
+            "Cantidad Actual",
+            "Volumen Total",
+          ],
+        ],
+        body: productos,
+        startY: 110,
+      });
+    } else {
+      doc.text("No hay productos asociados a este pedido.", 14, 110);
+    }
+
+    doc.save(`Pedido_${pedidoData.codigoFicha}.pdf`);
+  };
+
+  const handleExportClick = () => {
+    if (pedidoData && pedidoData.codigoFicha) {
+      handleExportPDF(pedidoData);
+    } else {
+      console.error("Los datos del pedido no están disponibles");
+    }
+  };
+
+  const handleExportExcel = (pedidoData) => {
+    if (!pedidoData || !pedidoData.codigoFicha) {
+      console.error("Los datos del pedido no están disponibles");
+      return;
+    }
+
+    const pedidoHeaders = [
+      "Código de Ficha",
+      "Jefe de Oficina",
+      "Cédula del Jefe",
+      "Servidor Asignado",
+      "Cédula del Servidor",
+      "Correo",
+      "Estado",
+      "Fecha de creación",
+    ];
+
+    const pedidoValues = [
+      pedidoData.codigoFicha,
+      pedidoData.jefeOficina,
+      pedidoData.cedulaJefeOficina,
+      pedidoData.servidorAsignado,
+      pedidoData.cedulaServidor,
+      pedidoData.correo,
+      pedidoData.Estado?.estadoName || "Desconocido",
+      new Date(pedidoData.createdAt).toLocaleDateString(),
+    ];
+
+    const productoHeaders = [
+      "Producto",
+      "Código",
+      "Descripción",
+      "Marca",
+      "Cantidad Entrada",
+      "Cantidad Solicitada",
+      "Cantidad Salida",
+      "Cantidad Actual",
+      "Volumen Total",
+    ];
+
+    const productos =
+      pedidoData.Productos?.map((producto) => [
+        producto.nombre,
+        producto.codigo,
+        producto.descripcion,
+        producto.marca,
+        producto.cantidadEntrada,
+        producto.PedidoProducto.cantidadSolicitar,
+        producto.PedidoProducto.cantidadSalida,
+        producto.cantidadActual,
+        producto.VolumenTotal,
+      ]) || [];
+
+    const finalData = [
+      [...pedidoHeaders],
+      [...pedidoValues],
+      [],
+      [...productoHeaders],
+      ...productos,
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(finalData);
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Pedido");
+
+    XLSX.writeFile(workbook, `Pedido_${pedidoData.codigoFicha}.xlsx`);
   };
 
   return (
@@ -466,18 +615,36 @@ const FirmaPedidos = () => {
 
                 {/* Botones */}
                 <div className="flex justify-center items-center w-2/4 mt-10 mx-auto">
-                  <button className="btn-danger2 mx-4" onClick={Navigate}>
-                    Atrás
-                  </button>
-                  <button
-                    className={`btn-black2 ${
-                      !firmaAdjunta ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    disabled={!firmaAdjunta || loading}
-                    onClick={handleSubmit}
-                  >
-                    {loading ? "Enviando..." : "Enviar Pedido"}
-                  </button>
+                  <div>
+                    <button className="btn-danger2 mx-4" onClick={Navigate}>
+                      Atrás
+                    </button>
+                    <button
+                      className="btn-primary2 mr-2"
+                      onClick={handleExportClick}
+                    >
+                      PDF
+                    </button>
+                  </div>
+                  <div>
+                    <button
+                      className="btn-primary2 mr-2"
+                      onClick={() => handleExportExcel(pedidoData)}
+                      disabled={!pedidoData || !pedidoData.codigoFicha}
+                    >
+                      Excel
+                    </button>
+                  </div>
+                  {pedidoData &&
+                    pedidoData.EstadoId !== 7 &&
+                    pedidoData.EstadoId !== 6 && (
+                      <button
+                        className="btn-black2"
+                        onClick={handleSubmit}
+                      >
+                        Gestionar Pedido
+                      </button>
+                    )}
                 </div>
               </div>
             </div>

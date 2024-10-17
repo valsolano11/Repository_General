@@ -5,20 +5,24 @@ import { api } from "../api/token";
 import "react-toastify/dist/ReactToastify.css";
 import fondo from "/logoSena.png";
 import siga from "/Siga.png";
+import * as XLSX from "xlsx";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SidebarCoord from "../components/SidebarCoord";
 import Home from "../components/Home";
 import TablaPrestamosGestion from "../components/TablaPrestamosGestion";
 import FirmaPrestamosEntrega from "../components/FirmaPrestamoEntrega";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const GestionarPrestamos = () => {
   const [sidebarToggleCoord, setsidebarToggleCoord] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { prestamoId } = location.state || {};
-  const [pedidoData, setPedidoData] = useState(null);
+  const { herramientaId } = location.state || {};
+  const [prestamoData, setprestamoData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [productosSalida, setProductosSalida] = useState([]);
+  const [dummyState, setDummyState] = useState(false);
   const [formData, setFormData] = useState({
     fechaPrestamos: "",
     servidorAsignado: "",
@@ -33,6 +37,12 @@ const GestionarPrestamos = () => {
     correo: "",
     codigoSena: "",
   });
+  const [firmaAdjunta, setFirmaAdjunta] = useState(false);
+
+  const handleFirmaChange = (isFirmaAdjunta, file) => {
+    setFirmaAdjunta(isFirmaAdjunta);
+    setFirmaImagen(file);
+  };
 
   const [accordionStates, setAccordionStates] = useState({
     datos: false,
@@ -47,28 +57,17 @@ const GestionarPrestamos = () => {
     }));
   };
 
-  const showToastError = (message) => {
-    toast.error(message, {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-  };
-
   useEffect(() => {
     const fetchData = async () => {
-      if (prestamoId) {
+      if (herramientaId) {
         try {
-          const response = await api.get(`/prestamos/${prestamoId}`);
+          const response = await api.get(`/prestamos/${herramientaId}`);
           const data = response.data;
 
           const pedidoFormatted = {
             id: data.id,
-            fechaPrestamos: data.fechaPrestamos,
+            createdAt: data.createdAt,
+            firmaPrestamos: data.firmaPrestamos,
             codigoFicha: data.codigoFicha,
             jefeOficina: data.jefeOficina,
             cedulaJefeOficina: data.cedulaJefeOficina,
@@ -76,10 +75,12 @@ const GestionarPrestamos = () => {
             cedulaServidor: data.cedulaServidor,
             correo: data.correo,
             EstadoId: data.EstadoId,
+            Estado: data.Estado,
+            Herramienta: data.Herramienta,
           };
-          setPedidoData(pedidoFormatted);
+          setprestamoData(pedidoFormatted);
           setFormData({
-            fecha: formatDateForInput(data.fechaPrestamos),
+            fecha: formatDateForInput(data.createdAt),
             codigoFicha: data.codigoFicha,
             area: data.area,
             jefeOficina: data.jefeOficina,
@@ -87,6 +88,7 @@ const GestionarPrestamos = () => {
             servidorAsignado: data.servidorAsignado,
             cedulaServidor: data.cedulaServidor,
             correo: data.correo,
+            Herramienta: data.Herramienta,
           });
         } catch (error) {
           console.error("Error fetching préstamo data:", error);
@@ -96,7 +98,13 @@ const GestionarPrestamos = () => {
     };
 
     fetchData();
-  }, [prestamoId]);
+  }, [herramientaId]);
+
+  useEffect(() => {
+    if (prestamoData) {
+      setDummyState((prev) => !prev);
+    }
+  }, [prestamoData]);
 
   const formatDateForInput = (dateString) => {
     const date = new Date(dateString);
@@ -106,11 +114,11 @@ const GestionarPrestamos = () => {
     )}-${String(date.getDate()).padStart(2, "0")}`;
   };
 
-  const handlefechaEntregaChange = (index, prestamoId, fechaEntrega) => {
+  const handlefechaEntregaChange = (index, herramientaId, fechaEntrega) => {
     const updatedProductos = [...productosSalida];
 
     const productoIndex = updatedProductos.findIndex(
-      (producto) => producto.prestamoId === prestamoId
+      (producto) => producto.herramientaId === herramientaId
     );
 
     if (productoIndex >= 0) {
@@ -121,16 +129,15 @@ const GestionarPrestamos = () => {
       }
     } else {
       if (fechaEntrega > 0) {
-        updatedProductos.push({ prestamoId: prestamoId, fechaEntrega });
+        updatedProductos.push({ herramientaId: herramientaId, fechaEntrega });
       }
     }
     setProductosSalida(updatedProductos);
-
   };
 
-  const handleGestionarPedido = async () => {
+  const handleGestionarPrestamo = async () => {
     try {
-      const response = await api.put(`/prestamos/${prestamoId}/entrega`, {
+      const response = await api.put(`/prestamos/${herramientaId}/entrega`, {
         productos: productosSalida,
       });
 
@@ -139,17 +146,155 @@ const GestionarPrestamos = () => {
         fetchherramientasDelPedido();
         navigate("/prestamos");
       } else {
-        showToastError("Error al gestionar el Prestamo.");
+        toast.error("Error al gestionar el Prestamo.", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
       }
     } catch (error) {
       console.error("Error al gestionar el Prestamo:", error);
-      showToastError("Error al gestionar el Prestamo.");
+      toast.error("Error al gestionar el Prestamo.", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     }
   };
 
   const Navigate = () => {
     navigate("/prestamos");
   };
+
+  const handleExportPDF = (prestamoData) => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(16);
+    doc.text("Detalle del Préstamo", 14, 16);
+
+    doc.setFontSize(12); 
+    doc.text(`Código de Ficha: ${prestamoData.codigoFicha}`, 14, 30);
+    doc.text(`Jefe de Oficina: ${prestamoData.jefeOficina}`, 14, 40);
+    doc.text(`Cédula del Jefe: ${prestamoData.cedulaJefeOficina}`, 14, 50);
+    doc.text(`Servidor Asignado: ${prestamoData.servidorAsignado}`, 14, 60);
+    doc.text(`Cédula del Servidor: ${prestamoData.cedulaServidor}`, 14, 70);
+    doc.text(`Correo: ${prestamoData.correo}`, 14, 80);
+    doc.text(`Estado: ${prestamoData.Estado?.estadoName || "Desconocido"}`, 14, 90);
+    doc.text(
+        `Fecha de creación: ${new Date(
+          prestamoData.createdAt
+        ).toLocaleDateString()}`,
+        14,
+        100
+      );
+
+      if (prestamoData.Herramienta && prestamoData.Herramienta.length > 0) {
+        const Herramienta = prestamoData.Herramienta.map((herramienta) => [
+          herramienta.nombre,
+          herramienta.codigo,
+          herramienta.marca,
+          herramienta.condicion,
+          herramienta.PrestamoHerramienta?.observaciones || "N/A",
+        ]);
+  
+        doc.autoTable({
+          head: [
+            [
+              "Herramienta",
+              "Código",
+              "Descripción",
+              "Marca",
+              "Condición",
+              "Observaciones",
+            ],
+          ],
+          body: Herramienta,
+          startY: 110,
+        });
+      } else {
+        doc.text("No hay Herramienta asociados a este préstamo.", 14, 110);
+      }
+
+    doc.save(`Prestamo_${prestamoData.codigoFicha}.pdf`);
+  };
+
+  const handleExportClickPDF = () => {
+    if (prestamoData && prestamoData.codigoFicha) {
+      handleExportPDF(prestamoData);
+    } else {
+      console.error("Los datos del préstamo no están disponibles");
+    }
+  };
+
+
+  const handleExportExcel = (prestamoData) => {
+    if (!prestamoData || !prestamoData.codigoFicha) {
+      console.error("Los datos del préstamo no están disponibles");
+      return;
+    }
+  
+    const prestamoHeaders = [
+      "Código de Ficha",
+      "Jefe de Oficina",
+      "Cédula del Jefe",
+      "Servidor Asignado",
+      "Cédula del Servidor",
+      "Correo",
+      "Estado",
+      "Fecha de creación",
+    ];
+  
+    const prestamoValues = [
+      prestamoData.codigoFicha,
+      prestamoData.jefeOficina,
+      prestamoData.cedulaJefeOficina,
+      prestamoData.servidorAsignado,
+      prestamoData.cedulaServidor,
+      prestamoData.correo,
+      prestamoData.Estado?.estadoName || "Desconocido",
+      new Date(prestamoData.createdAt).toLocaleDateString(),
+    ];
+  
+    const herramientaHeaders = [
+      "Herramienta",
+      "Código",
+      "Marca",
+      "Condición",
+      "Observaciones",
+    ];
+  
+    const Herramienta =
+      prestamoData.Herramienta?.map((herramienta) => [
+        herramienta.nombre,
+        herramienta.codigo,
+        herramienta.marca,
+        herramienta.condicion,
+        herramienta.PrestamoHerramienta?.observaciones || "N/A",
+      ]) || [];
+  
+    const finalData = [
+      [...prestamoHeaders],
+      [...prestamoValues],
+      [], 
+      [...herramientaHeaders],
+      ...Herramienta,
+    ];
+  
+    const worksheet = XLSX.utils.aoa_to_sheet(finalData);
+  
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Préstamo");
+  
+    XLSX.writeFile(workbook, `Prestamo_${prestamoData.codigoFicha}.xlsx`);
+  };  
 
   return (
     <div className="flex min-h-screen">
@@ -405,18 +550,18 @@ const GestionarPrestamos = () => {
                 {/* PRÉSTAMOS*/}
                 <div className="flex flex-col rounded-lg w-full bg-white px-8 mx-auto border-2 border-black mb-4">
                   <button
-                    onClick={() => toggleAccordion("herramients")}
+                    onClick={() => toggleAccordion("herramientas")}
                     className="font-bold text-lg py-2 flex justify-between items-center w-full"
                   >
                     <span>Préstamo</span>
                     <ExpandMoreIcon className="mr-2" />
                   </button>
 
-                  {accordionStates.productos && (
+                  {accordionStates.herramientas && (
                     <div className="flex flex-col rounded-lg w-full">
                       <div className="flex flex-row justify-center w-full mb-4">
                         <TablaPrestamosGestion
-                          prestamoId={prestamoId}
+                          herramientaId={herramientaId}
                           actualizarFechaEntrega={handlefechaEntregaChange}
                           accordionStates={accordionStates}
                           toggleAccordion={toggleAccordion}
@@ -440,7 +585,7 @@ const GestionarPrestamos = () => {
                     <div className="flex flex-col rounded-lg w-full">
                       <div className="flex flex-row justify-between w-auto mb-4">
                         <FirmaPrestamosEntrega
-                          prestamoId={prestamoId}
+                          herramientaId={herramientaId}
                           accordionStates={accordionStates}
                           toggleAccordion={toggleAccordion}
                         />
@@ -451,22 +596,43 @@ const GestionarPrestamos = () => {
 
                 {/* Botones */}
                 <div className="flex justify-center items-center w-2/4 mt-10 mx-auto">
-                  <button className="btn-danger2 mx-4" onClick={Navigate}>
-                    Atrás
-                  </button>
-                  <button
-                    className="btn-black2"
-                    onClick={handleGestionarPedido}
-                    disabled={pedidoData && pedidoData.EstadoId === 7}
-                  >
-                    Gestionar Pedido
-                  </button>
+                  <div>
+                    <button className="btn-danger2 mx-4" onClick={Navigate}>
+                      Atrás
+                    </button>
+                    <button
+                      className="btn-primary2 mr-2"
+                      onClick={handleExportClickPDF}
+                    >
+                      PDF
+                    </button>
+                  </div>
+
+                  <div>
+                    <button
+                      className="btn-primary2 mr-2"
+                      onClick={() => handleExportExcel(prestamoData)}
+                      disabled={!prestamoData || !prestamoData.codigoFicha}
+                    >
+                      Excel
+                    </button>
+                  </div>
+                  {prestamoData &&
+                    prestamoData.EstadoId !== 7 &&
+                    prestamoData.EstadoId !== 5 && (
+                      <button
+                        className="btn-black2"
+                        onClick={handleGestionarPrestamo}
+                      >
+                        Gestionar Préstamo
+                      </button>
+                    )}
                 </div>
               </div>
             </div>
           </div>
-          <ToastContainer />
         </div>
+        <ToastContainer />
       </div>
     </div>
   );
