@@ -7,7 +7,7 @@ import Home from "../components/Home";
 import MUIDataTable from "mui-datatables";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
-import AddHerramientaModal from "../components/AddHerramientaModal";
+import AddHerramientaModal2 from "../components/AddHerramientaModal2";
 import EditHerramientaModal from "../components/EditHerramientaModal";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
@@ -446,7 +446,7 @@ const ConsumoDevolutivoGeneral = () => {
           herramienta={selectedHerramienta}
         />
       )}
-      <AddHerramientaModal
+      <AddHerramientaModal2
         isOpen={isOpenAddModal}
         onClose={handleCloseAddModal}
       />

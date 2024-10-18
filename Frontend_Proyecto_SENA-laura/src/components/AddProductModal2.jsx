@@ -4,20 +4,21 @@ import { FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
+const AddProductModal2 = ({ isOpen, onClose, product }) => {
   const [subcategorias, setSubcategorias] = useState([]);
   const [estados, setEstados] = useState([]);
-  const [usuarios, setUsuarios] = useState([]);
+  const [unidades, setUnidad] = useState([]);
   const [formErrors, setFormErrors] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     nombre: "",
     codigo: "",
+    descripcion: "",
+    cantidadEntrada: "",
     marca: "",
-    condicion: "",
-    observaciones: "",
-    EstadoId: "",
+    UnidadMedidaId: "",
     SubcategoriaId: "",
+    EstadoId: "",
   });
 
   useEffect(() => {
@@ -27,26 +28,26 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
   }, [isOpen]);
 
   useEffect(() => {
-    if (herramienta) {
+    if (product) {
       setFormData({
-        nombre: herramienta.nombre || "",
-        codigo: herramienta.codigo || "",
-        marca: herramienta.marca || "",
-        condicion: herramienta.condicion || "",
-        observaciones: herramienta.observaciones || "",
-        EstadoId: herramienta.EstadoId || "",
-        SubcategoriaId: herramienta.SubcategoriaId || "",
-        UsuarioId: herramienta.UsuarioId || "",
+        nombre: product.nombre || "",
+        codigo: product.codigo || "",
+        descripcion: product.descripcion || "",
+        cantidadEntrada: product.cantidad_entrada || "",
+        marca: product.marca || "",
+        UnidadMedidaId: product.UnidadMedidaId || "",
+        SubcategoriaId: product.SubcategoriaId || "",
+        EstadoId: product.EstadoId || "",
       });
     }
-  }, [herramienta]);
+  }, [product]);
 
   useEffect(() => {
     const fetchsubcategorias = async () => {
       try {
         const response = await api.get("/subcategoria/estado");
         const filteredSubcategorias = response.data.filter(
-          (Categoria) => Categoria.CategoriaId === 2 
+          (Categoria) => Categoria.CategoriaId === 4
         );
         setSubcategorias(filteredSubcategorias);
       } catch (error) {
@@ -65,8 +66,18 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
       }
     };
 
+    const fetchUnidad = async () => {
+      try {
+        const response = await api.get("/units");
+        setUnidad(response.data);
+      } catch (error) {
+        showToastError("Error al cargar la unidad de medida");
+      }
+    };
+
     fetchsubcategorias();
     fetchEstados();
+    fetchUnidad();
   }, []);
 
   const validateInput = (name, value) => {
@@ -82,21 +93,29 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const errorMessage = validateInput(name, value);
+    const processedValue =
+      name === "UnidadMedidaId" ||
+      name === "EstadoId" ||
+      name === "SubcategoriaId"
+        ? Number(value)
+        : value;
+
+    const errorMessage = validateInput(name, processedValue);
     setFormErrors((prevErrors) => ({
       ...prevErrors,
       [name]: errorMessage,
     }));
+
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: processedValue,
     }));
   };
 
   const showToastError = (message) => {
     toast.error(message, {
       position: "top-right",
-      autoClose: 2000,
+      autoClose: 2500,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -109,12 +128,13 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
     setFormData({
       nombre: "",
       codigo: "",
+      descripcion: "",
+      cantidadEntrada: "",
       marca: "",
-      condicion: "",
-      observaciones: "",
-      EstadoId: "",
-      SubcategoriaId: "",
       UsuarioId: "",
+      UnidadMedidaId: "",
+      SubcategoriaId: "",
+      EstadoId: "",
     });
   };
 
@@ -122,99 +142,59 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
     const {
       nombre,
       codigo,
+      descripcion,
+      cantidadEntrada,
       marca,
-      condicion,
-      observaciones,
-      EstadoId,
+      UnidadMedidaId,
       SubcategoriaId,
+      EstadoId,
     } = formData;
-
     const codigoError = validateInput("codigo", codigo);
     const nombreError = validateInput("nombre", nombre);
-    const condicionError = validateInput("condicion", condicion);
-    const observacionesError = validateInput("observaciones", observaciones);
+    const descripcionError = validateInput("fechaDeIngreso", descripcion);
+    const cantidadEntradaError = validateInput(
+      "fechaDeIngreso",
+      cantidadEntrada
+    );
     const marcaError = validateInput("marca", marca);
-
-    if (
-      codigoError ||
-      nombreError ||
-      condicionError ||
-      observacionesError ||
-      marcaError
-    ) {
-      setFormErrors({
-        codigo: codigoError,
+    if (nombreError) {
+      setFormErrors((prevErrors) => ({
+        ...prevErrors,
         nombre: nombreError,
-        condicion: condicionError,
-        observaciones: observacionesError,
+        codigo: codigoError,
+        descripcion: descripcionError,
+        cantidadEntrada: cantidadEntradaError,
         marca: marcaError,
-      });
-
-      if (codigoError) {
-        showToastError("El código es inválido o está vacío.");
-      }
-      if (nombreError) {
-        showToastError("El nombre es obligatorio y debe ser válido.");
-      }
-      if (condicionError) {
-        showToastError("La condición es obligatoria.");
-      }
-      if (observacionesError) {
-        showToastError("El campo de observaciones es obligatorio.");
-      }
-      if (marcaError) {
-        showToastError("La marca es obligatoria.");
-      }
+      }));
+      showToastError("Por favor, corrige los errores antes de agregar.");
       return;
     }
-
     if (
-      !codigo ||
       !nombre ||
-      !condicion ||
-      !observaciones ||
+      !codigo ||
+      !descripcion ||
+      !cantidadEntrada ||
       !marca ||
-      !EstadoId ||
-      !SubcategoriaId
+      !UnidadMedidaId ||
+      !SubcategoriaId ||
+      !EstadoId
     ) {
-      if (!codigo) {
-        showToastError("El campo 'Código' es obligatorio.");
-      }
-      if (!nombre) {
-        showToastError("El campo 'Nombre' es obligatorio.");
-      }
-      if (!condicion) {
-        showToastError("El campo 'Condición' es obligatorio.");
-      }
-      if (!observaciones) {
-        showToastError("El campo 'Observaciones' es obligatorio.");
-      }
-      if (!marca) {
-        showToastError("El campo 'Marca' es obligatorio.");
-      }
-      if (!EstadoId) {
-        showToastError("El campo 'Estado' es obligatorio.");
-      }
-      if (!SubcategoriaId) {
-        showToastError("El campo 'Subcategoría' es obligatorio.");
-      }
+      showToastError("Todos los campos son obligatorios.");
       return;
     }
-
     setLoading(true);
     try {
       const token = document.cookie.replace(
         /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
         "$1"
       );
-      const response = await api.post("/herramienta", formData, {
+      const response = await api.post("/producto", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
       if (response.status === 201) {
-        toast.success("Herramienta agregada exitosamente", {
+        toast.success("producto agregado exitosamente", {
           position: "top-right",
           autoClose: 2000,
           hideProgressBar: false,
@@ -229,12 +209,12 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
         }, 2000);
       } else {
         showToastError(
-          "Error al agregar la herramienta. Intenta con un código o nombre diferente."
+          "Ocurrió un error!, por favor intenta con un documento o correo diferente."
         );
       }
     } catch (error) {
       showToastError(
-        "Ocurrió un error al agregar la herramienta. Verifica los datos e intenta nuevamente."
+        "Ocurrió un error, por favor intenta con valores diferentes."
       );
     } finally {
       setLoading(false);
@@ -248,17 +228,17 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
       }`}
     >
       <div className="bg-white rounded-lg shadow-lg sm:w-full md:w-1/4 mt-4 max-h-screen overflow-y-auto">
-        <div className="flex justify-end p-2">
+        <div className="flex justify-end p-1">
           <button onClick={onClose}>
-            <FaTimes className="text-black w-4 h-4" />
+            <FaTimes className="text-black w-3 h-3" />
           </button>
         </div>
-        <div className="flex items-center justify-center space-y-4 md:space-y-0 mb-4">
+        <div className="flex items-center justify-center space-y-1 md:space-y-0 mb-2">
           <div className="w-full md:w-3/4">
-            <div className="font-inter ml-2">
-              <div className="space-y-2 md:space-y-2 text-left">
-                <h6 className="font-bold text-center text-2xl mb-2">
-                  Registro Herramienta
+            <div className="font-inter ml-1">
+              <div className="space-y-1 md:space-y-0.5 text-left">
+                <h6 className="font-bold text-center text-lg mb-1">
+                  Registro Producto
                 </h6>
 
                 <div className="flex flex-col">
@@ -318,34 +298,37 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Condicion *</label>
-                  <select
-                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    name="condicion"
-                    value={formData.condicion}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Seleccione una Condicion</option>
-                    <option value="BUENO">BUENO</option>
-                    <option value="REGULAR">REGULAR</option>
-                    <option value="MALO">MALO</option>
-                  </select>
-                </div>
-
-                <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">
-                    Observaciones *
+                    Descripcion *
                   </label>
                   <input
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
                     type="text"
-                    name="observaciones"
-                    value={formData.observaciones}
+                    name="descripcion"
+                    value={formData.descripcion}
                     onChange={handleInputChange}
                   />
-                  {formErrors.observaciones && (
+                  {formErrors.descripcion && (
                     <div className="text-red-400 text-sm mt-1 px-2">
-                      {formErrors.observaciones}
+                      {formErrors.descripcion}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="mb-1 font-bold text-sm">
+                    Cantidad Entrada *
+                  </label>
+                  <input
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
+                    type="text"
+                    name="cantidadEntrada"
+                    value={formData.cantidadEntrada}
+                    onChange={handleInputChange}
+                  />
+                  {formErrors.cantidadEntrada && (
+                    <div className="text-red-400 text-sm mt-1 px-2">
+                      {formErrors.cantidadEntrada}
                     </div>
                   )}
                 </div>
@@ -370,6 +353,25 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                 </div>
 
                 <div className="flex flex-col">
+                  <label className="mb-1 font-bold text-sm">
+                    Unidad de Medida *
+                  </label>
+                  <select
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
+                    name="UnidadMedidaId"
+                    value={formData.UnidadMedidaId}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Seleccione una Unidad de medida</option>
+                    {unidades.map((uni) => (
+                      <option key={uni.id} value={uni.id}>
+                        {uni.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Estado *</label>
                   <select
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
@@ -384,9 +386,9 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                         value={estado.id}
                         style={{
                           color:
-                            estado.estadoName === "ACTIVO"
+                            estado.nombre === "ACTIVO"
                               ? "green"
-                              : estado.estadoName === "INACTIVO"
+                              : estado.nombre === "INACTIVO"
                               ? "red"
                               : "inherit",
                         }}
@@ -396,7 +398,6 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                     ))}
                   </select>
                 </div>
-
                 <div className="sm:w-full md:w-full flex flex-col justify-end">
                   <div className="flex justify-center mt-4 mb-4 mx-2">
                     <button className="btn-danger2 mx-2" onClick={onClose}>
@@ -420,4 +421,4 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
   );
 };
 
-export default AddHerramientaModal;
+export default AddProductModal2;
