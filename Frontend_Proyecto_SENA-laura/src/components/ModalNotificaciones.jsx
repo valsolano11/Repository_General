@@ -1,77 +1,158 @@
-import React, { useEffect, useState } from "react";
-import { FaTimes, FaUserCircle } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { FaTimes } from "react-icons/fa";
+import { ToastContainer } from "react-toastify";
 import { api } from "../api/token";
+import { useNavigate } from "react-router-dom";
+import "react-toastify/dist/ReactToastify.css";
 
-const ModalCsesion = ({ isOpen, onClose, children }) => {
-  const [userInfo, setUserInfo] = useState(null);
+const ModalNotificaciones = ({ isOpen, onClose, onNewNotifications }) => {
+  const [notificaciones, setNotificaciones] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
-      fetchUserProfile();
+      fetchNotificaciones();
+      const interval = setInterval(() => {
+        fetchNotificaciones(); 
+      }, 30000);
+      return () => clearInterval(interval); 
     }
   }, [isOpen]);
 
-  const fetchUserProfile = async () => {
+  const fetchNotificaciones = async () => {
+    setLoading(true);
     try {
-      const token = document.cookie.replace(
-        /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-        "$1"
-      );
-
-      const response = await api.get("/perfil", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      const response = await api.get("/notificaciones");
       if (response.status === 200) {
-        setUserInfo(response.data.perfil);
-        setError(null);
+        const noLeidas = response.data.filter((n) => n.nueva);
+        setNotificaciones(noLeidas);
+
+        const nuevas = noLeidas.length;
+        onNewNotifications(nuevas); 
       } else {
-        console.error("Error fetching user profile:", response.data.message);
-        setError(response.data.message);
+        console.error(
+          "Error al cargar las notificaciones:",
+          response.data.message
+        );
       }
     } catch (error) {
-      console.error("Error fetching user profile:", error);
-      setError("Error al cargar la información del usuario.");
+      console.error("Error al cargar las notificaciones:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleNotificationClick = async (id, redirectionPath) => {
+    try {
+      await api.put(`/notificaciones/${id}/leida`);
+      setNotificaciones((prev) =>
+        prev.map((notificacion) =>
+          notificacion.id === id
+            ? { ...notificacion, nueva: false }
+            : notificacion
+        )
+      );
+      if (redirectionPath) {
+        navigate(redirectionPath);
+      }
+      onNewNotifications(notificaciones.filter((n) => n.nueva).length - 1);
+    } catch (error) {
+      console.error("Error al marcar la notificación como leída:", error);
+    }
+  };
+
+  const handleMarkAsUnread = async (id) => {
+    try {
+      await api.put(`/notificaciones/${id}/no-leida`);
+      setNotificaciones((prev) =>
+        prev.map((notificacion) =>
+          notificacion.id === id
+            ? { ...notificacion, nueva: true }
+            : notificacion
+        )
+      );
+      onNewNotifications(notificaciones.filter((n) => n.nueva).length + 1);
+    } catch (error) {
+      console.error("Error al marcar la notificación como no leída:", error);
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-10 flex items-start justify-end bg-fondo bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-lg w-72 mt-4 mr-4 max-h-screen overflow-y-auto">
-        <div className="flex justify-end p-2">
-          <button onClick={onClose}>
-            <FaTimes className="text-black w-4 h-4" />
+    <div className="fixed inset-0 z-50 flex items-start justify-end bg-opacity-50 bg-gray-500">
+      <div className="bg-white rounded-lg shadow-2xl sm:w-full md:w-1/3 mt-4 max-h-screen 
+        overflow-y-auto mr-4 border border-gray-200 relative">
+        <div className="flex justify-between items-center p-4 bg-gray-100 rounded-t-lg">
+          <div>
+            <h2 className="font-bold text-2xl mb-1">Notificaciones</h2>
+            {/* <p className="text-lg text-gray-600">Nuevas Notificaciones</p> */}
+          </div>
+          <button
+            onClick={onClose}
+            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+          >
+            <FaTimes className="text-black w-6 h-6" />
           </button>
         </div>
-        <div className="flex items-center px-4">
-          <FaUserCircle className="text-black w-10 h-10 mr-4" />
-          <div>
+        <div className="flex flex-col p-4 space-y-4 mb-4">
+          <div className="overflow-y-auto max-h-60">
             {loading ? (
-              <p>Cargando información...</p>
-            ) : error ? (
-              <p>{error}</p>
-            ) : userInfo ? (
-              <div className="font-inter font-bold">
-                <p>{userInfo.nombre}</p>
-                <p>{userInfo.Documento}</p>
-              </div>
+              <p className="text-lg text-center text-gray-700">
+                Cargando notificaciones...
+              </p>
+            ) : notificaciones.length === 0 ? (
+              <p className="text-lg text-center text-gray-700">
+                No hay notificaciones.
+              </p>
             ) : (
-              <p>Error al cargar la información del usuario.</p>
+              notificaciones.map((notificacion) => (
+                <div
+                  key={notificacion.id}
+                  className={`border-b border-gray-200 py-2 flex flex-col p-4 mb-2 rounded-lg ${
+                    notificacion.nueva ? "bg-green-200" : "bg-white"
+                  }`}
+                >
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-lg">{notificacion.message}</p>
+                      <p className="text-base text-gray-500">
+                        {new Date(notificacion.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <div>
+                      <button
+                        onClick={() =>
+                          handleNotificationClick(notificacion.id, "/historial")
+                        }
+                        className="text-white bg-green-700 hover:bg-green-800 rounded px-2 py-1 text-sm"
+                      >
+                        Detalles
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() =>
+                      notificacion.nueva
+                        ? handleNotificationClick(notificacion.id)
+                        : handleMarkAsUnread(notificacion.id)
+                    }
+                    className="text-sm text-blue-500 mt-2"
+                  >
+                    {notificacion.nueva
+                      ? "Marcar como leída"
+                      : "Marcar como no leída"}
+                  </button>
+                </div>
+              ))
             )}
           </div>
         </div>
-        {children && <div className="px-4">{children}</div>}
       </div>
+      <ToastContainer />
     </div>
   );
 };
 
-export default ModalCsesion;
+export default ModalNotificaciones;

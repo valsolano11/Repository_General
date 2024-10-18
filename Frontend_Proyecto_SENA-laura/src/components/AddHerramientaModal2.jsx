@@ -4,7 +4,7 @@ import { FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
+const AddHerramientaModal2 = ({ isOpen, onClose, herramienta }) => {
   const [subcategorias, setSubcategorias] = useState([]);
   const [estados, setEstados] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
@@ -46,7 +46,7 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
       try {
         const response = await api.get("/subcategoria/estado");
         const filteredSubcategorias = response.data.filter(
-          (Categoria) => Categoria.CategoriaId === 2 
+          (Categoria) => Categoria.CategoriaId === 3
         );
         setSubcategorias(filteredSubcategorias);
       } catch (error) {
@@ -420,4 +420,4 @@ const AddHerramientaModal = ({ isOpen, onClose, herramienta }) => {
   );
 };
 
-export default AddHerramientaModal;
+export default AddHerramientaModal2;

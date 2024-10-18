@@ -9,7 +9,7 @@ import MUIDataTable from "mui-datatables";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
 import EditProductModal from "../components/EditProductModal";
-import AddProductModal from "../components/AddProductModal";
+import AddProductModal2 from "../components/AddProductModal2";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -534,7 +534,7 @@ const ConsumoControladoGeneral = () => {
           product={selectedProduct}
         />
       )}
-      <AddProductModal isOpen={isOpenAddModal} onClose={handleCloseAddModal} />
+      <AddProductModal2 isOpen={isOpenAddModal} onClose={handleCloseAddModal} />
     </div>
   );
 };
