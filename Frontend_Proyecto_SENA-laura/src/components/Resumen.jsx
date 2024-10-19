@@ -41,7 +41,7 @@ const Resumen = () => {
     }
     setLoading(false);
   };
-
+  
   useEffect(() => {
     fetchPedidos();
   }, []);
@@ -50,10 +50,11 @@ const Resumen = () => {
     const fetchHerramientas = async () => {
       try {
         const response = await api.get("/herramienta");
-        
+
         const herramientasBuenas = response.data.filter(
-          (herramienta) => herramienta.condicion === "Bueno"
-        );
+          (herramienta) => herramienta.condicion.toUpperCase() === "BUENO"
+        );        
+
         setCantidadHerramientas(herramientasBuenas.length);
       } catch (error) {
         console.error("Error al obtener las herramientas", error);
@@ -132,7 +133,9 @@ const Resumen = () => {
             justifyContent="center"
           >
             <StatBox1
-              icon={<PushPinIcon sx={{ color: green[600], fontSize: "26px" }} />}
+              icon={<PushPinIcon 
+                sx={{ color: green[600], fontSize: "26px" }} 
+              />}
             />
           </Box>
           <Box
@@ -159,7 +162,9 @@ const Resumen = () => {
           >
             <StatBox3
               icon={
-                <HardwareIcon sx={{ color: green[600], fontSize: "26px" }} />
+                <HardwareIcon 
+                  sx={{ color: green[600], fontSize: "26px" }} 
+                />
               }
             />
           </Box>
@@ -244,7 +249,6 @@ const Resumen = () => {
                 </Link>
               </Box>
             ))}
-            
           </Box>
 
           {/* FILA 3 */}

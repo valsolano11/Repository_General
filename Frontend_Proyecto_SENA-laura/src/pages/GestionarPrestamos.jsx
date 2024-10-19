@@ -18,7 +18,7 @@ const GestionarPrestamos = () => {
   const [sidebarToggleCoord, setsidebarToggleCoord] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { herramientaId } = location.state || {};
+  const { prestamoId } = location.state || {};
   const [prestamoData, setprestamoData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [productosSalida, setProductosSalida] = useState([]);
@@ -59,14 +59,14 @@ const GestionarPrestamos = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (herramientaId) {
+      if (prestamoId) {
         try {
-          const response = await api.get(`/prestamos/${herramientaId}`);
+          const response = await api.get(`/prestamos/${prestamoId}`);
           const data = response.data;
 
           const pedidoFormatted = {
             id: data.id,
-            createdAt: data.createdAt,
+            fechaPrestamos: data.fechaPrestamos,
             firmaPrestamos: data.firmaPrestamos,
             codigoFicha: data.codigoFicha,
             jefeOficina: data.jefeOficina,
@@ -80,7 +80,7 @@ const GestionarPrestamos = () => {
           };
           setprestamoData(pedidoFormatted);
           setFormData({
-            fecha: formatDateForInput(data.createdAt),
+            fecha: formatDateForInput(data.fechaPrestamos),
             codigoFicha: data.codigoFicha,
             area: data.area,
             jefeOficina: data.jefeOficina,
@@ -98,7 +98,7 @@ const GestionarPrestamos = () => {
     };
 
     fetchData();
-  }, [herramientaId]);
+  }, [prestamoId]);
 
   useEffect(() => {
     if (prestamoData) {
@@ -114,11 +114,11 @@ const GestionarPrestamos = () => {
     )}-${String(date.getDate()).padStart(2, "0")}`;
   };
 
-  const handlefechaEntregaChange = (index, herramientaId, fechaEntrega) => {
+  const handlefechaEntregaChange = (index, prestamoId, fechaEntrega) => {
     const updatedProductos = [...productosSalida];
 
     const productoIndex = updatedProductos.findIndex(
-      (producto) => producto.herramientaId === herramientaId
+      (producto) => producto.prestamoId === prestamoId
     );
 
     if (productoIndex >= 0) {
@@ -129,15 +129,30 @@ const GestionarPrestamos = () => {
       }
     } else {
       if (fechaEntrega > 0) {
-        updatedProductos.push({ herramientaId: herramientaId, fechaEntrega });
+        updatedProductos.push({ prestamoId: prestamoId, fechaEntrega });
       }
     }
     setProductosSalida(updatedProductos);
   };
 
+  const fetchherramientasDelPedido = async () => {
+    try {
+        const response = await api.get(`/prestamos/${prestamoId}/herramientas`);
+        if (response.status === 200) {
+            console.log("Herramientas del pedido:", response.data);
+            // Si necesitas actualizar algún estado con las herramientas, puedes hacerlo aquí
+            // Por ejemplo: setHerramientas(response.data);
+        } else {
+            console.error("Error al obtener las herramientas del pedido");
+        }
+    } catch (error) {
+        console.error("Error al obtener las herramientas del pedido:", error);
+    }
+};
+
   const handleGestionarPrestamo = async () => {
     try {
-      const response = await api.put(`/prestamos/${herramientaId}/entrega`, {
+      const response = await api.put(`/prestamos/${prestamoId}/entrega`, {
         productos: productosSalida,
       });
 
@@ -190,7 +205,7 @@ const GestionarPrestamos = () => {
     doc.text(`Estado: ${prestamoData.Estado?.estadoName || "Desconocido"}`, 14, 90);
     doc.text(
         `Fecha de creación: ${new Date(
-          prestamoData.createdAt
+          prestamoData.fechaPrestamos
         ).toLocaleDateString()}`,
         14,
         100
@@ -260,7 +275,7 @@ const GestionarPrestamos = () => {
       prestamoData.cedulaServidor,
       prestamoData.correo,
       prestamoData.Estado?.estadoName || "Desconocido",
-      new Date(prestamoData.createdAt).toLocaleDateString(),
+      new Date(prestamoData.fechaPrestamos).toLocaleDateString(),
     ];
   
     const herramientaHeaders = [
@@ -561,7 +576,7 @@ const GestionarPrestamos = () => {
                     <div className="flex flex-col rounded-lg w-full">
                       <div className="flex flex-row justify-center w-full mb-4">
                         <TablaPrestamosGestion
-                          herramientaId={herramientaId}
+                          prestamoId={prestamoId}
                           actualizarFechaEntrega={handlefechaEntregaChange}
                           accordionStates={accordionStates}
                           toggleAccordion={toggleAccordion}
@@ -585,7 +600,7 @@ const GestionarPrestamos = () => {
                     <div className="flex flex-col rounded-lg w-full">
                       <div className="flex flex-row justify-between w-auto mb-4">
                         <FirmaPrestamosEntrega
-                          herramientaId={herramientaId}
+                          prestamoId={prestamoId}
                           accordionStates={accordionStates}
                           toggleAccordion={toggleAccordion}
                         />

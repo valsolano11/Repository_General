@@ -7,17 +7,34 @@ import "react-toastify/dist/ReactToastify.css";
 
 const TablaPrestamosGestion = () => {
   const location = useLocation();
-  const { herramientaId } = location.state || {};
+  const [herramientas, setHerramientas] = useState([]);
+  const { prestamoId } = location.state || {};
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
   useEffect(() => {
+    const fetchherramientas = async () => {
+        try {
+            const response = await api.get(`/herramienta`);
+            setHerramientas(response.data);
+        } catch (err) {
+            console.error("Error fetching herramientas:", err);
+            toast.error("Error al cargar herramientas.");
+        }
+    };
+
+    fetchherramientas();
+}, []);
+
+  useEffect(() => {
     const fetchHerramientasDelPedido = async () => {
+      if (!prestamoId) return;
+
       try {
         setLoading(true);
-        const response = await api.get(`/prestamos/${herramientaId}`);
-        
+        const response = await api.get(`/prestamos/${prestamoId}`);
         const herramientasData = response.data.Herramienta || [];
+        const prestamo = response.data;
 
         const formatDate = (dateString) => {
           const date = new Date(dateString);
@@ -33,8 +50,8 @@ const TablaPrestamosGestion = () => {
 
         const herramientasFormatted = herramientasData.map(
           (herramienta, index) => {
-            const fechaEntrega = herramienta.fechaEntrega
-              ? formatDate(herramienta.fechaEntrega)
+            const fechaEntrega = prestamo.fechaEntrega
+              ? formatDate(prestamo.fechaEntrega)
               : "Sin fecha";
 
             return {
@@ -59,7 +76,7 @@ const TablaPrestamosGestion = () => {
     };
 
     fetchHerramientasDelPedido();
-  }, [herramientaId]);
+  }, [prestamoId]);
 
   const columns = [
     {

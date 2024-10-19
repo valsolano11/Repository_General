@@ -15,16 +15,17 @@ const ProgressCircle = ({ size = "100" }) => {
       try {
         const response = await api.get("/herramienta");
         const totalHerramientas = response.data.length;
+    
         const herramientasBuenas = response.data.filter(
-          (herramienta) => herramienta.condicion === "Bueno"
+          (herramienta) => herramienta.condicion.toUpperCase() === "BUENO"
         ).length;
         const herramientasRegulares = response.data.filter(
-          (herramienta) => herramienta.condicion === "Regular"
+          (herramienta) => herramienta.condicion.toUpperCase() === "REGULAR"
         ).length;
         const herramientasMalas = response.data.filter(
-          (herramienta) => herramienta.condicion === "Malo"
+          (herramienta) => herramienta.condicion.toUpperCase() === "MALO"
         ).length;
-
+    
         setPercentages({
           bueno: (herramientasBuenas / totalHerramientas) * 100,
           regular: (herramientasRegulares / totalHerramientas) * 100,
@@ -34,7 +35,7 @@ const ProgressCircle = ({ size = "100" }) => {
         console.error("Error al obtener las herramientas", error);
       }
     };
-
+    
     fetchHerramientas();
   }, []);
 

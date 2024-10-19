@@ -12,19 +12,19 @@ const TablaHerramientas = ({
   const handleInputChange = (index, event) => {
     const { name, value } = event.target;
     const updatedHerramienta = [...herramientas];
-    updatedHerramienta[index][name] = value;
+    updatedHerramienta[index][name] = value.toUpperCase();
     handleHerramientaChange(updatedHerramienta);
 
     if (name === "nombre") {
       buscarSugerenciasHerramienta(index, value);
     }
   };
-
+  
   const addRow = () => {
     const newHerramienta = {
       HerramientumId: "",
       nombre: "",
-      codigo: "", // Agregar campo 'codigo'
+      codigo: "",
       observaciones: "",
     };
 
@@ -138,12 +138,16 @@ const TablaHerramientas = ({
                       />
                       {Array.isArray(sugerenciasherramientas[index]) &&
                         sugerenciasherramientas[index].length > 0 && (
-                          <div className="absolute bg-white border border-gray-300 max-h-40  max-h-40 overflow-y-auto z-10">
+                          <div className="absolute bg-white border border-gray-300 max-h-40 overflow-y-auto z-10">
                             {sugerenciasherramientas[index].map(
                               (sugerencia, i) => (
                                 <div
                                   key={i}
                                   className="px-2 py-1 cursor-pointer hover:bg-gray-200"
+                                  onChange={(e) => {
+                                    const valorEnMayusculas = e.target.value.toUpperCase();
+                                    handleInputChange({ target: { name: "nombre", value: valorEnMayusculas } });
+                                  }}
                                   onClick={() =>
                                     handleSelectSuggestion(
                                       index,

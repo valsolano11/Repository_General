@@ -20,7 +20,7 @@ const Prestamos = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([
     {
-      createdAt: "",
+      fechaPrestamos: "",
       servidorAsignado: "",
       codigoFicha: "",
       area: "",
@@ -57,7 +57,7 @@ const Prestamos = () => {
 
       const PrestamoFormatted = data.map((prestamo) => ({
         id: prestamo.id,
-        createdAt: prestamo.createdAt,
+        fechaPrestamos: prestamo.fechaPrestamos,
         servidorAsignado: prestamo.servidorAsignado,
         codigoFicha: prestamo.codigoFicha,
         area: prestamo.area,
@@ -85,8 +85,8 @@ const Prestamos = () => {
   }, []);
 
   const handleViewClick = (rowIndex) => {
-    const Herramienta = data[rowIndex];
-    navigate("/gestionarPrestamos", { state: { herramientaId: Herramienta.id } });
+    const prestamo = data[rowIndex];
+    navigate("/gestionarPrestamos", { state: { prestamoId: prestamo.id } });
   };
 
   function formatDate(dateString) {
@@ -99,7 +99,7 @@ const Prestamos = () => {
 
   const columns = [
     {
-      name: "createdAt",
+      name: "fechaPrestamos",
       label: "FECHA",
       options: {
         customHeadRender: (columnMeta) => (
@@ -248,7 +248,7 @@ const Prestamos = () => {
 
     data.forEach((prestamo) => {
       const prestamoData = [
-        prestamo.createdAt || "",
+        prestamo.fechaPrestamos || "",
         prestamo.servidorAsignado || "",
         prestamo.codigoFicha || "",
         prestamo.area || "",

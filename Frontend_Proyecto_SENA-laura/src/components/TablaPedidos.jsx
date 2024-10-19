@@ -7,7 +7,7 @@ const TablaPedidos = ({ accordionStates, handleProductChange, productos }) => {
   const handleInputChange = (index, event) => {
     const { name, value } = event.target;
     const updatedProducts = [...productos];
-    updatedProducts[index][name] = value;
+    updatedProducts[index][name] = value.toUpperCase();
     handleProductChange(updatedProducts);
 
     if (name === "nombre") {
@@ -124,6 +124,10 @@ const TablaPedidos = ({ accordionStates, handleProductChange, productos }) => {
                                 <div
                                   key={i}
                                   className="px-2 py-1 cursor-pointer hover:bg-gray-200"
+                                  onChange={(e) => {
+                                    const valorEnMayusculas = e.target.value.toUpperCase();
+                                    handleInputChange({ target: { name: "nombre", value: valorEnMayusculas } });
+                                  }}
                                   onClick={() =>
                                     handleSelectSuggestion(
                                       index,

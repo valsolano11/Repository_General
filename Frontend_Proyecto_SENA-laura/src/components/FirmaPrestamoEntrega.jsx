@@ -7,7 +7,7 @@ const FirmaPrestamoEntrega = ({ accordionStates, onFirmaChange }) => {
   const [firmaImagen, setFirmaImagen] = useState(null);
   const [firmaExistente, setFirmaExistente] = useState(null);
   const location = useLocation();
-  const { herramientaId } = location.state || {};
+  const { prestamoId } = location.state || {};
   const [loading, setLoading] = useState(false);
 
   const { user } = useAuth();
@@ -24,9 +24,9 @@ const FirmaPrestamoEntrega = ({ accordionStates, onFirmaChange }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (herramientaId) {
+      if (prestamoId) {
         try {
-          const response = await api.get(`/prestamos/${herramientaId}`);
+          const response = await api.get(`/prestamos/${prestamoId}`);
           const data = response.data;
 
           if (data.firma) {
@@ -42,7 +42,7 @@ const FirmaPrestamoEntrega = ({ accordionStates, onFirmaChange }) => {
     };
 
     fetchData();
-  }, [herramientaId, onFirmaChange]);
+  }, [prestamoId, onFirmaChange]);
 
   const canUpload =
     user?.Rol?.RolId === 3 || user?.Rol?.rolName === "COORDINADOR";

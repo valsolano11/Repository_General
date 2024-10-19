@@ -25,7 +25,7 @@ const EditPrestamoModal = ({ isOpen, onClose, prestamo }) => {
     fechaDevolucion: "",
     estado: "",
     observaciones: "",
-  });
+  });l
 
   const { user } = useAuth();
 
