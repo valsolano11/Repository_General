@@ -3,26 +3,24 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api/token";
 import { FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
-import { useAuth } from "../context/AuthContext"; 
 import "react-toastify/dist/ReactToastify.css";
 
 const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
   const [loading, setLoading] = useState(false);
-  const [categorias, setCategorias] = useState([]);
+  const [subcategorias, setSubcategorias] = useState([]);
   const [estados, setEstados] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    codigo: "",
     nombre: "",
-    fechaIngreso: "",
+    codigo: "",
     marca: "",
-    estadoId: "",
-    categoriaId: "",
-    descripcion: "",
+    condicion: "",
+    observaciones: "",
+    EstadoId: "",
+    SubcategoriaId: "",
   });
-
-  const { user } = useAuth();
 
   useEffect(() => {
     if (isOpen && herramienta) {
@@ -31,46 +29,63 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
   }, [isOpen, herramienta]);
 
   useEffect(() => {
-    const fetchCategorias = async () => {
+    const fetchsubcategorias = async () => {
       try {
-        const response = await api.get("/categorias");
-        setCategorias(response.data);
+        const response = await api.get("/subcategoria/estado");
+        const filteredSubcategorias = response.data.filter(
+          (Categoria) => Categoria.CategoriaId === 2 || Categoria.CategoriaId === 3
+        );
+        setSubcategorias(filteredSubcategorias);
       } catch (error) {
-        toast.error("Error al cargar categorías", { position: "top-right" });
       }
     };
 
     const fetchEstados = async () => {
       try {
-        const response = await api.get("/estados");
-        setEstados(response.data);
+        const response = await api.get("/Estado");
+        const filteredEstados = response.data.filter(
+          (estado) => estado.id === 1 || estado.id === 2
+        );
+        setEstados(filteredEstados);
       } catch (error) {
-        toast.error("Error al cargar los estados", { position: "top-right" });
+        showToastError("Error al cargar los estados");
       }
     };
 
-    fetchCategorias();
+    fetchsubcategorias();
     fetchEstados();
   }, []);
 
   const fetchHerramientaDetails = async (herramientaId) => {
     setLoading(true);
     try {
-      const response = await api.get(`/herramientas/${herramientaId}`);
+      const response = await api.get(`/herramienta/${herramientaId}`);
       if (response.status === 200) {
-        const { codigo, nombre, fechaIngreso, marca, estadoId, categoriaId, descripcion } = response.data;
+        const {
+          nombre,
+          codigo,
+          marca,
+          condicion,
+          observaciones,
+          EstadoId,
+          SubcategoriaId,
+          UsuarioId,
+        } = response.data;
         setFormData({
-          codigo: codigo || "",
           nombre: nombre || "",
-          fechaIngreso: fechaIngreso || "",
+          codigo: codigo || "",
           marca: marca || "",
-          estadoId: estadoId || "",
-          categoriaId: categoriaId || "",
-          descripcion: descripcion || "",
+          condicion: condicion || "",
+          observaciones: observaciones || "",
+          EstadoId: EstadoId || "",
+          SubcategoriaId: SubcategoriaId || "",
         });
         setLoading(false);
       } else {
-        console.error("Error fetching herramienta details:", response.data.message);
+        console.error(
+          "Error fetching herramienta details:",
+          response.data.message
+        );
         toast.error("Error al cargar la información de la herramienta.", {
           position: "top-right",
         });
@@ -87,17 +102,11 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
 
   const validateInput = (name, value) => {
     let errorMessage = "";
-    if (name === "codigo" && !value) {
-      errorMessage = "El código es obligatorio.";
-    } else if (name === "nombre") {
+    if (name === "nombre") {
       const nameRegex = /^[A-Za-z\s-_\u00C0-\u017F]+$/;
       if (!nameRegex.test(value) || /\d/.test(value)) {
-        errorMessage = "El nombre no puede contener números o caracteres especiales.";
+        errorMessage = "El nombre no puede contener caracteres especiales.";
       }
-    } else if (name === "fechaIngreso" && !Date.parse(value)) {
-      errorMessage = "La fecha debe ser válida.";
-    } else if (name === "marca" && !value) {
-      errorMessage = "La marca es obligatoria.";
     }
     return errorMessage;
   };
@@ -116,27 +125,25 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
   };
 
   const handleUpdate = async () => {
-    const { codigo, nombre, fechaIngreso, marca, estadoId, categoriaId, descripcion } = formData;
+    const {
+      nombre,
+      codigo,
+      marca,
+      condicion,
+      observaciones,
+      EstadoId,
+      SubcategoriaId,
+    } = formData;
 
-    const codigoError = validateInput("codigo", codigo);
-    const nombreError = validateInput("nombre", nombre);
-    const fechaIngresoError = validateInput("fechaIngreso", fechaIngreso);
-    const marcaError = validateInput("marca", marca);
-
-    if (codigoError || nombreError || fechaIngresoError || marcaError) {
-      setFormErrors({
-        codigo: codigoError,
-        nombre: nombreError,
-        fechaIngreso: fechaIngresoError,
-        marca: marcaError,
-      });
-      toast.error("Por favor, corrige los errores antes de actualizar.", {
-        position: "top-right",
-      });
-      return;
-    }
-
-    if (!codigo || !nombre || !fechaIngreso || !marca || !estadoId || !categoriaId) {
+    if (
+      !codigo ||
+      !nombre ||
+      !condicion ||
+      !observaciones ||
+      !marca ||
+      !EstadoId ||
+      !SubcategoriaId
+    ) {
       toast.error("Todos los campos son obligatorios.", {
         position: "top-right",
       });
@@ -146,15 +153,15 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
     setLoading(true);
     try {
       const response = await api.put(
-        `/herramientas/${herramienta.id}`,
+        `/herramienta/${herramienta.id}`,
         {
-          codigo,
           nombre,
-          fechaIngreso,
+          codigo,
           marca,
-          estadoId,
-          categoriaId,
-          descripcion,
+          condicion,
+          observaciones,
+          EstadoId: EstadoId,
+          SubcategoriaId: SubcategoriaId,
         },
         {
           headers: {
@@ -177,7 +184,10 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
           onClose(response.data);
         }, 2000);
       } else {
-        console.error("Error updating herramienta profile:", response.data.message);
+        console.error(
+          "Error updating herramienta profile:",
+          response.data.message
+        );
         toast.error("Error al actualizar la información de la herramienta.", {
           position: "top-right",
         });
@@ -198,13 +208,6 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
     }
   };
 
-  // Función para verificar permisos
-  const hasPermission = (permissionName) => {
-    return user.DetallePermisos.some(
-      (permiso) => permiso.Permiso.nombrePermiso === permissionName
-    );
-  };  
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-fondo bg-opacity-50">
       <div className="bg-white rounded-lg shadow-lg sm:w-full md:w-1/4 mt-4 max-h-screen overflow-y-auto">
@@ -220,22 +223,6 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                 <h6 className="font-bold text-center text-2xl mb-2">
                   Editar Herramienta
                 </h6>
-
-                <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Código *</label>
-                  <input
-                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    type="text"
-                    name="codigo"
-                    value={formData.codigo}
-                    onChange={handleInputChange}
-                  />
-                  {formErrors.codigo && (
-                    <div className="text-red-400 text-sm mt-1 px-2">
-                      {formErrors.codigo}
-                    </div>
-                  )}
-                </div>
 
                 <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Nombre *</label>
@@ -259,17 +246,17 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Fecha de Ingreso *</label>
+                  <label className="mb-1 font-bold text-sm">Código *</label>
                   <input
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    type="date"
-                    name="fechaIngreso"
-                    value={formData.fechaIngreso}
+                    type="text"
+                    name="codigo"
+                    value={formData.codigo}
                     onChange={handleInputChange}
                   />
-                  {formErrors.fechaIngreso && (
+                  {formErrors.codigo && (
                     <div className="text-red-400 text-sm mt-1 px-2">
-                      {formErrors.fechaIngreso}
+                      {formErrors.codigo}
                     </div>
                   )}
                 </div>
@@ -291,23 +278,75 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                 </div>
 
                 <div className="flex flex-col">
+                  <label className="mb-1 font-bold text-sm">Condicion *</label>
+                  <select
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
+                    name="condicion"
+                    value={formData.condicion}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Seleccione una Condicion</option>
+                    <option value="BUENO">BUENO</option>
+                    <option value="REGULAR">REGULAR</option>
+                    <option value="MALO">MALO</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="mb-1 font-bold text-sm">
+                    Observaciones *
+                  </label>
+                  <input
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
+                    type="text"
+                    name="observaciones"
+                    value={formData.observaciones}
+                    onChange={handleInputChange}
+                  />
+                  {formErrors.observaciones && (
+                    <div className="text-red-400 text-sm mt-1 px-2">
+                      {formErrors.observaciones}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="mb-1 font-bold text-sm">
+                    Subcategoría *
+                  </label>
+                  <select
+                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
+                    name="SubcategoriaId"
+                    value={formData.SubcategoriaId}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Seleccione una Subcategoría</option>
+                    {subcategorias.map((categoria) => (
+                      <option key={categoria.id} value={categoria.id}>
+                        {categoria.subcategoriaName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Estado *</label>
                   <select
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    name="estadoId"
-                    value={formData.estadoId}
+                    name="EstadoId"
+                    value={formData.EstadoId}
                     onChange={handleInputChange}
                   >
-                    <option value="">Seleccionar Estado</option>
+                    <option value="">Seleccione un estado</option>
                     {estados.map((estado) => (
                       <option
                         key={estado.id}
                         value={estado.id}
                         style={{
                           color:
-                            estado.estadoName === "ACTIVO"
+                            estado.nombre === "ACTIVO"
                               ? "green"
-                              : estado.estadoName === "INACTIVO"
+                              : estado.nombre === "INACTIVO"
                               ? "red"
                               : "inherit",
                         }}
@@ -317,48 +356,19 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                     ))}
                   </select>
                 </div>
-
-                <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Categoría *</label>
-                  <select
-                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    name="categoriaId"
-                    value={formData.categoriaId}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Seleccionar Categoría</option>
-                    {categorias.map((categoria) => (
-                      <option key={categoria.id} value={categoria.id}>
-                        {categoria.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Descripción</label>
-                  <textarea
-                    className="bg-grisClaro text-sm rounded-lg px-2 h-24"
-                    name="descripcion"
-                    value={formData.descripcion}
-                    onChange={handleInputChange}
-                  />
-                </div>
               </div>
             </div>
           </div>
         </div>
         <div className="sm:w-full md:w-full flex flex-col justify-end">
-          {hasPermission("Modificar Herramienta") && (
-            <div className="flex justify-center mb-4 mx-2">
-              <button className="btn-danger2 mx-2" onClick={onClose}>
-                Cancelar
-              </button>
-              <button className="btn-primary2 mx-2" onClick={handleUpdate}>
-                Actualizar
-              </button>
-            </div>
-          )}
+          <div className="flex justify-center mb-4 mx-2">
+            <button className="btn-danger2 mx-2" onClick={onClose}>
+              Cancelar
+            </button>
+            <button className="btn-primary2 mx-2" onClick={handleUpdate}>
+              Actualizar
+            </button>
+          </div>
         </div>
       </div>
       <ToastContainer />

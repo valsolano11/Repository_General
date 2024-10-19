@@ -31,7 +31,9 @@ export const crearPedido = async (req, res) => {
       where: { estadoName: "PENDIENTE" },
     });
     if (!estadoPendiente) {
-      return res.status(404).json({ message: "El estado 'PENDIENTE' no existe." });
+      return res
+        .status(404)
+        .json({ message: "El estado 'PENDIENTE' no existe." });
     }
 
     const nuevoPedido = await Pedido.create({
@@ -188,10 +190,10 @@ export const actualizarPedido = async (req, res) => {
 
     // Si se ha subido un archivo de firma, actualizar la ruta de la firma
     if (req.file && filename) {
-      const firmaPath = path.join(__dirname, "../../uploads", filename);
+      const firmaPath = `/uploads/${filename}`; 
       pedido.firma = firmaPath;
     } else {
-      console.log("No se ha subido ningún archivo de firma.");
+      console.log("Ruta de la firma guardada:", firmaPath);
     }
 
     // Actualizar el estado a "EN PROCESO"

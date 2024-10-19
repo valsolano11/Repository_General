@@ -13,7 +13,7 @@ const TablaPedidosFirma = () => {
   useEffect(() => {
     const fetchUnidades = async () => {
       try {
-        const response = await api.get(`/units`);
+        const response = await api.get("/units");
         setUnidades(response.data);
       } catch (err) {
         console.error("Error fetching unidades:", err);

@@ -9,7 +9,6 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
   const [loading, setLoading] = useState(false);
   const [estados, setEstados] = useState([]);
   const [medidas, setMedidas] = useState([]);
-  const [usuario, setUsuario] = useState([]);
   const [subcategoria, sesubcategoria] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const navigate = useNavigate();
@@ -21,16 +20,21 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
     SubcategoriaId: "",
     EstadoId: "",
   });
+
   useEffect(() => {
     if (isOpen && product) {
       fetchProductDetails(product.id);
     }
   }, [isOpen, product]);
+
   useEffect(() => {
     const fetchEstados = async () => {
       try {
-        const response = await api.get("/Estado/tipo/producto");
-        setEstados(response.data);
+        const response = await api.get("/Estado");
+        const filteredEstados = response.data.filter(
+          (estado) => estado.id === 1 || estado.id === 2
+        );
+        setEstados(filteredEstados);
       } catch (error) {
         showToastError("Error al cargar los estados");
       }
@@ -50,11 +54,11 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
     const fetchSubcategoria = async () => {
       try {
         const response = await api.get("/subcategoria/estado");
-        sesubcategoria(response.data);
+        const filteredSubcategorias = response.data.filter(
+          (Categoria) => Categoria.CategoriaId === 1 || Categoria.CategoriaId === 4
+        );
+        sesubcategoria(filteredSubcategorias);
       } catch (error) {
-        toast.error("Error al cargar las subcategorias", {
-          position: "top-right",
-        });
       }
     };
 
@@ -68,7 +72,14 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
     try {
       const response = await api.get(`/producto/${productId}`);
       if (response.status === 200) {
-        const { nombre,marca,descripcion, UnidadMedidaId,SubcategoriaId,EstadoId,} = response.data;
+        const {
+          nombre,
+          marca,
+          descripcion,
+          UnidadMedidaId,
+          SubcategoriaId,
+          EstadoId,
+        } = response.data;
         setFormData({
           nombre: nombre || "",
           marca: marca || "",
@@ -76,7 +87,6 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
           UnidadMedidaId: UnidadMedidaId || "",
           SubcategoriaId: SubcategoriaId || "",
           EstadoId: EstadoId || "",
-          
         });
         setLoading(false);
       } else {
@@ -94,6 +104,7 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
       setLoading(false);
     }
   };
+
   const validateInput = (name, value) => {
     let errorMessage = "";
     if (name === "nombre" || name === "descripcion") {
@@ -107,6 +118,7 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
     }
     return errorMessage;
   };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const errorMessage = validateInput(name, value);
@@ -119,10 +131,25 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
       [name]: value,
     }));
   };
-  const handleUpdate = async () => {
-    const { nombre,marca,descripcion, UnidadMedidaId,SubcategoriaId, EstadoId,}= formData;
 
-    if (!nombre || !marca || !descripcion || !UnidadMedidaId || !SubcategoriaId || !EstadoId) {
+  const handleUpdate = async () => {
+    const {
+      nombre,
+      marca,
+      descripcion,
+      UnidadMedidaId,
+      SubcategoriaId,
+      EstadoId,
+    } = formData;
+
+    if (
+      !nombre ||
+      !marca ||
+      !descripcion ||
+      !UnidadMedidaId ||
+      !SubcategoriaId ||
+      !EstadoId
+    ) {
       toast.error("Todos los campos son obligatorios.", {
         position: "top-right",
       });
@@ -180,6 +207,7 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
       setLoading(false);
     }
   };
+
   if (!isOpen) return null;
 
   return (
@@ -202,7 +230,9 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
                 ) : (
                   <div className="space-y-1">
                     <div className="flex flex-col">
-                      <label className="mb-0.5 font-bold text-xs">Nombre *</label>
+                      <label className="mb-0.5 font-bold text-xs">
+                        Nombre *
+                      </label>
                       <input
                         className="bg-grisClaro text-xs rounded-lg px-1 py-1"
                         type="text"
@@ -219,7 +249,7 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
 
                     <div className="flex flex-col">
                       <label className="mb-0.5 font-bold text-xs">
-                       Marca *
+                        Marca *
                       </label>
                       <input
                         className="bg-grisClaro text-xs rounded-lg px-1 py-1"
@@ -236,7 +266,7 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
                     </div>
                     <div className="flex flex-col">
                       <label className="mb-0.5 font-bold text-xs">
-                      Descripcion *
+                        Descripcion *
                       </label>
                       <input
                         className="bg-grisClaro text-xs rounded-lg px-1 py-1"
@@ -276,10 +306,9 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
                       )}
                     </div>
 
-
                     <div className="flex flex-col">
                       <label className="mb-0.5 font-bold text-xs">
-                      Subcategoria *
+                        Subcategoria *
                       </label>
                       <select
                         className="bg-grisClaro text-xs rounded-lg px-1 py-1"
@@ -301,35 +330,33 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
                       )}
                     </div>
 
-
                     <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Estado *</label>
-                  <select
-                    className="bg-grisClaro text-sm rounded-lg px-2 h-8"
-                    name="EstadoId"
-                    value={formData.EstadoId}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Seleccionar Estado</option>
-                    {estados.map((estado) => (
-                      <option
-                        key={estado.id}
-                        value={estado.id}
-                        style={{
-                          color:
-                            estado.estadoName === "ACTIVO"
-                              ? "green"
-                              : estado.estadoName === "INACTIVO"
-                              ? "red"
-                              : "inherit",
-                        }}
+                      <label className="mb-1 font-bold text-sm">Estado *</label>
+                      <select
+                        className="bg-grisClaro text-sm rounded-lg px-2 h-8"
+                        name="EstadoId"
+                        value={formData.EstadoId}
+                        onChange={handleInputChange}
                       >
-                        {estado.estadoName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-  
+                        <option value="">Seleccionar Estado</option>
+                        {estados.map((estado) => (
+                          <option
+                            key={estado.id}
+                            value={estado.id}
+                            style={{
+                              color:
+                                estado.estadoName === "ACTIVO"
+                                  ? "green"
+                                  : estado.estadoName === "INACTIVO"
+                                  ? "red"
+                                  : "inherit",
+                            }}
+                          >
+                            {estado.estadoName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 )}
               </div>
@@ -341,7 +368,10 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
             <button className="btn-danger2 mx-1 text-xs" onClick={onClose}>
               Cancelar
             </button>
-            <button className="btn-primary2 mx-1 text-xs" onClick={handleUpdate}>
+            <button
+              className="btn-primary2 mx-1 text-xs"
+              onClick={handleUpdate}
+            >
               Actualizar
             </button>
           </div>

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { FaBars, FaSearch, FaBell, FaUserCircle } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { FaBars, FaBell, FaUserCircle } from "react-icons/fa";
 import ModalCsesion from "./ModalCsesion";
 import ModalPerfil from "./ModalPerfil";
 import ConfirmLogoutModal from "./ConfirmLogoutModal";
@@ -16,8 +16,29 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
   const [isModalPerfilOpen, setIsModalPerfilOpen] = useState(false);
   const [showConfirmLogout, setShowConfirmLogout] = useState(false);
   const [isNotificacionesOpen, setIsNotificacionesOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [notificacionesNuevas, setNotificacionesNuevas] = useState(0);
 
-  const notifications = ["Notificación 1", "Notificación 2", "Notificación 3"];
+  const fetchNotifications = async () => {
+    try {
+      const response = await api.get("/notificaciones");
+      setNotifications(response.data);
+      const unreadCount = response.data.filter((notif) => notif.nueva).length;
+      setUnreadNotifications(unreadCount);
+    } catch (error) {
+      console.error("Error al obtener notificaciones:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 2500); // Cada 5 segundos
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = () => {
     setShowConfirmLogout(true);
@@ -49,9 +70,20 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
     setIsNotificacionesOpen(false);
   };
 
+  const handleNewNotifications = (count) => {
+    setUnreadNotifications((prev) => prev + count); 
+    setNotificacionesNuevas(count); 
+  };
+
+  const handleOpenNotifications = async () => {
+    setIsNotificacionesOpen(true);
+    await fetchNotifications(); 
+  };
+
   return (
     <nav
-      className={`bg-gray-200 shadow px-4 py-3 flex justify-between items-center fixed top-0 left-0 z-50 w-full transition-all duration-300`}
+      className={`bg-gray-200 shadow px-4 py-3 flex justify-between items-center 
+        fixed top-0 left-0 z-50 w-full transition-all duration-300`}
       style={{
         marginLeft: sidebarToggle ? "16rem" : "0",
         width: sidebarToggle ? "calc(100% - 16rem)" : "100%",
@@ -71,23 +103,17 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
       </div>
       <div className="flex justify-end w-full max-w-full">
         <div className="flex items-center gap-x-5">
-          {/* <div className="relative items-center md:w-65">
-            <span className="relative md:absolute inside-y-0 left-0 flex items-center pl-40">
-              <button className="p-2 focus:outline-none text-white md:text-black">
-                <FaSearch />
-              </button>
-            </span>
-            <input
-              type="text"
-              placeholder="Buscar aquí"
-              className="w-full px-4 py-1 pl-22 rounded-lg shadow outline-none hidden md:block bg-gray-100"
-            />
-          </div> */}
-          <div className="text-white">
+          <div className="relative text-white">
             <FaBell
               className="w-6 h-6 text-black cursor-pointer"
-              onClick={() => setIsNotificacionesOpen(true)}
+              onClick={handleOpenNotifications}
             />
+            {unreadNotifications > 0 && (
+              <span className="absolute top-0 right-0 inline-flex items-center 
+              justify-center px-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                {unreadNotifications}
+              </span>
+            )}
           </div>
           <div>
             <button
@@ -111,16 +137,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
               </span>
             </div>
           </li>
-          {/* <li>
-            <div className="bg-gray-100 text-center rounded-lg my-4">
-              <a href="">Ayuda</a>
-            </div>
-          </li>
-          <li>
-            <div className="bg-gray-100 text-center rounded-lg my-4">
-              <a href="">Configuración</a>
-            </div>
-          </li> */}
+
           <li>
             <div className="bg-gray-100 text-center rounded-lg my-4">
               <span
@@ -143,6 +160,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
         isOpen={isNotificacionesOpen}
         onClose={handleCloseModals}
         notifications={notifications}
+        onNewNotifications={handleNewNotifications}
       />
     </nav>
   );

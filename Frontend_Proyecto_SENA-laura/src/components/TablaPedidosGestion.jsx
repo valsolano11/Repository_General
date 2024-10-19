@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const TablaPedidosGestion = ({ actualizarCantidadSalida }) => {
   const [unidades, setUnidades] = useState([]);
+  const [productos, setProductos] = useState([]);
   const location = useLocation();
   const { pedidoId } = location.state || {};
   const [loading, setLoading] = useState(true);
@@ -27,6 +28,20 @@ const TablaPedidosGestion = ({ actualizarCantidadSalida }) => {
 
   useEffect(() => {
     const fetchProductos = async () => {
+      try {
+        const response = await api.get(`/producto`);
+        setProductos(response.data);
+      } catch (err) {
+        console.error("Error fetching productos:", err);
+        toast.error("Error al cargar productos.");
+      }
+    };
+
+    fetchProductos();
+  }, []);
+
+  useEffect(() => {
+    const fetchProductosDelPedido = async () => {
       if (!pedidoId || unidades.length === 0) return;
 
       try {
@@ -38,12 +53,20 @@ const TablaPedidosGestion = ({ actualizarCantidadSalida }) => {
           const unidad = unidades.find(
             (unit) => unit.id === producto.UnidadMedidaId
           );
+
+          const productoActual = productos.find((p) => p.id === producto.id);
+          const cantidadActual = productoActual
+            ? productoActual.cantidadActual
+            : 0;
+
           return {
             item: index + 1,
             nombre: producto.nombre,
             ProductoId: producto.id,
             UnidadMedidaId: unidad ? unidad.nombre : "",
             cantidadSolicitar: producto.PedidoProducto.cantidadSolicitar,
+            cantidadActual,
+            cantidadSalida: producto.PedidoProducto.cantidadSalida || "",
             observaciones: producto.PedidoProducto.observaciones,
           };
         });
@@ -56,17 +79,47 @@ const TablaPedidosGestion = ({ actualizarCantidadSalida }) => {
         setLoading(false);
       }
     };
-      fetchProductos();
-  }, [pedidoId, unidades]);
+    fetchProductosDelPedido();
+  }, [pedidoId, unidades, productos]);
 
-  const handleCantidadSalidaChange = (index, value) => {
-    const numericValue = parseInt(value);
-    if (isNaN(numericValue) || numericValue < 0) return;
+  const handleCantidadSalidaChange = (index, value, productoId) => {
+    const numericValue = value === "" ? "" : parseInt(value);
+
+    if (numericValue === "") {
+      const updatedData = [...data];
+      updatedData[index].cantidadSalida = "";
+      setData(updatedData);
+      actualizarCantidadSalida(index, productoId, "");
+      return;
+    }
+
+    if (numericValue < 0) {
+      toast.error("La cantidad entregada no puede ser negativa.");
+      return;
+    }
+
+    const cantidadSolicitar = data[index].cantidadSolicitar;
+    if (numericValue > cantidadSolicitar) {
+      toast.error(
+        `No puedes pedir más de ${cantidadSolicitar} para este producto.`
+      );
+      return;
+    }
+
+    const cantidadActual = data[index].cantidadActual;
+
+    if (numericValue > cantidadActual) {
+      toast.error(
+        "No hay suficientes productos en inventario para cumplir la entrega."
+      );
+      return;
+    }
 
     const updatedData = [...data];
     updatedData[index].cantidadSalida = numericValue;
     setData(updatedData);
-    actualizarCantidadSalida(numericValue);
+
+    actualizarCantidadSalida(index, productoId, numericValue);
   };
 
   const columns = [
@@ -143,18 +196,23 @@ const TablaPedidosGestion = ({ actualizarCantidadSalida }) => {
           </th>
         ),
         customBodyRender: (value, tableMeta) => {
-          const rowIndex = tableMeta.rowIndex; 
+          const rowIndex = tableMeta.rowIndex;
           const productoId = data[rowIndex].ProductoId;
           return (
-            <div className="text-center">
+            <div className="flex justify-center">
               <input
                 type="number"
-                value={value}
+                value={data[rowIndex].cantidadSalida || ""}
                 onChange={(e) => {
                   const cantidadSalida = parseInt(e.target.value);
-                  actualizarCantidadSalida(rowIndex, productoId, cantidadSalida);
-              }}
-                className="border px-2 py-1 rounded"
+                  handleCantidadSalidaChange(
+                    rowIndex,
+                    cantidadSalida,
+                    productoId
+                  );
+                }}
+                className="border px-2 py-1 rounded text-center"
+                style={{ width: "60px" }}
               />
             </div>
           );
@@ -248,4 +306,5 @@ const TablaPedidosGestion = ({ actualizarCantidadSalida }) => {
     </div>
   );
 };
+
 export default TablaPedidosGestion;

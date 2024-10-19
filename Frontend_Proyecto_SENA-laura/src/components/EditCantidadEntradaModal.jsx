@@ -149,7 +149,10 @@ const EditCantidadEntradaModal = ({ isOpen, onClose, product }) => {
             <button className="btn-danger2 mx-1 text-xs" onClick={onClose}>
               Cancelar
             </button>
-            <button className="btn-primary2 mx-1 text-xs" onClick={handleUpdate}>
+            <button
+              className="btn-primary2 mx-1 text-xs"
+              onClick={handleUpdate}
+            >
               Actualizar
             </button>
           </div>

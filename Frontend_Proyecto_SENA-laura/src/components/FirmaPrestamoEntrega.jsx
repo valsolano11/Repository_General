@@ -3,11 +3,11 @@ import { useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/token";
 
-const FirmasDos = ({ accordionStates, onFirmaChange }) => {
+const FirmaPrestamoEntrega = ({ accordionStates, onFirmaChange }) => {
   const [firmaImagen, setFirmaImagen] = useState(null);
   const [firmaExistente, setFirmaExistente] = useState(null);
   const location = useLocation();
-  const { pedidoId } = location.state || {};
+  const { herramientaId } = location.state || {};
   const [loading, setLoading] = useState(false);
 
   const { user } = useAuth();
@@ -24,9 +24,9 @@ const FirmasDos = ({ accordionStates, onFirmaChange }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (pedidoId) {
+      if (herramientaId) {
         try {
-          const response = await api.get(`/pedido/${pedidoId}`);
+          const response = await api.get(`/prestamos/${herramientaId}`);
           const data = response.data;
 
           if (data.firma) {
@@ -35,14 +35,14 @@ const FirmasDos = ({ accordionStates, onFirmaChange }) => {
             onFirmaChange(false, null);
           }
         } catch (error) {
-          console.error("Error fetching pedido data:", error);
+          console.error("Error fetching prestamo data:", error);
         }
       }
       setLoading(false);
     };
 
     fetchData();
-  }, [pedidoId, onFirmaChange]);
+  }, [herramientaId, onFirmaChange]);
 
   const canUpload =
     user?.Rol?.RolId === 3 || user?.Rol?.rolName === "COORDINADOR";
@@ -54,7 +54,7 @@ const FirmasDos = ({ accordionStates, onFirmaChange }) => {
           <div className="flex flex-col">
             <div>
               <label className="mb-2 font-bold text-xs">
-                Firma de quien aprueba el pedido:*
+                Firma de quien aprueba el préstamo:*
               </label>
             </div>
             {firmaExistente ? (
@@ -98,4 +98,4 @@ const FirmasDos = ({ accordionStates, onFirmaChange }) => {
   );
 };
 
-export default FirmasDos;
+export default FirmaPrestamoEntrega;

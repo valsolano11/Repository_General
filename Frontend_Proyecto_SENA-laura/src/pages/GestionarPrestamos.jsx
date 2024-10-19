@@ -1,30 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { api } from "../api/token";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import * as XLSX from "xlsx";
+import { api } from "../api/token";
 import "react-toastify/dist/ReactToastify.css";
 import fondo from "/logoSena.png";
 import siga from "/Siga.png";
+import * as XLSX from "xlsx";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import FirmaPrestamosEntrega from "../components/FirmaPrestamoEntrega";
-import TablaPrestamosFirma from "../components/TablaPrestamosFirma";
 import SidebarCoord from "../components/SidebarCoord";
 import Home from "../components/Home";
+import TablaPrestamosGestion from "../components/TablaPrestamosGestion";
+import FirmaPrestamosEntrega from "../components/FirmaPrestamoEntrega";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
-const FirmaPrestamos = () => {
+const GestionarPrestamos = () => {
   const [sidebarToggleCoord, setsidebarToggleCoord] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { herramientaId } = location.state || {};
-  const [prestamoData, setPrestamoData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [firmaImagen, setFirmaImagen] = useState(null);
+  const [prestamoData, setprestamoData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [productosSalida, setProductosSalida] = useState([]);
   const [dummyState, setDummyState] = useState(false);
   const [formData, setFormData] = useState({
-    firmaPrestamos: "",
+    fechaPrestamos: "",
     servidorAsignado: "",
     codigoFicha: "",
     area: "",
@@ -64,7 +64,7 @@ const FirmaPrestamos = () => {
           const response = await api.get(`/prestamos/${herramientaId}`);
           const data = response.data;
 
-          const prestamosFormatted = {
+          const pedidoFormatted = {
             id: data.id,
             createdAt: data.createdAt,
             firmaPrestamos: data.firmaPrestamos,
@@ -78,7 +78,7 @@ const FirmaPrestamos = () => {
             Estado: data.Estado,
             Herramienta: data.Herramienta,
           };
-          setPrestamoData(prestamosFormatted);
+          setprestamoData(pedidoFormatted);
           setFormData({
             fecha: formatDateForInput(data.createdAt),
             codigoFicha: data.codigoFicha,
@@ -91,7 +91,7 @@ const FirmaPrestamos = () => {
             Herramienta: data.Herramienta,
           });
         } catch (error) {
-          console.error("Error fetching prétamo data:", error);
+          console.error("Error fetching préstamo data:", error);
         }
       }
       setLoading(false);
@@ -114,45 +114,39 @@ const FirmaPrestamos = () => {
     )}-${String(date.getDate()).padStart(2, "0")}`;
   };
 
-  const handleSubmit = async () => {
-    if (!firmaAdjunta) {
-      toast.error("Debe adjuntar una firma antes de enviar el préstamo.", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      return;
+  const handlefechaEntregaChange = (index, herramientaId, fechaEntrega) => {
+    const updatedProductos = [...productosSalida];
+
+    const productoIndex = updatedProductos.findIndex(
+      (producto) => producto.herramientaId === herramientaId
+    );
+
+    if (productoIndex >= 0) {
+      if (fechaEntrega > 0) {
+        updatedProductos[productoIndex].fechaEntrega = fechaEntrega;
+      } else {
+        updatedProductos.splice(productoIndex, 1);
+      }
+    } else {
+      if (fechaEntrega > 0) {
+        updatedProductos.push({ herramientaId: herramientaId, fechaEntrega });
+      }
     }
+    setProductosSalida(updatedProductos);
+  };
 
+  const handleGestionarPrestamo = async () => {
     try {
-      const formData = new FormData();
-      formData.append("firma", firmaImagen);
-
-      setLoading(true);
-
-      const response = await api.put(`/prestamos/${herramientaId}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      const response = await api.put(`/prestamos/${herramientaId}/entrega`, {
+        productos: productosSalida,
       });
 
       if (response.status === 200) {
-        toast.success("Préstamo enviado correctamente.", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        navigate("/autPrestamos");
+        toast.success("Prestamo gestionado correctamente.");
+        fetchherramientasDelPedido();
+        navigate("/prestamos");
       } else {
-        toast.error("Error al enviar el préstamo.", {
+        toast.error("Error al gestionar el Prestamo.", {
           position: "top-right",
           autoClose: 2000,
           hideProgressBar: false,
@@ -163,8 +157,8 @@ const FirmaPrestamos = () => {
         });
       }
     } catch (error) {
-      console.error("Error al enviar el préstamo:", error);
-      toast.error("Error al enviar el préstamo.", {
+      console.error("Error al gestionar el Prestamo:", error);
+      toast.error("Error al gestionar el Prestamo.", {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -173,13 +167,11 @@ const FirmaPrestamos = () => {
         draggable: true,
         progress: undefined,
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   const Navigate = () => {
-    navigate("/autPrestamos");
+    navigate("/prestamos");
   };
 
   const handleExportPDF = (prestamoData) => {
@@ -241,6 +233,7 @@ const FirmaPrestamos = () => {
       console.error("Los datos del préstamo no están disponibles");
     }
   };
+
 
   const handleExportExcel = (prestamoData) => {
     if (!prestamoData || !prestamoData.codigoFicha) {
@@ -304,10 +297,10 @@ const FirmaPrestamos = () => {
   };  
 
   return (
-    <div className="flex min-h-screen bg-grisClaro">
+    <div className="flex min-h-screen">
       <SidebarCoord sidebarToggleCoord={sidebarToggleCoord} />
       <div
-        className={`flex flex-col flex-grow p-4 bg-grisClaro ${
+        className={`flex flex-col flex-grow p-4  ${
           sidebarToggleCoord ? "ml-64" : ""
         } mt-16`}
       >
@@ -315,8 +308,8 @@ const FirmaPrestamos = () => {
           sidebarToggle={sidebarToggleCoord}
           setSidebarToggle={setsidebarToggleCoord}
         />
-        <div className="flex flex-col justify-center md:flex-row h-screen bg-grisClaro">
-          <div className="hidden md:flex items-star justify-center md:w-3/4 bg-grisClaro mx-4">
+        <div className="flex flex-col justify-center md:flex-row h-screen">
+          <div className="hidden md:flex items-star justify-center md:w-3/4 mx-4">
             <div className="w-full mt-10">
               <div className={"px-4 py-3 w-full"}>
                 <div className="flex items-center justify-between text-sm w-auto">
@@ -369,7 +362,7 @@ const FirmaPrestamos = () => {
                               Código Regional
                             </label>
                             <input
-                              className="bg-grisClaro border-b border-black text-xs text-black w-6 px-2 h-8"
+                              className="border-b border-black text-xs text-black w-6 px-2 h-8"
                               type="text"
                               name="name"
                               value="5"
@@ -382,7 +375,7 @@ const FirmaPrestamos = () => {
                               Nombre Regional
                             </label>
                             <input
-                              className="bg-grisClaro border-b border-black text-xs text-center text-black w-20 px-2 h-8"
+                              className="border-b border-black text-xs text-center text-black w-20 px-2 h-8"
                               type="text"
                               name="name"
                               value="Antioquia"
@@ -394,7 +387,7 @@ const FirmaPrestamos = () => {
                               Código Centro de Costos
                             </label>
                             <input
-                              className="bg-grisClaro border-b border-black text-xs text-center text-black w-20 px-2 h-8"
+                              className="border-b border-black text-xs text-center text-black w-20 px-2 h-8"
                               type="text"
                               name="name"
                               value="920510"
@@ -409,10 +402,22 @@ const FirmaPrestamos = () => {
                               Nombre Centro de Costos
                             </label>
                             <input
-                              className="bg-grisClaro border-b border-black text-xs text-center text-black w-80 px-2 h-8"
+                              className="border-b border-black text-xs text-center text-black w-80 px-2 h-8"
                               type="text"
                               name="name"
                               value="Centro Tecnólogico del Mobiliario"
+                              readOnly
+                            />
+                          </div>
+                          <div className="flex flex-row min-w-[200px] w-full md:w-1/3">
+                            <label className="mb-1 font-bold text-xs mt-2">
+                              Fecha de Solicitud*
+                            </label>
+                            <input
+                              className="border-b border-black text-xs px-2 h-8"
+                              type="date"
+                              name="fecha"
+                              value={formData.fecha || ""}
                               readOnly
                             />
                           </div>
@@ -537,25 +542,27 @@ const FirmaPrestamos = () => {
                           </div>
                         </div>
                       </div>
+                      <div></div>
                     </div>
                   )}
                 </div>
 
-                {/* PRESTAMOS */}
+                {/* PRÉSTAMOS*/}
                 <div className="flex flex-col rounded-lg w-full bg-white px-8 mx-auto border-2 border-black mb-4">
                   <button
-                    onClick={() => toggleAccordion("productos")}
+                    onClick={() => toggleAccordion("herramientas")}
                     className="font-bold text-lg py-2 flex justify-between items-center w-full"
                   >
-                    <span>Préstamos</span>
+                    <span>Préstamo</span>
                     <ExpandMoreIcon className="mr-2" />
                   </button>
 
-                  {accordionStates.productos && (
+                  {accordionStates.herramientas && (
                     <div className="flex flex-col rounded-lg w-full">
                       <div className="flex flex-row justify-center w-full mb-4">
-                        <TablaPrestamosFirma
+                        <TablaPrestamosGestion
                           herramientaId={herramientaId}
+                          actualizarFechaEntrega={handlefechaEntregaChange}
                           accordionStates={accordionStates}
                           toggleAccordion={toggleAccordion}
                         />
@@ -581,26 +588,26 @@ const FirmaPrestamos = () => {
                           herramientaId={herramientaId}
                           accordionStates={accordionStates}
                           toggleAccordion={toggleAccordion}
-                          onFirmaChange={handleFirmaChange}
                         />
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Botón Enviar */}
+                {/* Botones */}
                 <div className="flex justify-center items-center w-2/4 mt-10 mx-auto">
-                <div>
-                  <button className="btn-danger2 mx-4" onClick={Navigate}>
-                    Atrás
-                  </button>
-                  <button
+                  <div>
+                    <button className="btn-danger2 mx-4" onClick={Navigate}>
+                      Atrás
+                    </button>
+                    <button
                       className="btn-primary2 mr-2"
                       onClick={handleExportClickPDF}
                     >
                       PDF
                     </button>
                   </div>
+
                   <div>
                     <button
                       className="btn-primary2 mr-2"
@@ -612,10 +619,10 @@ const FirmaPrestamos = () => {
                   </div>
                   {prestamoData &&
                     prestamoData.EstadoId !== 7 &&
-                    prestamoData.EstadoId !== 6 && (
+                    prestamoData.EstadoId !== 5 && (
                       <button
                         className="btn-black2"
-                        onClick={handleSubmit}
+                        onClick={handleGestionarPrestamo}
                       >
                         Gestionar Préstamo
                       </button>
@@ -624,11 +631,11 @@ const FirmaPrestamos = () => {
               </div>
             </div>
           </div>
-          <ToastContainer />
         </div>
+        <ToastContainer />
       </div>
     </div>
   );
 };
 
-export default FirmaPrestamos;
+export default GestionarPrestamos;

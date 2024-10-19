@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
+import { api } from "../api/token";
 import { saveAs } from "file-saver";
 import { toast } from "react-toastify";
-import { api } from "../api/token";
 import { useAuth } from "../context/AuthContext";
+import Sidebar from "../components/Sidebar";
+import Home from "../components/Home";
 import MUIDataTable from "mui-datatables";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
+import EditProductModal from "../components/EditProductModal";
+import AddProductModal2 from "../components/AddProductModal2";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
-import Sidebar from "../components/Sidebar";
-import Home from "../components/Home";
-import EditProductModal from "../components/EditProductModal";
-import AddProductModal from "../components/AddProductModal";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import "react-toastify/dist/ReactToastify.css";
 
 const ConsumoControladoGeneral = () => {
@@ -27,13 +29,23 @@ const ConsumoControladoGeneral = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/productos/categoria/:2", {
+      const subcategoriaResponse = await api.get("/subcategoria", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-
-      const productoconUnidadSub = response.data.map((produc) => ({
+      const subcategoriasCategoria4 = subcategoriaResponse.data
+        .filter((subcategoria) => subcategoria.CategoriaId === 4)
+        .map((subcategoria) => subcategoria.id);
+      const productoResponse = await api.get("/producto", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const productosFiltrados = productoResponse.data.filter(
+        (producto) => subcategoriasCategoria4.includes(producto.SubcategoriaId)
+      );
+      const productoconUnidadSub = productosFiltrados.map((produc) => ({
         ...produc,
         productoNombre: produc.nombre,
         nombreUser: produc.Usuario ? produc.Usuario.nombre : "Desconocido",
@@ -41,16 +53,16 @@ const ConsumoControladoGeneral = () => {
         subcategoriaName: produc.Subcategorium
           ? produc.Subcategorium.subcategoriaName
           : "Desconocido",
-        unidadNombre: produc.UnidadMedida
-          ? produc.UnidadMedida.sigla
+        unidadNombre: produc.UnidadDeMedida
+          ? produc.UnidadDeMedida.nombre
           : "Desconocido",
       }));
-
       productoconUnidadSub.sort((a, b) => a.id - b.id);
       setData(productoconUnidadSub);
+  
     } catch (error) {
-      console.error("Error fetching subcategoria data:", error);
-      toast.error("Error al cargar los datos de la  subcategoria", {
+      console.error("Error fetching data:", error);
+      toast.error("Error al cargar los datos", {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -98,10 +110,11 @@ const ConsumoControladoGeneral = () => {
       label: "ID",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
-              {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -112,10 +125,11 @@ const ConsumoControladoGeneral = () => {
       label: "Nombre del Producto",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
-              {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -126,10 +140,11 @@ const ConsumoControladoGeneral = () => {
       label: "Codigo",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
-              {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -140,10 +155,11 @@ const ConsumoControladoGeneral = () => {
       label: "Descripcion",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
-              {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -154,10 +170,11 @@ const ConsumoControladoGeneral = () => {
       label: "Cantidad Entrada",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
-              {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -168,10 +185,11 @@ const ConsumoControladoGeneral = () => {
       label: "Cantidad Salida",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
-              {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -183,24 +201,26 @@ const ConsumoControladoGeneral = () => {
       label: "Cantidad Actual",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
-              {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
       },
     },
     {
-      name: "volumenTotal",
+      name: "VolumenTotal",
       label: "volumen Total",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
-              {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -211,10 +231,11 @@ const ConsumoControladoGeneral = () => {
       label: "Marca",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
-              {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -225,10 +246,11 @@ const ConsumoControladoGeneral = () => {
       label: "Unidad de Medida",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
-              {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -239,10 +261,11 @@ const ConsumoControladoGeneral = () => {
       label: "Subcategoria",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
-              {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -253,10 +276,11 @@ const ConsumoControladoGeneral = () => {
       label: "Usuario",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
-              {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => <div className="text-center">{value}</div>,
@@ -267,10 +291,11 @@ const ConsumoControladoGeneral = () => {
       label: "ESTADO",
       options: {
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
-              {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value) => (
@@ -297,10 +322,11 @@ const ConsumoControladoGeneral = () => {
       options: {
         filter: false,
         customHeadRender: (columnMeta) => (
-          <th 
+          <th
             key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold">
-              {columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
+            {columnMeta.label}
           </th>
         ),
         customBodyRender: (value, tableMeta, updateValue) => (
@@ -348,7 +374,59 @@ const ConsumoControladoGeneral = () => {
     return user.DetallePermisos.some(
       (permiso) => permiso.Permiso.nombrePermiso === permissionName
     );
-  };  
+  };
+
+  const handleExportPDF = () => {
+    const doc = new jsPDF("landscape");
+    const tableColumn = [
+      "ID",
+      "Nombre del Producto",
+      "Codigo",
+      "Descripcion",
+      "Cantidad Entrada",
+      "Cantidad Salida",
+      "Cantidad Actual",
+      "Volumen Total",
+      "Marca",
+      "Unidad de Medida",
+      "Subcategoria",
+      "Usuario",
+      "ESTADO",
+    ];
+    const tableRows = [];
+
+    data.forEach((producto) => {
+      const productoData = [
+        producto.id || "",
+        producto.productoNombre || "",
+        producto.codigo || "",
+        producto.descripcion || "",
+        producto.cantidadEntrada || "",
+        producto.cantidadSalida || "",
+        producto.cantidadActual || "",
+        producto.VolumenTotal || "",
+        producto.marca || "",
+        producto.unidadNombre || "",
+        producto.subcategoriaName || "",
+        producto.nombreUser || "",
+        producto.estadoName || "",
+      ];
+      tableRows.push(productoData);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      theme: "striped",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [0, 57, 107] },
+      margin: { top: 10 },
+    });
+
+    doc.text("Listado de Productos", 14, 15);
+    doc.save("Productos.pdf");
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -362,14 +440,23 @@ const ConsumoControladoGeneral = () => {
           sidebarToggle={sidebarToggle}
           setSidebarToggle={setSidebarToggle}
         />
-        <div className="flex justify-end mt-2">
-        {hasPermission("Crear Producto") && (
-          <button className="btn-primary" onClick={handleOpenAddModal}>
-            Agregar Producto
+
+        {/* Contenedor para los botones */}
+        <div className="flex justify-end mt-6 fixed top-16 right-6 z-10">
+          <button className="btn-black mr-2" onClick={handleExportPDF}>
+            Exportar PDF
           </button>
-        )}
+          {hasPermission("Crear Producto") && (
+            <button className="btn-primary" onClick={handleOpenAddModal}>
+              Agregar Producto
+            </button>
+          )}
         </div>
-        <div className="flex-grow flex items-center justify-center">
+
+        {/* Contenedor de la tabla */}
+        <div className="flex-grow flex items-center justify-center mt-16">
+          {" "}
+          {/* Añadir mt-16 para espacio */}
           <div className="w-full max-w-9xl mx-auto">
             {loading ? (
               <div className="text-center">Cargando productos...</div>
@@ -447,8 +534,9 @@ const ConsumoControladoGeneral = () => {
           product={selectedProduct}
         />
       )}
-      <AddProductModal isOpen={isOpenAddModal} onClose={handleCloseAddModal} />
+      <AddProductModal2 isOpen={isOpenAddModal} onClose={handleCloseAddModal} />
     </div>
   );
 };
+
 export default ConsumoControladoGeneral;

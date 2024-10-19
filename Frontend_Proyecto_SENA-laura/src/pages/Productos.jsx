@@ -12,6 +12,8 @@ import EditProductModal from "../components/EditProductModal";
 import AddProductModal from "../components/AddProductModal";
 import clsx from "clsx";
 import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import "react-toastify/dist/ReactToastify.css";
 
 const Productos = () => {
@@ -27,13 +29,23 @@ const Productos = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/producto", {
+      const subcategoriaResponse = await api.get("/subcategoria", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-
-      const productoconUnidadSub = response.data.map((produc) => ({
+      const subcategoriasCategoria1 = subcategoriaResponse.data
+        .filter((subcategoria) => subcategoria.CategoriaId === 1)
+        .map((subcategoria) => subcategoria.id);
+      const productoResponse = await api.get("/producto", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const productosFiltrados = productoResponse.data.filter(
+        (producto) => subcategoriasCategoria1.includes(producto.SubcategoriaId)
+      );
+      const productoconUnidadSub = productosFiltrados.map((produc) => ({
         ...produc,
         productoNombre: produc.nombre,
         nombreUser: produc.Usuario ? produc.Usuario.nombre : "Desconocido",
@@ -41,16 +53,15 @@ const Productos = () => {
         subcategoriaName: produc.Subcategorium
           ? produc.Subcategorium.subcategoriaName
           : "Desconocido",
-        unidadNombre: produc.UnidadMedida
-          ? produc.UnidadMedida.sigla
+        unidadNombre: produc.UnidadDeMedida
+          ? produc.UnidadDeMedida.nombre
           : "Desconocido",
       }));
-
       productoconUnidadSub.sort((a, b) => a.id - b.id);
       setData(productoconUnidadSub);
     } catch (error) {
-      console.error("Error fetching subcategoria data:", error);
-      toast.error("Error al cargar los datos de la  subcategoria", {
+      console.error("Error fetching data:", error);
+      toast.error("Error al cargar los datos", {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -62,7 +73,7 @@ const Productos = () => {
     }
     setLoading(false);
   };
-
+  
   useEffect(() => {
     fetchData();
   }, []);
@@ -113,7 +124,10 @@ const Productos = () => {
       label: "Nombre del Producto",
       options: {
         customHeadRender: (columnMeta) => (
-          <th className="text-center bg-white text-black uppercase text-xs font-bold">
+          <th
+            key={columnMeta.label}
+            className="text-center bg-white text-black uppercase text-xs font-bold"
+          >
             {columnMeta.label}
           </th>
         ),
@@ -361,6 +375,58 @@ const Productos = () => {
     );
   };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF("landscape");
+    const tableColumn = [
+      "ID",
+      "Nombre del Producto",
+      "Codigo",
+      "Descripcion",
+      "Cantidad Entrada",
+      "Cantidad Salida",
+      "Cantidad Actual",
+      "Volumen Total",
+      "Marca",
+      "Unidad de Medida",
+      "Subcategoria",
+      "Usuario",
+      "ESTADO",
+    ];
+    const tableRows = [];
+
+    data.forEach((producto) => {
+      const productoData = [
+        producto.id || "",
+        producto.productoNombre || "",
+        producto.codigo || "",
+        producto.descripcion || "",
+        producto.cantidadEntrada || "",
+        producto.cantidadSalida || "",
+        producto.cantidadActual || "",
+        producto.VolumenTotal || "",
+        producto.marca || "",
+        producto.unidadNombre || "",
+        producto.subcategoriaName || "",
+        producto.nombreUser || "",
+        producto.estadoName || "",
+      ];
+      tableRows.push(productoData);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      theme: "striped",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [0, 57, 107] },
+      margin: { top: 10 },
+    });
+
+    doc.text("Listado de Productos", 14, 15);
+    doc.save("Productos.pdf");
+  };
+
   return (
     <div className="flex min-h-screen">
       <Sidebar sidebarToggle={sidebarToggle} />
@@ -373,14 +439,23 @@ const Productos = () => {
           sidebarToggle={sidebarToggle}
           setSidebarToggle={setSidebarToggle}
         />
-        <div className="flex justify-end mt-2">
+
+        {/* Contenedor para los botones */}
+        <div className="flex justify-end mt-6 fixed top-16 right-6 z-10">
+          <button className="btn-black mr-2" onClick={handleExportPDF}>
+            Exportar PDF
+          </button>
           {hasPermission("Crear Producto") && (
             <button className="btn-primary" onClick={handleOpenAddModal}>
               Agregar Producto
             </button>
           )}
         </div>
-        <div className="flex-grow flex items-center justify-center">
+
+        {/* Contenedor de la tabla */}
+        <div className="flex-grow flex items-center justify-center mt-16">
+          {" "}
+          {/* Añadir mt-16 para espacio */}
           <div className="w-full max-w-9xl mx-auto">
             {loading ? (
               <div className="text-center">Cargando productos...</div>

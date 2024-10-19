@@ -1,30 +1,33 @@
 import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import fondo from "/logoSena.png";
 import siga from "/Siga.png";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { FaGripLinesVertical } from "react-icons/fa6";
-import Firmas from "../components/Firmas";
 import TablaHerramientas from "../components/TablaHerramientas";
+import { api } from "../api/token";
 
 const FormatoHerram = () => {
   const [formErrors, setFormErrors] = useState({});
   const [formData, setFormData] = useState({
-    nombre: "",
-    Documento: "",
-    fecha: "",
-    ficha: "",
+    codigoFicha: "",
     area: "",
-    coordi: "",
-    cedCoordi: "",
-    instructor: "",
-    cedInstructor: "",
+    jefeOficina: "",
+    cedulaJefeOficina: "",
+    servidorAsignado: "",
+    cedulaServidor: "",
     correo: "",
-    item: "",
-    codigoSena: "",
+    herramientas: [
+      {
+        HerramientumId: "",
+        codigo: "",
+        observaciones: "",
+      },
+    ],
   });
+
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -38,7 +41,6 @@ const FormatoHerram = () => {
   const [accordionStates, setAccordionStates] = useState({
     datos: false,
     herramientas: false,
-    firmas: false,
   });
 
   const toggleAccordion = (section) => {
@@ -48,12 +50,23 @@ const FormatoHerram = () => {
     }));
   };
 
+  const showToastError = (message) => {
+    toast.error(message, {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+  };
+
   const validateInput = (name, value) => {
     let errorMessage = "";
-    if (name === "area" || name === "coordi" || name === "instructor") {
-      const nameRegex = /^[A-Za-z\s-_\u00C0-\u017F]+$/;
+    if (["area", "jefeOficina", "servidorAsignado"].includes(name)) {
+      const nameRegex = /^[A-Za-z\s]+$/;
       if (!nameRegex.test(value) || /\d/.test(value)) {
-        errorMessage = "No puede contener caracteres especiales.";
+        errorMessage = "No puede contener números o caracteres especiales.";
       }
     }
     return errorMessage;
@@ -66,86 +79,74 @@ const FormatoHerram = () => {
       ...prevErrors,
       [name]: errorMessage,
     }));
-
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
 
-  const showToastError = (message) => {
-    toast.error(message, {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+  const handleHerramientaChange = (updatedHerramienta) => {
+    setFormData({ ...formData, herramientas: updatedHerramienta });
   };
 
-  const handleCreate = (currentSection) => {
+  const handleCreate = async () => {
     const {
-      nombre,
-      Documento,
-      ficha,
-      fecha,
+      codigoFicha,
       area,
-      coordi,
-      cedCoordi,
-      instructor,
-      cedInstructor,
+      jefeOficina,
+      cedulaJefeOficina,
+      servidorAsignado,
+      cedulaServidor,
       correo,
+      herramientas,
     } = formData;
-    const areaError = validateInput("area", area);
-    const coordiError = validateInput("coordi", coordi);
-    const instructorError = validateInput("instructor", instructor);
-
-    if (areaError || coordiError || instructorError) {
-      setFormErrors({
-        area: areaError,
-        coordi: coordiError,
-        instructor: instructorError,
-      });
-      showToastError("Por favor, corrige los errores antes de agregar.");
-      return;
-    }
 
     if (
-      !nombre ||
-      !Documento ||
-      !fecha ||
-      !ficha ||
+      !codigoFicha ||
       !area ||
-      !coordi ||
-      !cedCoordi ||
-      !instructor ||
-      !cedInstructor ||
-      !correo
+      !jefeOficina ||
+      !cedulaJefeOficina ||
+      !servidorAsignado ||
+      !cedulaServidor ||
+      !correo ||
+      !herramientas.some((p) => p.HerramientumId && p.codigo)
     ) {
-      showToastError("Todos los campos son obligatorios, incluyendo la fecha.");
+      showToastError("Todos los campos son obligatorios.");
       return;
     }
 
-    if (currentSection === "datos") {
-      setAccordionStates({
-        datos: false,
-        herramientas: true,
-        firmas: false,
+    try {
+      const response = await api.post("/prestamos", formData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-    } else if (currentSection === "herramientas") {
-      setAccordionStates({
-        datos: false,
-        herramientas: false,
-        firmas: true,
-      });
-    } else if (currentSection === "firmas") {
-      setAccordionStates({
-        datos: false,
-        herramientas: false,
-        firmas: false,
-      });
+
+      if (response.status === 201) {
+        toast.success("Prestamo creado con éxito.");
+        setFormData({
+          codigoFicha: "",
+          area: "",
+          jefeOficina: "",
+          cedulaJefeOficina: "",
+          servidorAsignado: "",
+          cedulaServidor: "",
+          correo: "",
+          herramientas: [
+            {
+              HerramientumId: "",
+              codigo: "",
+              observaciones: "",
+            },
+          ],
+        });
+      } else {
+        const errorData = await response.json();
+        showToastError(errorData.message || "Error al crear el pedido.");
+      }
+    } catch (error) {
+      console.error("Error en la comunicación con el servidor:", error);
+      showToastError("Error en la comunicación con el servidor.");
     }
   };
 
@@ -250,18 +251,6 @@ const FormatoHerram = () => {
                           readOnly
                         />
                       </div>
-                      <div className="flex flex-row min-w-[200px] w-full md:w-1/3">
-                        <label className="mb-1 font-bold text-xs mt-2">
-                          Fecha de Solicitud*
-                        </label>
-                        <input
-                          className="bg-grisClaro border-b border-black text-xs px-2 h-8"
-                          type="date"
-                          name="fecha"
-                          value={formData.fecha}
-                          onChange={handleInputChange}
-                        />
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -288,8 +277,8 @@ const FormatoHerram = () => {
                       <input
                         className=" border-b border-black text-xs text-center h-8 w-20"
                         type="text"
-                        name="ficha"
-                        value={formData.ficha}
+                        name="codigoFicha"
+                        value={formData.codigoFicha}
                         onChange={handleInputChange}
                         onKeyPress={(e) => {
                           if (!/[0-9]/.test(e.key)) {
@@ -334,13 +323,13 @@ const FormatoHerram = () => {
                         <input
                           className=" border-b border-black text-xs text-center px-2 h-8"
                           type="text"
-                          name="coordi"
-                          value={formData.coordi}
+                          name="jefeOficina"
+                          value={formData.jefeOficina}
                           onChange={handleInputChange}
                         />
-                        {formErrors.coordi && (
+                        {formErrors.jefeOficina && (
                           <div className="text-red-400 text-xs mt-1 px-2">
-                            {formErrors.coordi}
+                            {formErrors.jefeOficina}
                           </div>
                         )}
                       </div>
@@ -352,8 +341,8 @@ const FormatoHerram = () => {
                     <input
                       className=" border-b border-black text-xs text-center h-8 w-20"
                       type="text"
-                      name="cedCoordi"
-                      value={formData.cedCoordi}
+                      name="cedulaJefeOficina"
+                      value={formData.cedulaJefeOficina}
                       onChange={handleInputChange}
                       onKeyPress={(e) => {
                         if (!/[0-9]/.test(e.key)) {
@@ -362,9 +351,9 @@ const FormatoHerram = () => {
                       }}
                       maxLength={10}
                     />
-                    {formErrors.Documento && (
+                    {formErrors.cedulaJefeOficina && (
                       <div className="text-red-400 text-xs mt-1 px-2">
-                        {formErrors.Documento}
+                        {formErrors.cedulaJefeOficina}
                       </div>
                     )}
                   </div>
@@ -379,13 +368,13 @@ const FormatoHerram = () => {
                         <input
                           className=" border-b border-black text-xs text-center px-2 h-8"
                           type="text"
-                          name="instructor"
-                          value={formData.instructor}
+                          name="servidorAsignado"
+                          value={formData.servidorAsignado}
                           onChange={handleInputChange}
                         />
-                        {formErrors.instructor && (
+                        {formErrors.servidorAsignado && (
                           <div className="text-red-400 text-xs mt-1 px-2">
-                            {formErrors.instructor}
+                            {formErrors.servidorAsignado}
                           </div>
                         )}
                       </div>
@@ -398,8 +387,8 @@ const FormatoHerram = () => {
                       <input
                         className=" border-b border-black text-xs text-center h-8 w-20"
                         type="text"
-                        name="cedInstructor"
-                        value={formData.cedInstructor}
+                        name="cedulaServidor"
+                        value={formData.cedulaServidor}
                         onChange={handleInputChange}
                         onKeyPress={(e) => {
                           if (!/[0-9]/.test(e.key)) {
@@ -408,9 +397,9 @@ const FormatoHerram = () => {
                         }}
                         maxLength={10}
                       />
-                      {formErrors.Documento && (
+                      {formErrors.cedulaServidor && (
                         <div className="text-red-400 text-xs mt-1 px-2">
-                          {formErrors.Documento}
+                          {formErrors.cedulaServidor}
                         </div>
                       )}
                     </div>
@@ -432,15 +421,6 @@ const FormatoHerram = () => {
                       </div>
                     </div>
                   </div>
-
-                  <div className="flex justify-end mt-2">
-                    <button
-                      className="btn-black2 mb-4"
-                      onClick={() => handleCreate("datos")}
-                    >
-                      Guardar y continuar
-                    </button>
-                  </div>
                 </div>
               )}
             </div>
@@ -460,7 +440,8 @@ const FormatoHerram = () => {
                   <div className="flex flex-row justify-between w-full mb-4">
                     <TablaHerramientas
                       accordionStates={accordionStates}
-                      toggleAccordion={toggleAccordion}
+                      handleHerramientaChange={handleHerramientaChange}
+                      herramientas={formData.herramientas}
                     />
                   </div>
                 </div>
@@ -468,7 +449,12 @@ const FormatoHerram = () => {
             </div>
 
             <div className="flex justify-center items-center w-2/4 mt-10 mx-auto">
-              <button className="btn-black2">Enviar solicitud</button>
+              <button
+                className="btn-black2 mb-4"
+                onClick={() => handleCreate("herramientas")}
+              >
+                Enviar Solicitud
+              </button>
               <FaGripLinesVertical className="h-24 mx-4" />
               <div onClick={handleClick} style={{ cursor: "pointer" }}>
                 <h6 className="font-semibold">FORMATO DE PRODUCTOS</h6>

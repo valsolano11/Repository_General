@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { api } from "../api/token"; 
+import { api } from "../api/token";
 import { FaTimes } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const AddProductModal = ({ isOpen, onClose, product }) => {
-
   const [subcategorias, setSubcategorias] = useState([]);
   const [estados, setEstados] = useState([]);
-  const [usuarios, setUsuarios] = useState([]);
   const [unidades, setUnidad] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     nombre: "",
     codigo: "",
@@ -30,7 +27,6 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
     }
   }, [isOpen]);
 
-
   useEffect(() => {
     if (product) {
       setFormData({
@@ -42,24 +38,29 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
         UnidadMedidaId: product.UnidadMedidaId || "",
         SubcategoriaId: product.SubcategoriaId || "",
         EstadoId: product.EstadoId || "",
-
       });
     }
   }, [product]);
+
   useEffect(() => {
     const fetchsubcategorias = async () => {
       try {
         const response = await api.get("/subcategoria/estado");
-        setSubcategorias(response.data);
+        const filteredSubcategorias = response.data.filter(
+          (Categoria) => Categoria.CategoriaId === 1
+        );
+        setSubcategorias(filteredSubcategorias);
       } catch (error) {
-        showToastError("Error al cargar subcategorías");
       }
     };
 
     const fetchEstados = async () => {
       try {
-        const response = await api.get("/Estado/tipo/producto");
-        setEstados(response.data);
+        const response = await api.get("/Estado");
+        const filteredEstados = response.data.filter(
+          (estado) => estado.id === 1 || estado.id === 2
+        );
+        setEstados(filteredEstados);
       } catch (error) {
         showToastError("Error al cargar los estados");
       }
@@ -79,7 +80,6 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
     fetchUnidad();
   }, []);
 
-
   const validateInput = (name, value) => {
     let errorMessage = "";
     if (name === "nombre") {
@@ -94,7 +94,9 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const processedValue =
-      name === "UnidadMedidaId" || name === "EstadoId" || name === "SubcategoriaId"
+      name === "UnidadMedidaId" ||
+      name === "EstadoId" ||
+      name === "SubcategoriaId"
         ? Number(value)
         : value;
 
@@ -109,7 +111,6 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
       [name]: processedValue,
     }));
   };
-
 
   const showToastError = (message) => {
     toast.error(message, {
@@ -138,11 +139,23 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
   };
 
   const handleCreate = async () => {
-    const {nombre, codigo, descripcion, cantidadEntrada, marca, UnidadMedidaId, SubcategoriaId, EstadoId,} = formData;
+    const {
+      nombre,
+      codigo,
+      descripcion,
+      cantidadEntrada,
+      marca,
+      UnidadMedidaId,
+      SubcategoriaId,
+      EstadoId,
+    } = formData;
     const codigoError = validateInput("codigo", codigo);
     const nombreError = validateInput("nombre", nombre);
     const descripcionError = validateInput("fechaDeIngreso", descripcion);
-    const cantidadEntradaError = validateInput("fechaDeIngreso", cantidadEntrada);
+    const cantidadEntradaError = validateInput(
+      "fechaDeIngreso",
+      cantidadEntrada
+    );
     const marcaError = validateInput("marca", marca);
     if (nombreError) {
       setFormErrors((prevErrors) => ({
@@ -150,20 +163,30 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
         nombre: nombreError,
         codigo: codigoError,
         descripcion: descripcionError,
-        cantidadEntrada:cantidadEntradaError,
+        cantidadEntrada: cantidadEntradaError,
         marca: marcaError,
       }));
       showToastError("Por favor, corrige los errores antes de agregar.");
       return;
     }
-    if (!nombre  || !codigo || !descripcion || !cantidadEntrada || !marca ||!UnidadMedidaId || !SubcategoriaId || !EstadoId) {
+    if (
+      !nombre ||
+      !codigo ||
+      !descripcion ||
+      !cantidadEntrada ||
+      !marca ||
+      !UnidadMedidaId ||
+      !SubcategoriaId ||
+      !EstadoId
+    ) {
       showToastError("Todos los campos son obligatorios.");
       return;
     }
     setLoading(true);
     try {
       const token = document.cookie.replace(
-        /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,"$1"
+        /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+        "$1"
       );
       const response = await api.post("/producto", formData, {
         headers: {
@@ -181,7 +204,9 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
           progress: undefined,
         });
         resetForm();
-        setTimeout(() => {}, 2000);
+        setTimeout(() => {
+          onClose(response.data);
+        }, 2000);
       } else {
         showToastError(
           "Ocurrió un error!, por favor intenta con un documento o correo diferente."
@@ -223,7 +248,10 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
                     type="text"
                     name="nombre"
                     value={formData.nombre}
-                    onChange={handleInputChange}
+                    onChange={(e) => {
+                      const valorEnMayusculas = e.target.value.toUpperCase();
+                      handleInputChange({ target: { name: "nombre", value: valorEnMayusculas } });
+                    }}
                     onKeyPress={(e) => {
                       if (/\d/.test(e.key)) {
                         e.preventDefault();
@@ -269,9 +297,10 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
                   )}
                 </div>
 
-
                 <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Descripcion *</label>
+                  <label className="mb-1 font-bold text-sm">
+                    Descripcion *
+                  </label>
                   <input
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
                     type="text"
@@ -287,7 +316,9 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Cantidad Entrada *</label>
+                  <label className="mb-1 font-bold text-sm">
+                    Cantidad Entrada *
+                  </label>
                   <input
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
                     type="text"
@@ -303,7 +334,9 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Subcategoría *</label>
+                  <label className="mb-1 font-bold text-sm">
+                    Subcategoría *
+                  </label>
                   <select
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
                     name="SubcategoriaId"
@@ -320,7 +353,9 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="mb-1 font-bold text-sm">Unidad de Medida *</label>
+                  <label className="mb-1 font-bold text-sm">
+                    Unidad de Medida *
+                  </label>
                   <select
                     className="bg-grisClaro text-sm rounded-lg px-2 h-8"
                     name="UnidadMedidaId"
@@ -335,7 +370,6 @@ const AddProductModal = ({ isOpen, onClose, product }) => {
                     ))}
                   </select>
                 </div>
-
 
                 <div className="flex flex-col">
                   <label className="mb-1 font-bold text-sm">Estado *</label>

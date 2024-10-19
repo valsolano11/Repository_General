@@ -39,6 +39,7 @@ const HistorialIF = () => {
   useEffect(() => {
     fetchData();
   }, []);
+  
   const sampleData = [
     {
       id: 1,
@@ -46,7 +47,7 @@ const HistorialIF = () => {
       FichaId: "2694524",
       Trimestre: 1,
       fecha: "2024-07-31",
-      hora: "10:00 AM"
+      hora: "10:00 AM",
     },
     {
       id: 2,
@@ -54,7 +55,7 @@ const HistorialIF = () => {
       FichaId: "2694524",
       Trimestre: 2,
       fecha: "2024-08-01",
-      hora: "11:00 AM"
+      hora: "11:00 AM",
     },
     {
       id: 3,
@@ -62,7 +63,7 @@ const HistorialIF = () => {
       FichaId: "2694524",
       Trimestre: 3,
       fecha: "2024-08-02",
-      hora: "12:00 PM"
+      hora: "12:00 PM",
     },
     {
       id: 4,
@@ -70,7 +71,7 @@ const HistorialIF = () => {
       FichaId: "2694524",
       Trimestre: 4,
       fecha: "2024-08-03",
-      hora: "01:00 PM"
+      hora: "01:00 PM",
     },
     {
       id: 5,
@@ -78,7 +79,7 @@ const HistorialIF = () => {
       FichaId: "2694524",
       Trimestre: 5,
       fecha: "2024-08-04",
-      hora: "02:00 PM"
+      hora: "02:00 PM",
     },
     {
       id: 6,
@@ -86,7 +87,7 @@ const HistorialIF = () => {
       FichaId: "2694524",
       Trimestre: 6,
       fecha: "2024-08-05",
-      hora: "03:00 PM"
+      hora: "03:00 PM",
     },
     {
       id: 7,
@@ -94,8 +95,8 @@ const HistorialIF = () => {
       FichaId: "2694524",
       Trimestre: 7,
       fecha: "2024-08-06",
-      hora: "04:00 PM"
-    }
+      hora: "04:00 PM",
+    },
   ];
 
   return (
@@ -129,21 +130,39 @@ const HistorialIF = () => {
                 <div className="text-center">No hay registros</div>
               ) : (
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                  <Typography variant="subtitle1" className="text-gray-600 mb-10 text-2xl">
+                  <Typography
+                    variant="subtitle1"
+                    className="text-gray-600 mb-10 text-2xl"
+                  >
                     Hoy - miércoles, 31 de julio de 2024
                   </Typography>
                   {sampleData.map((item, index) => (
-                    <div key={index} className="mb-10 flex justify-between items-center border-b border-gray-300 pb-6">
-                      <Typography variant="h6" className="text-gray-800 text-xl">
+                    <div
+                      key={index}
+                      className="mb-10 flex justify-between items-center border-b border-gray-300 pb-6"
+                    >
+                      <Typography
+                        variant="h6"
+                        className="text-gray-800 text-xl"
+                      >
                         {item.hora}
                       </Typography>
-                      <Typography variant="h6" className="text-gray-800 text-xl">
+                      <Typography
+                        variant="h6"
+                        className="text-gray-800 text-xl"
+                      >
                         Instructor ID: {item.InstructorId}
                       </Typography>
-                      <Typography variant="h6" className="text-gray-800 text-xl">
+                      <Typography
+                        variant="h6"
+                        className="text-gray-800 text-xl"
+                      >
                         Ficha ID: {item.FichaId}
                       </Typography>
-                      <Typography variant="h6" className="text-gray-800 text-xl">
+                      <Typography
+                        variant="h6"
+                        className="text-gray-800 text-xl"
+                      >
                         Trimestre {item.Trimestre}
                       </Typography>
                     </div>

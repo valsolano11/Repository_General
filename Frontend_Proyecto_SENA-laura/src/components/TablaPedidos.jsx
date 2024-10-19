@@ -1,41 +1,37 @@
 import React, { useState } from "react";
 import { api } from "../api/token";
 
-const TablaPedidos = ({ accordionStates, toggleAccordion }) => {
-  const [formErrors, setFormErrors] = useState({});
-  const [productos, setProductos] = useState([
-    {
-      nombre: "",
-      UnidadDeMedida: "",
-      cantidadSolicitar: "",
-      observaciones: "",
-    },
-  ]);
-
+const TablaPedidos = ({ accordionStates, handleProductChange, productos }) => {
   const [sugerenciasProductos, setSugerenciasProductos] = useState({});
 
   const handleInputChange = (index, event) => {
     const { name, value } = event.target;
-    const newProductos = [...productos];
-    newProductos[index][name] = value;
-    setProductos(newProductos);
+    const updatedProducts = [...productos];
+    updatedProducts[index][name] = value;
+    handleProductChange(updatedProducts);
 
-    // Si el campo es 'nombre', ejecutamos la búsqueda de sugerencias
     if (name === "nombre") {
       buscarSugerenciasProducto(index, value);
     }
   };
 
   const addRow = () => {
-    setProductos([
-      ...productos,
-      {
-        nombre: "",
-        UnidadDeMedida: "",
-        cantidadSolicitar: "",
-        observaciones: "",
-      },
-    ]);
+    const newProduct = {
+      ProductoId: "",
+      nombre: "",
+      cantidadSolicitar: "",
+      observaciones: "",
+    };
+
+    const updatedProducts = [...productos, newProduct];
+
+    handleProductChange(updatedProducts);
+  };
+
+  const removeRow = (index) => {
+    const updatedProducts = productos.filter((_, i) => i !== index);
+
+    handleProductChange(updatedProducts);
   };
 
   const buscarSugerenciasProducto = async (index, query) => {
@@ -43,48 +39,45 @@ const TablaPedidos = ({ accordionStates, toggleAccordion }) => {
       try {
         const response = await api.get(`/producto/busqueda?query=${query}`);
 
-        console.log("Response data:", response.data);
-
         if (Array.isArray(response.data)) {
           const productosConUnidad = response.data.map((producto) => ({
             ...producto,
-            UnidadDeMedida: producto.UnidadDeMedida?.sigla || "", 
           }));
 
           setSugerenciasProductos((prev) => ({
             ...prev,
             [index]: productosConUnidad,
           }));
-          console.log("Sugerencias actualizadas:", productosConUnidad);
         } else {
           setSugerenciasProductos((prev) => ({
             ...prev,
-            [index]: [], 
+            [index]: [],
           }));
         }
       } catch (error) {
-        console.error("Error al buscar productos:", error);
+        console.error("Error al buscar :", error);
         setSugerenciasProductos((prev) => ({
           ...prev,
-          [index]: [], 
+          [index]: [],
         }));
       }
     } else {
       setSugerenciasProductos((prev) => ({
         ...prev,
-        [index]: [], 
+        [index]: [],
       }));
     }
   };
 
-  const handleSelectSuggestion = (index, value, unidadDeMedida) => {
+  const handleSelectSuggestion = (index, ProductoId, nombre) => {
     const newProductos = [...productos];
-    newProductos[index].nombre = value;
-    newProductos[index].UnidadDeMedida = unidadDeMedida; 
-    setProductos(newProductos);
+    newProductos[index].ProductoId = ProductoId;
+    newProductos[index].nombre = nombre;
+    handleProductChange(newProductos);
+
     setSugerenciasProductos((prev) => ({
       ...prev,
-      [index]: [], 
+      [index]: [],
     }));
   };
 
@@ -97,10 +90,14 @@ const TablaPedidos = ({ accordionStates, toggleAccordion }) => {
               <thead>
                 <tr>
                   <th className="border border-black px-2">ITEM</th>
-                  <th className="border border-black px-2">NOMBRE DEL PRODUCTO</th>
-                  <th className="border border-black px-2">UNIDAD DE MEDIDA</th>
-                  <th className="border border-black px-2">CANTIDAD A SOLICITAR</th>
+                  <th className="border border-black px-2">
+                    NOMBRE DEL PRODUCTO
+                  </th>
+                  <th className="border border-black px-2">
+                    CANTIDAD A SOLICITAR
+                  </th>
                   <th className="border border-black px-2">OBSERVACIONES</th>
+                  <th className="border border-black px-2">ACCIONES</th>
                 </tr>
               </thead>
               <tbody>
@@ -109,43 +106,41 @@ const TablaPedidos = ({ accordionStates, toggleAccordion }) => {
                     <td className="border border-black px-4 py-2">
                       {index + 1}
                     </td>
-
                     <td className="border border-black px-4 py-2 relative">
                       <input
-                        type="text"
                         className="w-full px-2 py-1 rounded"
                         name="nombre"
-                        value={producto.nombre}
-                        onChange={(event) => handleInputChange(index, event)}
+                        value={producto.nombre || ""}
+                        onChange={(e) => handleInputChange(index, e)}
                       />
-
-                      {Array.isArray(sugerenciasProductos[index]) && sugerenciasProductos[index].length > 0 && (
-                        <div className="absolute bg-white border border-gray-300 w-full max-h-40 overflow-y-auto z-10">
-                          {sugerenciasProductos[index].map((sugerencia, i) => (
-                            <div
-                              key={i}
-                              className="px-2 py-1 cursor-pointer hover:bg-gray-200"
-                              onClick={() => handleSelectSuggestion(index, sugerencia.nombre, sugerencia.UnidadDeMedida)} // Pasar unidad de medida
-                            >
-                              {sugerencia.nombre}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      {Array.isArray(sugerenciasProductos[index]) &&
+                        sugerenciasProductos[index].length > 0 && (
+                          <div
+                            className="absolute bg-white border border-gray-300 max-h-40 overflow-y-auto z-10"
+                            style={{ width: "100%" }}
+                          >
+                            {sugerenciasProductos[index].map(
+                              (sugerencia, i) => (
+                                <div
+                                  key={i}
+                                  className="px-2 py-1 cursor-pointer hover:bg-gray-200"
+                                  onClick={() =>
+                                    handleSelectSuggestion(
+                                      index,
+                                      sugerencia.id,
+                                      sugerencia.nombre
+                                    )
+                                  }
+                                >
+                                  {sugerencia.nombre} (
+                                  {sugerencia.UnidadDeMedida})
+                                </div>
+                              )
+                            )}
+                          </div>
+                        )}
                     </td>
 
-                    {/* UNIDAD DE MEDIDA */}
-                    <td className="border border-black px-4 py-2">
-                      <input
-                        type="text"
-                        className="w-full px-2 py-1 rounded"
-                        name="UnidadDeMedida"
-                        value={producto.UnidadDeMedida}
-                        readOnly 
-                      />
-                    </td>
-
-                    {/* CANTIDAD A SOLICITAR */}
                     <td className="border border-black px-4 py-2">
                       <input
                         type="number"
@@ -155,8 +150,6 @@ const TablaPedidos = ({ accordionStates, toggleAccordion }) => {
                         onChange={(event) => handleInputChange(index, event)}
                       />
                     </td>
-
-                    {/* OBSERVACIONES */}
                     <td className="border border-black px-4 py-2">
                       <input
                         type="text"
@@ -166,18 +159,22 @@ const TablaPedidos = ({ accordionStates, toggleAccordion }) => {
                         onChange={(event) => handleInputChange(index, event)}
                       />
                     </td>
+                    <td className="border border-black px-4 py-2">
+                      <button
+                        className="btn-red"
+                        onClick={() => removeRow(index)}
+                      >
+                        Eliminar
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-
           <div className="flex justify-between mt-2">
             <button className="btn-black2" onClick={addRow}>
               Agregar item
-            </button>
-            <button className="btn-black2 mb-4" onClick={() => handleCreate("productos")}>
-              Guardar y continuar
             </button>
           </div>
         </div>
