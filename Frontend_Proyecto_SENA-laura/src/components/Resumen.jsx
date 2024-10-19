@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { api } from "../api/token";
 import { Box, Button, CardHeader, Typography } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
-import PushPinIcon from '@mui/icons-material/PushPin';
+import PushPinIcon from "@mui/icons-material/PushPin";
 import HardwareIcon from "@mui/icons-material/Hardware";
 import LineChart from "../components/LineChart";
 import ProgressCircle from "./../components/ProgressCircle";
@@ -20,6 +20,7 @@ const Resumen = () => {
   const [loading, setLoading] = useState(false);
   const [totalPedidos2024, setTotalPedidos2024] = useState(0);
   const [cantidadHerramientas, setCantidadHerramientas] = useState(0);
+  const [chartData, setChartData] = useState(null);
 
   const fetchPedidos = async () => {
     setLoading(true);
@@ -31,17 +32,24 @@ const Resumen = () => {
       });
 
       const pedidos2024 = response.data.filter((pedido) => {
-        const fechaPedido = new Date(pedido.createdAt); 
+        const fechaPedido = new Date(pedido.createdAt);
         return fechaPedido.getFullYear() === 2024;
       });
 
       setTotalPedidos2024(pedidos2024.length);
+
+      const mappedData = pedidos2024.map((pedido) => ({
+        x: new Date(pedido.createdAt).toISOString().split("T")[0],
+        y: pedido.total,
+      }));
+
+      setChartData(mappedData);
     } catch (error) {
       console.error("Error al cargar pedidos:", error);
     }
     setLoading(false);
   };
-  
+
   useEffect(() => {
     fetchPedidos();
   }, []);
@@ -53,7 +61,7 @@ const Resumen = () => {
 
         const herramientasBuenas = response.data.filter(
           (herramienta) => herramienta.condicion.toUpperCase() === "BUENO"
-        );        
+        );
 
         setCantidadHerramientas(herramientasBuenas.length);
       } catch (error) {
@@ -74,7 +82,12 @@ const Resumen = () => {
     <div>
       <Box m="20px">
         {/* HEADER */}
-        <Box className="flex justify-between items-center font-inter">
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          fontFamily="Inter"
+        >
           <CardHeader
             title="DASHBOARD"
             subheader="Bienvenido a tu panel de control"
@@ -85,36 +98,25 @@ const Resumen = () => {
               },
             }}
           />
-          <Box>
-            <Button
-              color="primary"
-              sx={{
-                backgroundColor: "primary.main",
-                color: "white",
-                fontSize: "16px",
-                fontWeight: "bold",
-                borderRadius: "8px",
-                padding: "10px 20px",
-                textTransform: "none",
-                "&:hover": {
-                  backgroundColor: "primary.dark",
-                  color: "white",
-                },
-                "&:active": {
-                  backgroundColor: "primary.light",
-                  color: "white",
-                },
-                "&:focus": {
-                  backgroundColor: "primary.main",
-                  color: "white",
-                },
-              }}
-              onClick={handleRedirect}
-            >
-              <DownloadIcon sx={{ mr: "10px" }} />
-              Descargar Reportes
-            </Button>
-          </Box>
+          <Button
+            color="primary"
+            sx={{
+              backgroundColor: "primary.main",
+              color: "white",
+              fontSize: "16px",
+              fontWeight: "bold",
+              borderRadius: "8px",
+              padding: "10px 20px",
+              textTransform: "none",
+              "&:hover": {
+                backgroundColor: "primary.dark",
+              },
+            }}
+            onClick={handleRedirect}
+          >
+            <DownloadIcon sx={{ mr: "10px" }} />
+            Descargar Reportes
+          </Button>
         </Box>
 
         {/* CUADRÍCULAS Y GRÁFICOS */}
@@ -123,6 +125,17 @@ const Resumen = () => {
           gridTemplateColumns="repeat(12, 1fr)"
           gridAutoRows="140px"
           gap="20px"
+          sx={{
+            "@media (max-width: 1200px)": {
+              gridTemplateColumns: "repeat(8, 1fr)",
+            },
+            "@media (max-width: 900px)": {
+              gridTemplateColumns: "repeat(4, 1fr)",
+            },
+            "@media (max-width: 600px)": {
+              gridTemplateColumns: "repeat(2, 1fr)",
+            },
+          }}
         >
           {/* FILA 1 */}
           <Box
@@ -133,9 +146,9 @@ const Resumen = () => {
             justifyContent="center"
           >
             <StatBox1
-              icon={<PushPinIcon 
-                sx={{ color: green[600], fontSize: "26px" }} 
-              />}
+              icon={
+                <PushPinIcon sx={{ color: green[600], fontSize: "26px" }} />
+              }
             />
           </Box>
           <Box
@@ -147,9 +160,7 @@ const Resumen = () => {
           >
             <StatBox2
               icon={
-                <PushPinIcon
-                  sx={{ color: green[600], fontSize: "26px" }}
-                />
+                <PushPinIcon sx={{ color: green[600], fontSize: "26px" }} />
               }
             />
           </Box>
@@ -162,9 +173,7 @@ const Resumen = () => {
           >
             <StatBox3
               icon={
-                <HardwareIcon 
-                  sx={{ color: green[600], fontSize: "26px" }} 
-                />
+                <HardwareIcon sx={{ color: green[600], fontSize: "26px" }} />
               }
             />
           </Box>
@@ -178,7 +187,7 @@ const Resumen = () => {
             <Box
               mt="25px"
               p="0 30px"
-              display="flex "
+              display="flex"
               justifyContent="space-between"
               alignItems="center"
             >
@@ -192,7 +201,11 @@ const Resumen = () => {
               </Box>
             </Box>
             <Box height="250px" m="-20px 0 0 0">
-              <LineChart isDashboard={true} />
+              {chartData ? (
+                <LineChart data={chartData} isDashboard={true} />
+              ) : (
+                <Typography>Cargando gráfico...</Typography>
+              )}
             </Box>
           </Box>
 
@@ -214,7 +227,6 @@ const Resumen = () => {
                 Historial de Transacciones
               </Typography>
             </Box>
-            
             {mockTransactions.map((transaction, i) => (
               <Box
                 key={`${transaction.accion}-${i}`}
@@ -259,7 +271,7 @@ const Resumen = () => {
             p="30px"
           >
             <Typography variant="h" fontWeight="600">
-              Estado de las Herramientas 
+              Estado de las Herramientas
             </Typography>
             <Box
               display="flex"
@@ -272,7 +284,7 @@ const Resumen = () => {
                 {cantidadHerramientas} Herramientas en buen estado
               </Typography>
               <Typography variant="h">
-                Con gestión constante para el incremento{" "}
+                Con gestión constante para el incremento
               </Typography>
             </Box>
           </Box>
@@ -298,16 +310,16 @@ const Resumen = () => {
             gridColumn="span 4"
             gridRow="span 2"
             backgroundColor="grisClaro.main"
-            paddingTop="30px"
-            paddingLeft="30px"
-            paddingRight="30px"
+            pt="30px"
+            pl="30px"
+            pr="30px"
           >
             <Typography
               variant="h"
               fontWeight="600"
               sx={{ marginBottom: "15px" }}
             >
-              Consumo de productos por fichas
+              Productos disponibles en inventario
             </Typography>
             <Box height="200px">
               <PieChart isDashboard={true} />

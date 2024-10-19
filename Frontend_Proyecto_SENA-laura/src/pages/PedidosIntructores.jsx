@@ -65,14 +65,14 @@ const PedidosIntructores = () => {
     let errorMessage = "";
 
     if (["area", "jefeOficina", "servidorAsignado"].includes(name)) {
-      const nameRegex = /^[A-Za-z\s]+$/; 
+      const nameRegex = /^[A-Za-z\s]+$/;
       if (!nameRegex.test(value)) {
         errorMessage = "No puede contener números o caracteres especiales.";
       }
     }
 
     if (name === "correo") {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(value)) {
         errorMessage = "Por favor, ingresa un correo electrónico válido.";
       }
@@ -161,7 +161,7 @@ const PedidosIntructores = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-grisClaro">
+    <div className="accordion-container flex flex-col md:flex-row h-screen bg-grisClaro">
       <div className="hidden md:flex items-star justify-center md:w-2/3 bg-grisClaro mx-4">
         <div className="w-full mt-10">
           <div className="px-4 py-3 w-full">
@@ -268,7 +268,7 @@ const PedidosIntructores = () => {
             </div>
 
             {/* DATOS */}
-            <div className="flex flex-col rounded-lg w-full bg-white px-8 mx-auto border-2 border-black mt-4 mb-4">
+            <div className="accordion-header cursor-pointer flex flex-col rounded-lg w-full bg-white px-8 mx-auto border-2 border-black mt-4 mb-4 overflow-hidden">
               <button
                 onClick={() => toggleAccordion("datos")}
                 className="font-bold text-lg py-2 flex justify-between items-center w-full"
@@ -278,7 +278,7 @@ const PedidosIntructores = () => {
               </button>
 
               {accordionStates.datos && (
-                <div className="flex flex-col rounded-lg w-full">
+                <div className="accordion-body p-4 flex flex-col rounded-lg w-full">
                   <div className="flex flex-col md:flex-row justify-between gap-x-4">
                     <div className="flex flex-row min-w-[200px] w-full md:w-2/3">
                       <label className="mb-1 font-bold text-xs mt-2">
@@ -438,7 +438,7 @@ const PedidosIntructores = () => {
             </div>
 
             {/* PRODUCTOS */}
-            <div className="flex flex-col rounded-lg w-full bg-white px-8 mx-auto border-2 border-black mb-4">
+            <div className="accordion-header cursor-pointer flex flex-col rounded-lg w-full bg-white px-8 mx-auto border-2 border-black mt-4 mb-4 overflow-hidden">
               <button
                 onClick={() => toggleAccordion("productos")}
                 className="font-bold text-lg py-2 flex justify-between items-center w-full"
@@ -448,7 +448,7 @@ const PedidosIntructores = () => {
               </button>
 
               {accordionStates.productos && (
-                <div className="flex flex-col rounded-lg w-full">
+                <div className="accordion-body p-4 flex flex-col rounded-lg w-full">
                   <div className="flex flex-row justify-between w-full mb-4">
                     <TablaPedidos
                       accordionStates={accordionStates}
