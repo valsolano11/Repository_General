@@ -123,7 +123,7 @@ const FormatoHerram = () => {
       });
 
       if (response.status === 201) {
-        toast.success("Prestamo creado con éxito.");
+        toast.success("Préstamo creado con éxito.");
         setFormData({
           codigoFicha: "",
           area: "",

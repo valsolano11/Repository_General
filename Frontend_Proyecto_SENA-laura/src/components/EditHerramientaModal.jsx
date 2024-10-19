@@ -231,7 +231,10 @@ const EditHerramientaModal = ({ isOpen, onClose, herramienta }) => {
                     type="text"
                     name="nombre"
                     value={formData.nombre}
-                    onChange={handleInputChange}
+                    onChange={(e) => {
+                      const valorEnMayusculas = e.target.value.toUpperCase();
+                      handleInputChange({ target: { name: "nombre", value: valorEnMayusculas } });
+                    }}
                     onKeyPress={(e) => {
                       if (/\d/.test(e.key)) {
                         e.preventDefault();

@@ -24,6 +24,7 @@ const FirmaPrestamos = () => {
   const [firmaImagen, setFirmaImagen] = useState(null);
   const [dummyState, setDummyState] = useState(false);
   const [formData, setFormData] = useState({
+    fechaPrestamos: "",
     firmaPrestamos: "",
     servidorAsignado: "",
     codigoFicha: "",
@@ -66,7 +67,7 @@ const FirmaPrestamos = () => {
 
           const prestamosFormatted = {
             id: data.id,
-            createdAt: data.createdAt,
+            fechaPrestamos: data.fechaPrestamos,
             firmaPrestamos: data.firmaPrestamos,
             codigoFicha: data.codigoFicha,
             jefeOficina: data.jefeOficina,
@@ -80,7 +81,7 @@ const FirmaPrestamos = () => {
           };
           setPrestamoData(prestamosFormatted);
           setFormData({
-            fecha: formatDateForInput(data.createdAt),
+            fecha: formatDateForInput(data.fechaPrestamos),
             codigoFicha: data.codigoFicha,
             area: data.area,
             jefeOficina: data.jefeOficina,
@@ -198,7 +199,7 @@ const FirmaPrestamos = () => {
     doc.text(`Estado: ${prestamoData.Estado?.estadoName || "Desconocido"}`, 14, 90);
     doc.text(
         `Fecha de creación: ${new Date(
-          prestamoData.createdAt
+          prestamoData.fechaPrestamos
         ).toLocaleDateString()}`,
         14,
         100
@@ -267,7 +268,7 @@ const FirmaPrestamos = () => {
       prestamoData.cedulaServidor,
       prestamoData.correo,
       prestamoData.Estado?.estadoName || "Desconocido",
-      new Date(prestamoData.createdAt).toLocaleDateString(),
+      new Date(prestamoData.fechaPrestamos).toLocaleDateString(),
     ];
   
     const herramientaHeaders = [

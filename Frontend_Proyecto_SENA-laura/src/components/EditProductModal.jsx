@@ -238,7 +238,10 @@ const EditProductModal = ({ isOpen, onClose, product }) => {
                         type="text"
                         name="nombre"
                         value={formData.nombre}
-                        onChange={handleInputChange}
+                        onChange={(e) => {
+                          const valorEnMayusculas = e.target.value.toUpperCase();
+                          handleInputChange({ target: { name: "nombre", value: valorEnMayusculas } });
+                        }}
                       />
                       {formErrors.nombre && (
                         <div className="text-red-400 text-xs mt-0.5">

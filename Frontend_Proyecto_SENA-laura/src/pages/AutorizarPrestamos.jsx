@@ -57,7 +57,7 @@ const AutorizarPrestamos = () => {
 
       const prestamoFormatted = data.map((prestamo) => ({
         id: prestamo.id,
-        createdAt: prestamo.createdAt,
+        fechaPrestamos: prestamo.fechaPrestamos,
         servidorAsignado: prestamo.servidorAsignado,
         codigoFicha: prestamo.codigoFicha,
         area: prestamo.area,
@@ -99,7 +99,7 @@ const AutorizarPrestamos = () => {
 
   const columns = [
     {
-      name: "createdAt",
+      name: "fechaPrestamos",
       label: "FECHA",
       options: {
         customHeadRender: (columnMeta) => (
@@ -248,7 +248,7 @@ const AutorizarPrestamos = () => {
 
     data.forEach((prestamo) => {
       const prestamoData = [
-        prestamo.createdAt || "",
+        prestamo.fechaPrestamos || "",
         prestamo.servidorAsignado || "",
         prestamo.codigoFicha || "",
         prestamo.area || "",
