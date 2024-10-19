@@ -120,7 +120,7 @@ const Login = () => {
           });
           setTimeout(() => {
             if (role.toUpperCase() === "COORDINADOR") {
-              navigate("/homecoord");
+              navigate("/dashboard");
             } else {
               navigate("/dashboard");
             }

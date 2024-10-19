@@ -85,92 +85,92 @@ const ImportExcel = () => {
     return styledHtml;
   };
 
-  const columns = [
-    {
-      name: "id",
-      label: "ID",
-      options: {
-        customHeadRender: (columnMeta) => (
-          <th
-            key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
-          </th>
-        ),
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
-      },
-    },
-    {
-      name: "name",
-      label: "NOMBRE",
-      options: {
-        customHeadRender: (columnMeta) => (
-          <th
-            key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
-          </th>
-        ),
-        customBodyRender: (value) => <div className="text-center">{value}</div>,
-      },
-    },
-    {
-      name: "preview",
-      label: "VISTA PREVIA",
-      options: {
-        customHeadRender: (columnMeta) => (
-          <th
-            key={columnMeta.label}
-            className="text-center bg-white text-black uppercase text-xs font-bold"
-          >
-            {columnMeta.label}
-          </th>
-        ),
-        customBodyRender: (value, tableMeta) => (
-          <div className="flex items-center justify-center">
-            <IconButton onClick={() => handlePreviewClick(tableMeta.rowData)}>
-              <VisibilityIcon />
-            </IconButton>
-          </div>
-        ),
-      },
-    },
-  ];
+  // const columns = [
+  //   {
+  //     name: "id",
+  //     label: "ID",
+  //     options: {
+  //       customHeadRender: (columnMeta) => (
+  //         <th
+  //           key={columnMeta.label}
+  //           className="text-center bg-white text-black uppercase text-xs font-bold"
+  //         >
+  //           {columnMeta.label}
+  //         </th>
+  //       ),
+  //       customBodyRender: (value) => <div className="text-center">{value}</div>,
+  //     },
+  //   },
+  //   {
+  //     name: "name",
+  //     label: "NOMBRE",
+  //     options: {
+  //       customHeadRender: (columnMeta) => (
+  //         <th
+  //           key={columnMeta.label}
+  //           className="text-center bg-white text-black uppercase text-xs font-bold"
+  //         >
+  //           {columnMeta.label}
+  //         </th>
+  //       ),
+  //       customBodyRender: (value) => <div className="text-center">{value}</div>,
+  //     },
+  //   },
+  //   {
+  //     name: "preview",
+  //     label: "VISTA PREVIA",
+  //     options: {
+  //       customHeadRender: (columnMeta) => (
+  //         <th
+  //           key={columnMeta.label}
+  //           className="text-center bg-white text-black uppercase text-xs font-bold"
+  //         >
+  //           {columnMeta.label}
+  //         </th>
+  //       ),
+  //       customBodyRender: (value, tableMeta) => (
+  //         <div className="flex items-center justify-center">
+  //           <IconButton onClick={() => handlePreviewClick(tableMeta.rowData)}>
+  //             <VisibilityIcon />
+  //           </IconButton>
+  //         </div>
+  //       ),
+  //     },
+  //   },
+  // ];
 
-  const data = [
-    {
-      ID: 1,
-      name: "Documento ejemplo",
-      preview: "vista",
-    },
-  ];
+  // const data = [
+  //   {
+  //     ID: 1,
+  //     name: "Documento ejemplo",
+  //     preview: "vista",
+  //   },
+  // ];
 
-  const options = {
-    filterType: "checkbox",
-  };
+  // const options = {
+  //   filterType: "checkbox",
+  // };
 
-  const handlePreviewClick = (rowData) => {
-    console.log("Vista previa para:", rowData);
-  };
+  // const handlePreviewClick = (rowData) => {
+  //   console.log("Vista previa para:", rowData);
+  // };
 
-  const handleCustomExport = (rows) => {
-    const exportData = rows.map((row) => ({
-      id: row.data[0],
-      Nombre: row.data[2],
-    }));
+  // const handleCustomExport = (rows) => {
+  //   const exportData = rows.map((row) => ({
+  //     id: row.data[0],
+  //     Nombre: row.data[2],
+  //   }));
 
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Usuarios");
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(data, "Usuarios.xlsx");
-  };
+  //   const worksheet = XLSX.utils.json_to_sheet(exportData);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Usuarios");
+  //   const excelBuffer = XLSX.write(workbook, {
+  //     bookType: "xlsx",
+  //     type: "array",
+  //   });
+  //   const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+  //   saveAs(data, "Usuarios.xlsx");
+  // };
 
   return (
     <div className="flex min-h-screen">
@@ -203,7 +203,7 @@ const ImportExcel = () => {
             </button>
           </div>
         </div>
-        {uploading && (
+        {/* {uploading && (
           <LinearProgress className="h-2 w-full mb-4" color="primary" />
         )}
         <div className="flex flex-grow">
@@ -264,7 +264,7 @@ const ImportExcel = () => {
                 }}
               />
             </div>
-          </div>
+          </div> */}
           <div className="w-1/2 pl-2 h-full flex justify-center items-center">
             <div className="flex justify-center p-2">
               <div
@@ -281,7 +281,7 @@ const ImportExcel = () => {
           </div>
         </div>
       </div>
-    </div>
+    // </div>
   );
 };
 
