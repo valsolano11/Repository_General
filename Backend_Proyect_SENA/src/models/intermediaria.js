@@ -4,21 +4,13 @@ import { conexion } from "../conexion.js";
 import Herramienta from "./Herramientas.js"; // Importa el modelo de Herramienta
 import Prestamo from "./Prestamos.js"; // Importa el modelo de Prestamo
 
-// Modelo de la tabla PrestamosHerramientas (tabla intermedia)
 const PrestamoHerramienta = conexion.define(
   "PrestamoHerramienta",
   {
-    cantidadSolicitar: {
+    id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 1,
-      validate: {
-        min: 1,
-        isInt: true,
-      },
-    },
-    fechaDevolucion: {
-      type: DataTypes.DATE,
+      primaryKey: true,
+      autoIncrement: true,
       allowNull: false,
     },
     observaciones: {

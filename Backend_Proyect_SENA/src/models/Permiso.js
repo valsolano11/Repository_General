@@ -120,6 +120,9 @@ const Permiso = conexion.define("Permiso",
       // Dashboard
       { nombrePermiso: "Generar Reporte General del Dashboard" },
       { nombrePermiso: "vista Dashboard" },
+      //Autorizar
+      { nombrePermiso: "Autorizar pedidos" },
+      { nombrePermiso: "Autorizar prestamos" },
     ];
     const guardarPermisos = async () => {
         try {

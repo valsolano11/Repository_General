@@ -245,7 +245,7 @@ export const BusquedaProductos = async (req, res) => {
         const productos = await Producto.findAll({
             where: {
                 nombre: {
-                [Op.like]:` %${query}%`,
+                [Op.like]:`%${query}%`,
                 },
                 EstadoId: 1 
             },

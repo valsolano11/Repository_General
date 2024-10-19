@@ -19,6 +19,7 @@ import Pedido from "./routes/Pedidos.routes.js";
 import PedidoRouter from "./routes/Pedidos.routes.js";
 import HerramientaRouter from "./routes/Herramienta.routes.js";
 import PrestamoRouter from "./routes/Prestamos.routes.js";
+import NotificacionRouter from "./routes/Notificacion.routes.js"
 
 const app = express();
 
@@ -50,7 +51,8 @@ app.use(
   Pedido,
   PedidoRouter,
   HerramientaRouter,
-  PrestamoRouter
+  PrestamoRouter,
+  NotificacionRouter
 );
 
 export default app;
