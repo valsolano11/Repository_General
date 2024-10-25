@@ -161,6 +161,13 @@ const EditUserModal = ({ isOpen, onClose, selectedUser }) => {
   const handleUpdate = async () => {
     const { nombre, correo, Documento, RolId, EstadoId } = formData;
 
+    if (selectedUser.id === 1) {
+      toast.error("No se puede editar al usuario Administrador Sena", {
+        position: "top-right",
+      });
+      return;
+    }
+
     if (!nombre || !correo || !Documento || !RolId || !EstadoId) {
       toast.error("Todos los campos son obligatorios.", {
         position: "top-right",
@@ -168,16 +175,8 @@ const EditUserModal = ({ isOpen, onClose, selectedUser }) => {
       return;
     }
 
-    // if (!selectedPermisos || selectedPermisos.length === 0) {
-    //   toast.error("Debe seleccionar al menos un permiso.", {
-    //     position: "top-right",
-    //   });
-    //   return;
-    // }
-
     setLoading(true);
     try {
-
       const updatedFormData = {
         ...formData,
         permisos: selectedPermisos,

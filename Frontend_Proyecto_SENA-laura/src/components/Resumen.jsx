@@ -6,21 +6,23 @@ import { Box, Button, CardHeader, Typography } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import HardwareIcon from "@mui/icons-material/Hardware";
-import LineChart from "../components/LineChart";
+//import LineChart from "../components/LineChart";
 import ProgressCircle from "./../components/ProgressCircle";
 import { green, grey } from "@mui/material/colors";
 import StatBox1 from "./../components/StatBox1";
-import { mockTransactions } from "../data/mockData";
 import BarChart from "../components/BarChart";
 import PieChart from "../components/PieChart";
 import StatBox2 from "./StatBox2";
 import StatBox3 from "./StatBox3";
+const LineChart = React.lazy(() => import("../components/LineChart"));
 
 const Resumen = () => {
   const [loading, setLoading] = useState(false);
   const [totalPedidos2024, setTotalPedidos2024] = useState(0);
   const [cantidadHerramientas, setCantidadHerramientas] = useState(0);
   const [chartData, setChartData] = useState(null);
+  const [historial, setHistorial] = useState([]);
+  const [errorPedidos, setErrorPedidos] = useState(null);
 
   const fetchPedidos = async () => {
     setLoading(true);
@@ -30,21 +32,19 @@ const Resumen = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-
       const pedidos2024 = response.data.filter((pedido) => {
         const fechaPedido = new Date(pedido.createdAt);
         return fechaPedido.getFullYear() === 2024;
       });
-
       setTotalPedidos2024(pedidos2024.length);
-
       const mappedData = pedidos2024.map((pedido) => ({
         x: new Date(pedido.createdAt).toISOString().split("T")[0],
         y: pedido.total,
       }));
-
       setChartData(mappedData);
+      setErrorPedidos(null);
     } catch (error) {
+      setErrorPedidos("Error al cargar pedidos.");
       console.error("Error al cargar pedidos:", error);
     }
     setLoading(false);
@@ -62,7 +62,6 @@ const Resumen = () => {
         const herramientasBuenas = response.data.filter(
           (herramienta) => herramienta.condicion.toUpperCase() === "BUENO"
         );
-
         setCantidadHerramientas(herramientasBuenas.length);
       } catch (error) {
         console.error("Error al obtener las herramientas", error);
@@ -70,6 +69,21 @@ const Resumen = () => {
     };
 
     fetchHerramientas();
+  }, []);
+
+  useEffect(() => {
+    const fetchHistorial = async () => {
+      try {
+        const response = await api.get("/historial");
+        setHistorial(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error al obtener el historial:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchHistorial();
   }, []);
 
   const navigate = useNavigate();
@@ -98,25 +112,36 @@ const Resumen = () => {
               },
             }}
           />
-          <Button
-            color="primary"
-            sx={{
-              backgroundColor: "primary.main",
-              color: "white",
-              fontSize: "16px",
-              fontWeight: "bold",
-              borderRadius: "8px",
-              padding: "10px 20px",
-              textTransform: "none",
-              "&:hover": {
-                backgroundColor: "primary.dark",
-              },
-            }}
-            onClick={handleRedirect}
-          >
-            <DownloadIcon sx={{ mr: "10px" }} />
-            Descargar Reportes
-          </Button>
+          <Box>
+            <Button
+              color="primary"
+              sx={{
+                backgroundColor: "primary.main",
+                color: "white",
+                fontSize: "16px",
+                fontWeight: "bold",
+                borderRadius: "8px",
+                padding: "10px 20px",
+                textTransform: "none",
+                "&:hover": {
+                  backgroundColor: "primary.dark",
+                  color: "white",
+                },
+                "&:active": {
+                  backgroundColor: "primary.light",
+                  color: "white",
+                },
+                "&:focus": {
+                  backgroundColor: "primary.main",
+                  color: "white",
+                },
+              }}
+              onClick={handleRedirect}
+            >
+              <DownloadIcon sx={{ mr: "10px" }} />
+              Descargar Reportes
+            </Button>
+          </Box>
         </Box>
 
         {/* CUADRÍCULAS Y GRÁFICOS */}
@@ -196,15 +221,17 @@ const Resumen = () => {
                   Pedidos realizados por instructores en el 2024
                 </Typography>
                 <Typography variant="h5" fontWeight="bold" color={green[500]}>
-                  {loading ? "Cargando..." : totalPedidos2024}
+                  {loading ? "" : totalPedidos2024}
                 </Typography>
               </Box>
             </Box>
             <Box height="250px" m="-20px 0 0 0">
-              {chartData ? (
+              {errorPedidos ? (
+                <Typography color="error">{errorPedidos}</Typography>
+              ) : chartData ? (
                 <LineChart data={chartData} isDashboard={true} />
               ) : (
-                <Typography>Cargando gráfico...</Typography>
+                <Typography></Typography>
               )}
             </Box>
           </Box>
@@ -223,44 +250,64 @@ const Resumen = () => {
               color={grey[900]}
               p="15px"
             >
-              <Typography color={grey[900]} variant="h" fontWeight="600">
+              <Typography color={grey[900]} variant="h6" fontWeight="600">
                 Historial de Transacciones
               </Typography>
             </Box>
-            {mockTransactions.map((transaction, i) => (
-              <Box
-                key={`${transaction.accion}-${i}`}
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                borderBottom={`4px solid ${grey[900]}`}
+
+            {loading ? (
+              <Typography
+                variant="h6"
+                fontWeight="400"
+                color={grey[900]}
                 p="15px"
               >
-                <Box display="flex" flexDirection="column">
-                  <Typography color={green[500]} variant="h" fontWeight="400">
-                    {transaction.accion}
-                  </Typography>
-                  <Typography color={grey[900]} variant="h" fontWeight="200">
-                    {transaction.usuario}
-                  </Typography>
-                </Box>
-                <Box color={grey[900]} variant="h6" fontWeight="200">
-                  {transaction.fecha}
-                </Box>
-
-                <Link to="/historial">
-                  <Box
-                    backgroundColor={green[500]}
-                    p="5px 10px"
-                    borderRadius="4px"
-                    variant="h6"
+                Cargando...
+              </Typography>
+            ) : (
+              historial.map((transaction, i) => (
+                <Box
+                  key={`${transaction.tipoAccion}-${i}`}
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  borderBottom={`4px solid ${grey[900]}`}
+                  p="15px"
+                >
+                  <Box display="flex" flexDirection="column">
+                    <Typography color={green[500]} variant="h" fontWeight="400">
+                      {transaction.tipoAccion}
+                    </Typography>
+                    <Typography
+                      color={grey[900]}
+                      variant="body1"
+                      fontWeight="200"
+                    >
+                      {transaction.Usuario?.nombre}
+                    </Typography>
+                  </Box>
+                  <Typography
+                    color={grey[900]}
+                    variant="body1"
                     fontWeight="200"
                   >
-                    {transaction.estado}
-                  </Box>
-                </Link>
-              </Box>
-            ))}
+                    {new Date(transaction.createdAt).toLocaleDateString()}
+                  </Typography>
+
+                  <Link to="/historial">
+                    <Box
+                      backgroundColor={green[500]}
+                      p="5px 10px"
+                      borderRadius="4px"
+                      variant="h6"
+                      fontWeight="200"
+                    >
+                      Ver
+                    </Box>
+                  </Link>
+                </Box>
+              ))
+            )}
           </Box>
 
           {/* FILA 3 */}
@@ -284,7 +331,7 @@ const Resumen = () => {
                 {cantidadHerramientas} Herramientas en buen estado
               </Typography>
               <Typography variant="h">
-                Con gestión constante para el incremento
+                Con gestión constante para el incremento{" "}
               </Typography>
             </Box>
           </Box>
@@ -310,16 +357,16 @@ const Resumen = () => {
             gridColumn="span 4"
             gridRow="span 2"
             backgroundColor="grisClaro.main"
-            pt="30px"
-            pl="30px"
-            pr="30px"
+            paddingTop="30px"
+            paddingLeft="30px"
+            paddingRight="30px"
           >
             <Typography
               variant="h"
               fontWeight="600"
               sx={{ marginBottom: "15px" }}
             >
-              Productos disponibles en inventario
+              Consumo de productos por fichas
             </Typography>
             <Box height="200px">
               <PieChart isDashboard={true} />

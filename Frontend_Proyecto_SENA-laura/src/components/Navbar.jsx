@@ -17,25 +17,34 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
   const [showConfirmLogout, setShowConfirmLogout] = useState(false);
   const [isNotificacionesOpen, setIsNotificacionesOpen] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState([]); 
   const [notificacionesNuevas, setNotificacionesNuevas] = useState(0);
 
   const fetchNotifications = async () => {
     try {
       const response = await api.get("/notificaciones");
       setNotifications(response.data);
-      const unreadCount = response.data.filter((notif) => notif.nueva).length;
+      const unreadCount = response.data.filter(notif => !notif.leida).length;
       setUnreadNotifications(unreadCount);
     } catch (error) {
       console.error("Error al obtener notificaciones:", error);
     }
   };
-
+  
   useEffect(() => {
     fetchNotifications();
     const interval = setInterval(() => {
       fetchNotifications();
-    }, 2500); // Cada 5 segundos
+    }, 300000); 
+  
+    return () => clearInterval(interval);
+  }, []);
+  
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 2500);
 
     return () => clearInterval(interval);
   }, []);
@@ -71,7 +80,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
   };
 
   const handleNewNotifications = (count) => {
-    setUnreadNotifications((prev) => prev + count); 
+    setUnreadNotifications(prev => prev + count);
     setNotificacionesNuevas(count); 
   };
 
@@ -82,8 +91,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
 
   return (
     <nav
-      className={`bg-gray-200 shadow px-4 py-3 flex justify-between items-center 
-        fixed top-0 left-0 z-50 w-full transition-all duration-300`}
+      className={`bg-gray-200 shadow px-4 py-3 flex justify-between items-center fixed top-0 left-0 z-50 w-full transition-all duration-300`}
       style={{
         marginLeft: sidebarToggle ? "16rem" : "0",
         width: sidebarToggle ? "calc(100% - 16rem)" : "100%",
@@ -109,8 +117,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
               onClick={handleOpenNotifications}
             />
             {unreadNotifications > 0 && (
-              <span className="absolute top-0 right-0 inline-flex items-center 
-              justify-center px-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+              <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
                 {unreadNotifications}
               </span>
             )}
@@ -160,7 +167,7 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
         isOpen={isNotificacionesOpen}
         onClose={handleCloseModals}
         notifications={notifications}
-        onNewNotifications={handleNewNotifications}
+        onNewNotifications={handleNewNotifications} 
       />
     </nav>
   );

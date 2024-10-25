@@ -8,16 +8,12 @@ import { FiTool } from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
 import { PiChalkboardTeacher } from "react-icons/pi";
 import { TbCategory } from "react-icons/tb";
-import { 
-  RiAdminLine, 
-  RiTokenSwapLine 
-} from "react-icons/ri";
-import { FaUserLarge, 
-  FaArrowsDownToPeople 
-} from "react-icons/fa6";
-import { MdOutlineCategory, 
-  MdAssignmentReturned, 
-  MdDirectionsWalk 
+import { RiAdminLine, RiTokenSwapLine } from "react-icons/ri";
+import { FaUserLarge, FaArrowsDownToPeople } from "react-icons/fa6";
+import {
+  MdOutlineCategory,
+  MdAssignmentReturned,
+  MdDirectionsWalk,
 } from "react-icons/md";
 import {
   FaHome,
@@ -91,34 +87,34 @@ const SidebarCoord = ({ sidebarToggleCoord }) => {
         {/* Autorizar */}
         {(hasPermission("Autorizar pedidos") ||
           hasPermission("Autorizar prestamos")) && (
-        <li className="mb-2">
-          <div
-            className="flex items-center justify-between px-3 py-2 rounded hover:shadow hover:bg-gray-700 cursor-pointer"
-            onClick={() => handleToggle("autorizar")}
-          >
-            <div className="flex items-center">
-              <FaFileSignature className="inline-block w-6 h-6 mr-2 -mt-2"></FaFileSignature>
-              Autorizar Pedidos
+          <li className="mb-2">
+            <div
+              className="flex items-center justify-between px-3 py-2 rounded hover:shadow hover:bg-gray-700 cursor-pointer"
+              onClick={() => handleToggle("autorizar")}
+            >
+              <div className="flex items-center">
+                <FaFileSignature className="inline-block w-6 h-6 mr-2 -mt-2"></FaFileSignature>
+                Autorizar Pedidos
+              </div>
+              <span>{expanded.autorizar ? "-" : "+"}</span>
             </div>
-            <span>{expanded.autorizar ? "-" : "+"}</span>
-          </div>
-          {expanded.autorizar && (
-            <ul className="bg-black text-center text-white text-sm">
-              <li className="py-1 hover:bg-gray-700 rounded mx-4">
-                <a href="/autPedidos" className="px-3 flex items-center">
-                  <LiaDropbox className="inline-block w-4 h-4 mr-2 -mt-1"></LiaDropbox>
-                  Productos
-                </a>
-              </li>
-              <li className="py-1 hover:bg-gray-700 rounded mx-4">
-                <a href="/autPrestamos" className="px-3 flex items-center">
-                  <FiTool className="inline-block w-4 h-4 mr-2 -mt-1"></FiTool>
-                  Herramientas
-                </a>
-              </li>
-            </ul>
-          )}
-        </li>
+            {expanded.autorizar && (
+              <ul className="bg-black text-center text-white text-sm">
+                <li className="py-1 hover:bg-gray-700 rounded mx-4">
+                  <a href="/autPedidos" className="px-3 flex items-center">
+                    <LiaDropbox className="inline-block w-4 h-4 mr-2 -mt-1"></LiaDropbox>
+                    Productos
+                  </a>
+                </li>
+                <li className="py-1 hover:bg-gray-700 rounded mx-4">
+                  <a href="/autPrestamos" className="px-3 flex items-center">
+                    <FiTool className="inline-block w-4 h-4 mr-2 -mt-1"></FiTool>
+                    Herramientas
+                  </a>
+                </li>
+              </ul>
+            )}
+          </li>
         )}
 
         <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
@@ -220,8 +216,8 @@ const SidebarCoord = ({ sidebarToggleCoord }) => {
           </li>
         )}
 
-                {/* Categorías */}
-                {(hasPermission("Vista Categorias") ||
+        {/* Categorías */}
+        {(hasPermission("Vista Categorias") ||
           hasPermission("Vista Subcategorias")) && (
           <li className="mb-2">
             <div
@@ -316,6 +312,14 @@ const SidebarCoord = ({ sidebarToggleCoord }) => {
         )}
 
         {/* Otros enlaces */}
+        {hasPermission("Obtener Fichas e Instructores") && (
+          <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
+            <a href="/fichasCoordi" className="px-3">
+              <SiGoogleclassroom className="inline-block w-6 h-6 mr-2 -mt-2"></SiGoogleclassroom>
+              Gestión Fichas
+            </a>
+          </li>
+        )}
         {hasPermission("vista Prestamos") && (
           <li className="mb-2 rounded hover:shadow hover:bg-gray-700 py-2">
             <a href="/prestamos" className="px-3">

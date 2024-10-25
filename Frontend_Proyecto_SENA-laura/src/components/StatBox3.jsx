@@ -4,7 +4,7 @@ import { grey, green } from "@mui/material/colors";
 import { api } from "../api/token";
 import NewProgressCircle3 from "./NewProgressCircle3";
 
-const StatBox3 = ({ icon }) => {
+const StatBox3 = React.memo(({ icon })=> {
   const [herramientaMasUsada, setHerramientaMasUsada] = useState(null);
   const [usoHerramienta, setUsoHerramienta] = useState(0);
   const [totalPrestamos, setTotalPrestamos] = useState(0);
@@ -89,6 +89,6 @@ const StatBox3 = ({ icon }) => {
       </Box>
     </Box>
   );
-};
+});
 
 export default StatBox3;

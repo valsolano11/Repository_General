@@ -69,19 +69,30 @@ const FormatoHerram = () => {
         errorMessage = "No puede contener números o caracteres especiales.";
       }
     }
+    if (name === "correo") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) {
+        errorMessage = "Correo electrónico no válido.";
+      }
+    }
     return errorMessage;
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const errorMessage = validateInput(name, value);
+
+    const upperCasedValue = ["area", "jefeOficina", "servidorAsignado"].includes(name)
+      ? value.toUpperCase()
+      : value;
+
+    const errorMessage = validateInput(name, upperCasedValue);
     setFormErrors((prevErrors) => ({
       ...prevErrors,
       [name]: errorMessage,
     }));
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: upperCasedValue,
     }));
   };
 
@@ -100,28 +111,66 @@ const FormatoHerram = () => {
       correo,
       herramientas,
     } = formData;
-
-    if (
-      !codigoFicha ||
-      !area ||
-      !jefeOficina ||
-      !cedulaJefeOficina ||
-      !servidorAsignado ||
-      !cedulaServidor ||
-      !correo ||
-      !herramientas.some((p) => p.HerramientumId && p.codigo)
-    ) {
-      showToastError("Todos los campos son obligatorios.");
+  
+    if (!codigoFicha) {
+      showToastError("El campo 'Código de Ficha' es obligatorio.");
       return;
     }
-
+  
+    if (!area) {
+      showToastError("El campo 'Área' es obligatorio.");
+      return;
+    }
+  
+    if (!jefeOficina) {
+      showToastError("El campo 'Jefe de Oficina' es obligatorio.");
+      return;
+    }
+  
+    if (!cedulaJefeOficina) {
+      showToastError("El campo 'Cédula del Jefe de Oficina' es obligatorio.");
+      return;
+    }
+  
+    if (!servidorAsignado) {
+      showToastError("El campo 'Servidor Asignado' es obligatorio.");
+      return;
+    }
+  
+    if (!cedulaServidor) {
+      showToastError("El campo 'Cédula del Servidor' es obligatorio.");
+      return;
+    }
+  
+    if (!correo) {
+      showToastError("El campo 'Correo' es obligatorio.");
+      return;
+    }
+  
+    if (!herramientas || herramientas.length === 0) {
+      showToastError("Debe agregar al menos una herramienta.");
+      return;
+    }
+  
+    for (let i = 0; i < herramientas.length; i++) {
+      if (!herramientas[i].HerramientumId) {
+        showToastError(`El campo 'Herramienta' es obligatorio en la fila ${i + 1}.`);
+        return;
+      }
+  
+      if (!herramientas[i].codigo) {
+        showToastError(`El campo 'Código' es obligatorio en la fila ${i + 1}.`);
+        return;
+      }
+    }
+  
     try {
       const response = await api.post("/prestamos", formData, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-
+  
       if (response.status === 201) {
         toast.success("Préstamo creado con éxito.");
         setFormData({
@@ -142,14 +191,14 @@ const FormatoHerram = () => {
         });
       } else {
         const errorData = await response.json();
-        showToastError(errorData.message || "Error al crear el pedido.");
+        showToastError(errorData.message || "Error al crear el préstamo.");
       }
     } catch (error) {
       console.error("Error en la comunicación con el servidor:", error);
       showToastError("Error en la comunicación con el servidor.");
     }
   };
-
+  
   return (
     <div className="flex flex-col md:flex-row h-screen bg-grisClaro">
       <div className="hidden md:flex items-star justify-center md:w-2/3 bg-grisClaro mx-4">
@@ -418,6 +467,11 @@ const FormatoHerram = () => {
                           value={formData.correo}
                           onChange={handleInputChange}
                         />
+                        {formErrors.correo && (
+                          <div className="text-red-400 text-xs mt-1 px-2">
+                            {formErrors.correo}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
