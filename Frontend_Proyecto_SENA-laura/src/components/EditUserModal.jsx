@@ -126,6 +126,7 @@ const EditUserModal = ({ isOpen, onClose, selectedUser }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    const formattedValue = name === "nombre" ? value.toUpperCase() : value; 
     const errorMessage = validateInput(name, value);
     setFormErrors((prevErrors) => ({
       ...prevErrors,
@@ -133,7 +134,7 @@ const EditUserModal = ({ isOpen, onClose, selectedUser }) => {
     }));
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: formattedValue,
     }));
   };
 

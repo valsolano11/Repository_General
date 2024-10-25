@@ -298,10 +298,11 @@ const Intructor_Ficha = () => {
   const handleCustomExport = (rows) => {
     const exportData = rows.map((row) => ({
       NumeroFicha: row.data[1],
-      Instructor: row.data[2],
-      Trimestre: row.data[3],
-      InstructorNombre: row.data[4],
-      nombreUsuario: row.data[5],
+      Programa: row.data[2],
+      Jornada: row.data[3],
+      Trimestre: row.data[4],
+      InstructorNombre: row.data[5],
+      nombreUsuario: row.data[6],
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);

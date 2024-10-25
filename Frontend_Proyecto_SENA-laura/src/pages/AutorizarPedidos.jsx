@@ -221,7 +221,6 @@ const AutorizarPedidos = () => {
       "Fecha de Ingreso": row.data[2],
       Marca: row.data[3],
       Condición: row.data[4],
-      Descripción: row.data[5],
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
