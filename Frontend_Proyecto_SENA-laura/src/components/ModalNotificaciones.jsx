@@ -13,10 +13,6 @@ const ModalNotificaciones = ({ isOpen, onClose, onNewNotifications }) => {
   useEffect(() => {
     if (isOpen) {
       fetchNotificaciones();
-      const interval = setInterval(() => {
-        fetchNotificaciones(); 
-      }, 30000);
-      return () => clearInterval(interval); 
     }
   }, [isOpen]);
 
@@ -24,17 +20,20 @@ const ModalNotificaciones = ({ isOpen, onClose, onNewNotifications }) => {
     setLoading(true);
     try {
       const response = await api.get("/notificaciones");
-      if (response.status === 200) {
-        const noLeidas = response.data.filter((n) => n.nueva);
-        setNotificaciones(noLeidas);
+      const notificaciones = response.data;
 
-        const nuevas = noLeidas.length;
-        onNewNotifications(nuevas); 
-      } else {
-        console.error(
-          "Error al cargar las notificaciones:",
-          response.data.message
-        );
+      const unreadCount = notificaciones.filter(
+        (n) =>
+          n.usuarios &&
+          n.usuarios.length > 0 &&
+          n.usuarios[0]?.UsuarioNotificacion &&
+          !n.usuarios[0].UsuarioNotificacion.leida
+      ).length;
+
+      setNotificaciones(notificaciones);
+
+      if (typeof onNewNotifications === "function") {
+        onNewNotifications(unreadCount);
       }
     } catch (error) {
       console.error("Error al cargar las notificaciones:", error);
@@ -46,17 +45,32 @@ const ModalNotificaciones = ({ isOpen, onClose, onNewNotifications }) => {
   const handleNotificationClick = async (id, redirectionPath) => {
     try {
       await api.put(`/notificaciones/${id}/leida`);
+
       setNotificaciones((prev) =>
         prev.map((notificacion) =>
           notificacion.id === id
-            ? { ...notificacion, nueva: false }
+            ? {
+                ...notificacion,
+                usuarios: notificacion.usuarios.map((usuario) => ({
+                  ...usuario,
+                  UsuarioNotificacion: {
+                    ...usuario.UsuarioNotificacion,
+                    leida: true,
+                  },
+                })),
+              }
             : notificacion
         )
       );
+
       if (redirectionPath) {
         navigate(redirectionPath);
       }
-      onNewNotifications(notificaciones.filter((n) => n.nueva).length - 1);
+
+      onNewNotifications(
+        notificaciones.filter((n) => !n.usuarios[0]?.UsuarioNotificacion?.leida)
+          .length
+      );
     } catch (error) {
       console.error("Error al marcar la notificación como leída:", error);
     }
@@ -65,14 +79,28 @@ const ModalNotificaciones = ({ isOpen, onClose, onNewNotifications }) => {
   const handleMarkAsUnread = async (id) => {
     try {
       await api.put(`/notificaciones/${id}/no-leida`);
+
       setNotificaciones((prev) =>
         prev.map((notificacion) =>
           notificacion.id === id
-            ? { ...notificacion, nueva: true }
+            ? {
+                ...notificacion,
+                usuarios: notificacion.usuarios.map((usuario) => ({
+                  ...usuario,
+                  UsuarioNotificacion: {
+                    ...usuario.UsuarioNotificacion,
+                    leida: false,
+                  },
+                })),
+              }
             : notificacion
         )
       );
-      onNewNotifications(notificaciones.filter((n) => n.nueva).length + 1);
+
+      onNewNotifications(
+        notificaciones.filter((n) => !n.usuarios[0]?.UsuarioNotificacion?.leida)
+          .length + 1
+      );
     } catch (error) {
       console.error("Error al marcar la notificación como no leída:", error);
     }
@@ -82,12 +110,11 @@ const ModalNotificaciones = ({ isOpen, onClose, onNewNotifications }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-end bg-opacity-50 bg-gray-500">
-      <div className="bg-white rounded-lg shadow-2xl sm:w-full md:w-1/3 mt-4 max-h-screen 
-        overflow-y-auto mr-4 border border-gray-200 relative">
+      <div className="bg-white rounded-lg shadow-2xl sm:w-full md:w-1/3 mt-4 max-h-screen overflow-y-auto mr-4 border border-gray-200 relative">
         <div className="flex justify-between items-center p-4 bg-gray-100 rounded-t-lg">
           <div>
             <h2 className="font-bold text-2xl mb-1">Notificaciones</h2>
-            {/* <p className="text-lg text-gray-600">Nuevas Notificaciones</p> */}
+            <p className="text-lg text-gray-600">Nuevas Notificaciones</p>
           </div>
           <button
             onClick={onClose}
@@ -111,7 +138,9 @@ const ModalNotificaciones = ({ isOpen, onClose, onNewNotifications }) => {
                 <div
                   key={notificacion.id}
                   className={`border-b border-gray-200 py-2 flex flex-col p-4 mb-2 rounded-lg ${
-                    notificacion.nueva ? "bg-green-200" : "bg-white"
+                    notificacion.usuarios[0]?.UsuarioNotificacion?.leida
+                      ? "bg-white"
+                      : "bg-green-200"
                   }`}
                 >
                   <div className="flex justify-between items-center">
@@ -123,26 +152,30 @@ const ModalNotificaciones = ({ isOpen, onClose, onNewNotifications }) => {
                     </div>
                     <div>
                       <button
-                        onClick={() =>
-                          handleNotificationClick(notificacion.id, "/historial")
-                        }
-                        className="text-white bg-green-700 hover:bg-green-800 rounded px-2 py-1 text-sm"
+                        onClick={() => navigate("/historial")}
+                        style={{
+                          display: "block",
+                          padding: "10px",
+                          backgroundColor: "green",
+                          color: "white",
+                          borderRadius: "10px",
+                        }}
                       >
-                        Detalles
+                        Detalle
                       </button>
                     </div>
                   </div>
                   <button
                     onClick={() =>
-                      notificacion.nueva
-                        ? handleNotificationClick(notificacion.id)
-                        : handleMarkAsUnread(notificacion.id)
+                      notificacion.usuarios[0]?.UsuarioNotificacion?.leida
+                        ? handleMarkAsUnread(notificacion.id)
+                        : handleNotificationClick(notificacion.id)
                     }
                     className="text-sm text-blue-500 mt-2"
                   >
-                    {notificacion.nueva
-                      ? "Marcar como leída"
-                      : "Marcar como no leída"}
+                    {notificacion.usuarios[0]?.UsuarioNotificacion?.leida
+                      ? "Marcar como no leída"
+                      : "Marcar como leída"}
                   </button>
                 </div>
               ))

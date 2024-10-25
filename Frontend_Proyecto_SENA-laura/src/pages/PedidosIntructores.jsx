@@ -65,14 +65,14 @@ const PedidosIntructores = () => {
     let errorMessage = "";
 
     if (["area", "jefeOficina", "servidorAsignado"].includes(name)) {
-      const nameRegex = /^[A-Za-z\s]+$/;
+      const nameRegex = /^[A-Za-z\s]+$/; 
       if (!nameRegex.test(value)) {
         errorMessage = "No puede contener números o caracteres especiales.";
       }
     }
 
     if (name === "correo") {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
       if (!emailRegex.test(value)) {
         errorMessage = "Por favor, ingresa un correo electrónico válido.";
       }
@@ -83,14 +83,19 @@ const PedidosIntructores = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const errorMessage = validateInput(name, value);
+
+    const upperCasedValue = ["area", "jefeOficina", "servidorAsignado"].includes(name)
+      ? value.toUpperCase()
+      : value;
+
+    const errorMessage = validateInput(name, upperCasedValue);
     setFormErrors((prevErrors) => ({
       ...prevErrors,
       [name]: errorMessage,
     }));
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: upperCasedValue,
     }));
   };
 
@@ -109,31 +114,71 @@ const PedidosIntructores = () => {
       correo,
       productos,
     } = formData;
-
-    if (
-      !codigoFicha ||
-      !area ||
-      !jefeOficina ||
-      !cedulaJefeOficina ||
-      !servidorAsignado ||
-      !cedulaServidor ||
-      !correo ||
-      !productos.some((p) => p.ProductoId && p.cantidadSolicitar)
-    ) {
-      showToastError("Todos los campos son obligatorios.");
+  
+    if (!codigoFicha) {
+      showToastError("El campo 'Código de Ficha' es obligatorio.");
+      return;
+    }
+    
+    if (!area) {
+      showToastError("El campo 'Área' es obligatorio.");
+      return;
+    }
+  
+    if (!jefeOficina) {
+      showToastError("El campo 'Jefe de Oficina' es obligatorio.");
+      return;
+    }
+  
+    if (!cedulaJefeOficina) {
+      showToastError("El campo 'Cédula del Jefe de Oficina' es obligatorio.");
+      return;
+    }
+  
+    if (!servidorAsignado) {
+      showToastError("El campo 'Servidor Asignado' es obligatorio.");
+      return;
+    }
+  
+    if (!cedulaServidor) {
+      showToastError("El campo 'Cédula del Servidor' es obligatorio.");
+      return;
+    }
+  
+    if (!correo) {
+      showToastError("El campo 'Correo' es obligatorio.");
+      return;
+    }
+  
+    if (!productos || productos.length === 0) {
+      showToastError("Debe agregar al menos un producto.");
       return;
     }
 
+    for (let i = 0; i < productos.length; i++) {
+      if (!productos[i].ProductoId) {
+        showToastError(`El campo 'Producto' es obligatorio en la fila ${i + 1}.`);
+        return;
+      }
+  
+      if (!productos[i].cantidadSolicitar) {
+        showToastError(
+          `El campo 'Cantidad a Solicitar' es obligatorio en la fila ${i + 1}.`
+        );
+        return;
+      }
+    }
+  
     try {
       const response = await api.post("/pedido", formData, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-
+  
       if (response.status === 201) {
         toast.success("Pedido creado con éxito.");
-
+  
         setFormData({
           codigoFicha: "",
           area: "",
@@ -428,6 +473,11 @@ const PedidosIntructores = () => {
                           value={formData.correo}
                           onChange={handleInputChange}
                         />
+                        {formErrors.correo && (
+                          <div className="text-red-400 text-xs mt-1 px-2">
+                            {formErrors.correo}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
