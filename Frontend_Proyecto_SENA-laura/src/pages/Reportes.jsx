@@ -81,9 +81,7 @@ const Reportes = () => {
       doc.text("Cantidad Solicitada", 160, 20);
 
       formattedData.forEach((item, index) => {
-        const fechaFormateada = item.fecha
-          ? new Date(item.fecha).toLocaleDateString("es-ES")
-          : "N/A";
+        const fechaFormateada = item.fecha || "N/A";
       
         doc.text(fechaFormateada, 10, 30 + index * 10);
         doc.text(item.servidorAsignado || "N/A", 60, 30 + index * 10);
